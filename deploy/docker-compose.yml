@@ -1,0 +1,10 @@
+version: "3"
+name: "transcendence"
+
+services:
+  database:
+    image: database
+    container_name: database
+    build: ${DB_PATH}
+    env_file: ${DB_PATH}/.env
+    restart: on-failure
