@@ -28,6 +28,13 @@ export class User {
 
   @Column({
     nullable: false,
+    default: '',
+    unique: true,
+  })
+  nickname: string;
+
+  @Column({
+    nullable: false,
     default: '.../default.jpg',
   })
   profpic_url: string;

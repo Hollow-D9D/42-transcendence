@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, CacheModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -8,8 +8,6 @@ import entities from './typeorm';
 
 @Module({
   imports: [
-    AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: () => ({
@@ -23,6 +21,9 @@ import entities from './typeorm';
         synchronize: true,
       }),
     }),
+    CacheModule.register(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { User } from 'src/typeorm';
 import axios from 'axios';
+import { Cache } from 'cache-manager';
 
 interface user42 {
   login: string;
@@ -14,6 +16,8 @@ interface user42 {
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheM: Cache,
   ) {}
 
   async auth42(u_code, u_state): Promise<user42> {
@@ -43,8 +47,12 @@ export class AuthService {
   }
 
   async checkUser(login: string): Promise<boolean> {
-    const count = await this.userRepo.count({ where: { login: login } });
-    return count > 0;
+    try {
+      const count = await this.userRepo.count({ where: { login: login } });
+      return count > 0;
+    } catch (err) {
+      throw err;
+    }
   }
 
   createUser(userInfo: any) {
@@ -53,9 +61,49 @@ export class AuthService {
     this.userRepo.save(newUser);
   }
 
-  loginUser(userInfo: any) {
+  async loginUser(userInfo: any) {
     console.log('login process, jwt');
-    // const newUser = this.userRepo.create(userInfo);
-    // this.userRepo.save(newUser);
+    try {
+      if (await this.checkUser(userInfo.login)) {
+        const token = this.jwtService.sign(
+          {
+            login: userInfo.login,
+          },
+          { secret: process.env.JWT_SECRET },
+        );
+        const list: Array<string> = (await this.cacheM.get('logged_in'))
+          ? await this.cacheM.get('logged_in')
+          : [];
+        if (!list.includes(userInfo.login)) {
+          list.push(userInfo.login);
+        }
+        await this.cacheM.set('logged_in', list, 0);
+        return {
+          error: null,
+          body: {
+            token,
+          },
+        };
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async logoutUser(login: string) {
+    try {
+      const list: Array<string> = (await this.cacheM.get('logged_in'))
+        ? await this.cacheM.get('logged_in')
+        : [];
+      list.splice(list.indexOf(login), 1);
+      await this.cacheM.set('logged_in', list, 0);
+      console.log('after logout ', await this.cacheM.get('logged_in'));
+      return {
+        error: null,
+        body: null,
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 }
