@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title "Service"
+skinparam componentStyle rectangle
+'skinparam dpi 150
+'box "Service"
+
+Browser --> "React server" : (1) any event
+activate "React server" #6cdcdc
+
+"React server" --> Browser : (2) response\nwithout data
+
+"React server" -> "NestJS server" : (2) React server needs\nsome data
+activate "NestJS server" #6cdcdc
+
+"NestJS server" --> "React server" : (3) validation didn't\npass (bad request)\nor some calculations\nwere performed without\nthe need for data
+
+"NestJS server" -> Postgres : (3) fetch some data
+activate Postgres #6cdcdc
+
+Postgres -> "NestJS server" : (4) return data\nor error
+deactivate Postgres #6cdcdc
+
+"NestJS server" -> "React server" : (5) return data\nor error
+deactivate "NestJS server" #6cdcdc
+
+"React server" -> Browser : (6) return data\nor error
+deactivate "React server" #6cdcdc
+
+@enduml

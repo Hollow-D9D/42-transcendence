@@ -1,0 +1,51 @@
+version: "3"
+name: "transcendence"
+
+services:
+  # https://www.tomray.dev/nestjs-docker-production
+  # https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/
+  database:
+    image: database:v1
+    container_name: database
+    build: ${DB_PATH}
+    restart: always
+    env_file: ${DB_PATH}/.env
+    volumes:
+      - type: bind
+        source: ${PGDATA_PATH}
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
+    # https://docs.docker.com/engine/reference/builder/#healthcheck
+    # https://github.com/peter-evans/docker-compose-healthcheck
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    depends_on: 
+      - database
+    ports:
+      - 8080:8080
+  backend:
+    image: backend:v1
+    container_name: backend
+    build:
+      context: ${BACK_PATH} # maybe just replace with regular one-line build?
+      dockerfile: ${BACK_PATH}/Dockerfile
+    restart: always
+    depends_on: 
+      - database
+    env_file: ${BACK_PATH}/.env
+  frontend:
+    image: frontend:v1
+    container_name: frontend
+    build: ${FRONT_PATH}
+    restart: always
+    depends_on: 
+      - database
+    env_file: ${FRONT_PATH}/.env
