@@ -1,0 +1,7 @@
+# https://archive.is/KKy0R#selection-2529.0-2569.3
+node_modules
+dist
+.git
+.env
+docker.env
+Dockerfile

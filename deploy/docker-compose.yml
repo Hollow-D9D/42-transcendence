@@ -31,3 +31,21 @@ services:
       - database
     ports:
       - 8080:8080
+  backend:
+    image: backend:v1
+    container_name: backend
+    build:
+      context: ${BACK_PATH} # maybe just replace with regular one-line build?
+      dockerfile: ${BACK_PATH}/Dockerfile
+    restart: always
+    depends_on: 
+      - database
+    env_file: ${BACK_PATH}/.env
+  frontend:
+    image: frontend:v1
+    container_name: frontend
+    build: ${FRONT_PATH}
+    restart: always
+    depends_on: 
+      - database
+    env_file: ${FRONT_PATH}/.env
