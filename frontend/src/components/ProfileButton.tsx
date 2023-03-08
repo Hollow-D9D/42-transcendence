@@ -27,8 +27,6 @@ const ProfileButton: React.FC<Props> = ({ size }) => {
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
-            // backgroundColor: "blue",
-            // border: "none",
             fontSize: "16px",
             fontWeight: "bold",
             top: '1rem',

@@ -63,6 +63,10 @@ const Home: React.FC = () => {
   return (
     <div
       style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+        left: 0,
         backgroundImage: 'url("/background.jpg")',
         backgroundSize: 'cover',
         height: '100vh',
@@ -74,24 +78,6 @@ const Home: React.FC = () => {
       }}
     >
       <h1 style={{ color: '#E90931', marginTop: 0, fontSize: 48 }}>Welcome</h1>
-      {/* 
-      <div
-        style={{
-          padding: "100px",
-          position: "absolute",
-          top: "0",
-          left: "0",
-          right: "0",
-          bottom: "0",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          color: "white",
-          display: "flex",
-          textAlign: "center",
-          justifyContent: "center",
-          zIndex: "1",
-        }}
-      >
-        <h1>Welcome!</h1> */}
       <div
         style={{
           backgroundColor: '#E90931',
