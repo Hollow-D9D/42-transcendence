@@ -37,7 +37,8 @@
 !/backend/.vscode/extensions.json
 
 # configuration files
-/backend/.env
+# must be uncommented in prod 
+# /backend/.env
 
 /index.htm
 

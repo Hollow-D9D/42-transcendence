@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { User } from 'src/typeorm';
 import axios from 'axios';
 import { Cache } from 'cache-manager';
+import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
+// import * as QrCode from 'qrcode';
 
 interface user42 {
   login: string;
@@ -18,6 +20,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
+    private readonly twofaService: TwoFactorAuthService,
   ) {}
 
   async auth42(u_code, u_state): Promise<user42> {
@@ -65,6 +68,9 @@ export class AuthService {
     console.log('login process, jwt');
     try {
       if (await this.checkUser(userInfo.login)) {
+        const user = await this.userRepo.findOne({
+          where: { login: userInfo.login },
+        });
         const token = this.jwtService.sign(
           {
             login: userInfo.login,
@@ -82,6 +88,7 @@ export class AuthService {
           error: null,
           body: {
             token,
+            two_factor: user.two_factor_token ? true : false,
           },
         };
       }
