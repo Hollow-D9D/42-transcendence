@@ -1,0 +1,9 @@
+# compiled output
+frontend/dist
+frontend/node_modules
+
+# OS
+frontend/.DS_Store
+
+# configuration files
+frontend/.env
