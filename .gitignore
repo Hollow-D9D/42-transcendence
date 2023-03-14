@@ -1,5 +1,8 @@
 # *.env
 
+node_modules/
+
+
 # compiled output
 /backend/dist
 /backend/node_modules
