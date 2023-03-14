@@ -3,11 +3,13 @@ import React, { useState } from 'react'
 export const NickUserName: React.FC = () => {
     const [nickname, setNickname] = useState("John Doe");
     const [username, setusername] = useState("");
+    
     return (
         <div>
             <div
                 style={{
                     position: "absolute",
+                    transform: "translate(-0%, -50%)",
                     width: "600px",
                     height: "36px",
                     left: "300px",
@@ -18,7 +20,6 @@ export const NickUserName: React.FC = () => {
                     fontSize: "24px",
                     lineHeight: "150%",
                     color: "#ccc",
-                    // transform: 'translate(-50%, 120%)',
                 }}
             >
                 <label htmlFor="nickname">Nick Name: </label>

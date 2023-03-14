@@ -77,7 +77,12 @@ const Home: React.FC = () => {
         padding: '0 20px',
       }}
     >
-      <h1 style={{ color: '#E90931', marginTop: 0, fontSize: 48 }}>Welcome</h1>
+      <h1 style={{ 
+        color: '#E90931', 
+        marginTop: 0, 
+        fontSize: 48 }}>
+          Welcome
+      </h1>
       <div
         style={{
           backgroundColor: '#E90931',

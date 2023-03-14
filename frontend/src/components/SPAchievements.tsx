@@ -1,9 +1,11 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
+import Oval from './OvalShaped';
+import Square from './SquareShaped';
 
 export const SPAchievements: React.FC = () => {
     const navigate = useNavigate();
-    
+
     const handleClick = () => {
         navigate("/AchievementShowMore");
     };
@@ -12,7 +14,7 @@ export const SPAchievements: React.FC = () => {
             <h1 style={{
                 display: 'flex',
                 left: "80px",
-                top: "120px",
+                top: "60px",
                 position: "relative",
                 fontFamily: "Figma Hand",
                 color: "#ccc",
@@ -31,101 +33,62 @@ export const SPAchievements: React.FC = () => {
                     width: "250px",
                     height: "400px",
                     left: "20px",
-                    top: "120.73px",
+                    top: "60.73px",
                     display: "flex",
                     flexDirection: "column",
-                    // justifyContent: "center", 
+                    justifyContent: "center", 
                     alignItems: "center"
                 }}
 
             >
-                <div style={{
-
-                    width: "247px",
-                    height: "150px",
-                    borderRadius: "30%/35%",
-                    border: "1.5px dashed red",
-                    color: "#B12D2D",
-                    marginBottom: "10px",
-                    marginBlockStart: "10px",
-                    // backgroundImage: "radial-gradient(circle at center, , #ff00f0)",
-                    left: "100px",
-                    top: "40.55px",
-
-
-                }}>
-                    <div style={{
-                        position: "relative",
-                        width: "80px",
-                        height: "80px",
-                        borderRadius: "10%",
-                        border: "1.5px dashed red",
-                        color: "#ccc",
-                        // marginBottom: "20px",
-                        // backgroundImage: "radial-gradient(circle at center, , #ff00f0)",
-                        left: "140px",
-                        top: "30.55px",
-                    }}>
-
-                    </div>
-                    <div
-                        style={{
-                            position: "relative",
-                            fontFamily: 'Inter',
-                            fontStyle: "normal",
-                            fontWeight: 900,
-                            fontSize: "24px",
-                            textAlign: "left",
-                            lineHeight: "0%",
-                            letterSpacing: "-0.019em",
-                        }}
-                    >
-                        A.Name
-                    </div>
-                </div>
-
-
-                <div style={{
-                    width: "247px",
-                    height: "150px",
-                    borderRadius: "30%/35%",
-                    border: "1.5px dashed red",
-                    color: "#B12D2D",
-                    top: "800px",
-                    // backgroundImage: "radial-gradient(circle at center, , #ff00f0)",
-                }}>
-                    <div style={{
-                        position: "relative",
-                        width: "80px",
-                        height: "80px",
-                        borderRadius: "10%",
-                        border: "1.5px dashed red",
-                        color: "#ccc",
-                        // marginBottom: "20px",
-                        // backgroundImage: "radial-gradient(circle at center, , #ff00f0)",
-                        left: "140px",
-                        top: "30.55px",
-                    }}>
-
-                    </div>
-                    <div
-                        style={{
-                            position: "relative",
-                            fontFamily: 'Inter',
-                            fontStyle: "normal",
-                            fontWeight: 900,
-                            fontSize: "24px",
-                            textAlign: "left",
-                            lineHeight: "0%",
-                            letterSpacing: "-0.019em",
-                        }}
-                    >
-                        A.Name
-                    </div>
+                <div>
+                    {[...Array(2)].map((_, i) => (
+                        <div key={i}>
+                            <div
+                                style={{
+                                    position: "relative",
+                                    fontFamily: 'Inter',
+                                    fontStyle: "normal",
+                                    color: "#B12D2D",
+                                    fontWeight: 900,
+                                    fontSize: "24px",
+                                    textAlign: "left",
+                                    lineHeight: "0%",
+                                    letterSpacing: "-0.019em",
+                                    left: "10px",
+                                    top: "80px",
+                                }}
+                            >
+                                A.Name
+                            </div>
+                            <Oval
+                                width="247px"
+                                height="150px"
+                                borderRadius="30%/35%"
+                                border="1.5px dashed red"
+                                color="#B12D2D"
+                                marginBottom="10px"
+                                marginBlockStart="10px"
+                                marginLeft="0px"
+                            >
+                                <Square
+                                    position="relative"
+                                    width="80px"
+                                    height="80px"
+                                    borderRadius="10%"
+                                    border="1.5px solid #A4A4A4"
+                                    color="#ccc"
+                                    marginLeft="130px"
+                                    marginBlockStart="30px"
+                                />
+                            </Oval>
+                        </div>
+                    ))}
                 </div>
                 <button
                     style={{
-                        marginBlockStart: "30px",
+                        marginBlockStart: "17px",
+
                         fontSize: "14px",
                         border: "#ccc",
                         // backgroundColor: "white",
@@ -139,6 +102,6 @@ export const SPAchievements: React.FC = () => {
                     Show more
                 </button>
             </div>
-        </div>
+        </div >
     )
 }
