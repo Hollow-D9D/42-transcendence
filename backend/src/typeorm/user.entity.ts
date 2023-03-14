@@ -7,6 +7,9 @@ import {
 
 @Entity()
 export class User {
+  save() {
+    throw new Error('Method not implemented.');
+  }
   @PrimaryGeneratedColumn({
     type: 'bigint',
     name: 'id',

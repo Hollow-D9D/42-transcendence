@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
           secret: process.env.JWT_SECRET,
         });
         return this.cacheManager.get('logged_in').then((res: Array<string>) => {
-          if (res.includes(<string>payload.login)) {
+          if (res && res.includes(<string>payload.login)) {
             return true;
           }
         });

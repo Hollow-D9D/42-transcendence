@@ -4,8 +4,11 @@ import {
   Query,
   UseGuards,
   Headers,
+  Post,
+  Body,
   // Redirect,
 } from '@nestjs/common';
+import { getPayload } from './utils';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 
@@ -40,11 +43,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   async getLogout(@Headers() headers) {
     try {
-      const header = headers['authorization'];
-      const token = header.split(' ')[1];
-      const payload = JSON.parse(
-        Buffer.from(token.split('.')[1], 'base64').toString(),
-      );
+      const payload = getPayload(headers);
       return this.authService.logoutUser(payload.login);
     } catch (err) {
       return {
@@ -54,3 +53,5 @@ export class AuthController {
     }
   }
 }
+
+
