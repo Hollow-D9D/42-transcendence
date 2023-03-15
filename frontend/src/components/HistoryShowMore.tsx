@@ -38,15 +38,16 @@ export const HistoryShowMore = () => {
       }}>
         Achievements
       </h2>
-      <div 
+      <div
         style={{
           backgroundColor: "#ccc",
+          transform: "translate(-50%, -50%)",
           borderRadius: "2%",
           position: "absolute",
-          width: "600px",
-          height: "600px",
-          left: "25%",
-          top: "30%",
+          width: "800px",
+          height: "400px",
+          left: "50%",
+          top: "70%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
