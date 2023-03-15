@@ -55,8 +55,13 @@ export const HistoryShowMore = () => {
         }}
       >
         <ScrollableContainer>
-
-          <div>
+          <div style={{ 
+            display: "flex",
+            flexWrap: "wrap",
+            marginBlockStart: "5px",
+            marginLeft: "10px",
+            gap: '10px',
+          }}>
             {[...Array(50)].map((_, i) => (
               <Oval
                 key={i}
@@ -65,7 +70,7 @@ export const HistoryShowMore = () => {
                 borderRadius="20%/40%"
                 border="2.5px dashed red"
                 color="#B12D2D"
-                marginBottom="10px"
+                marginBottom="2px"
                 marginBlockStart="10px"
                 marginLeft="0px"
               >

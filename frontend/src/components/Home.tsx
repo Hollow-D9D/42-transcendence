@@ -1,12 +1,11 @@
 import React from "react";
-// import SignIn from "./SignIn";
 import AccountPage from "./AccountPage";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 
 const Home: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -77,11 +76,12 @@ const Home: React.FC = () => {
         padding: '0 20px',
       }}
     >
-      <h1 style={{ 
-        color: '#E90931', 
-        marginTop: 0, 
-        fontSize: 48 }}>
-          Welcome
+      <h1 style={{
+        color: '#E90931',
+        marginTop: 0,
+        fontSize: 48
+      }}>
+        Welcome
       </h1>
       <div
         style={{
@@ -95,8 +95,6 @@ const Home: React.FC = () => {
           marginBottom: '13%',
         }}
       >
-
-
         <button
           onClick={handleLogin}
           style={{

@@ -3,8 +3,9 @@ import styled from 'styled-components';
 export const ScrollableContainer = styled.div`
   height: 896px;
   overflow-y: scroll;
-  padding-right: 20px;
-
+  padding-right: 17px;
+  margin-right: 10px;
+  
   &::-webkit-scrollbar {
     width: 15px;
   }

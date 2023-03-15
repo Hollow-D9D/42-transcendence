@@ -5,7 +5,7 @@ import Square from './SquareShaped';
 import { ScrollableContainer } from './ScrollableContainer';
 
 export const AchievementShowMore = () => {
-  const [width, setWidth] = useState(0);
+  const [width, setWidth] = useState<number>(0);
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
@@ -72,7 +72,7 @@ export const AchievementShowMore = () => {
             content: "",
             display: "block",
             backgroundColor: "#B12D2D",
-            width: "50px",
+            width: `${width}%`,
             zIndex: 0,
           }}>
           </div>

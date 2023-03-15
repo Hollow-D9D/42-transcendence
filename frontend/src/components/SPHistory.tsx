@@ -13,7 +13,7 @@ export const SPHistory: React.FC = () => {
             <h1 style={{
                 display: 'flex',
                 left: "520px",
-                top: "-450px",
+                top: "-550px",
                 position: "relative",
                 fontFamily: "Figma Hand",
                 color: "#ccc",
@@ -31,10 +31,10 @@ export const SPHistory: React.FC = () => {
                     width: "400px",
                     height: "500px",
                     left: "350px",
-                    top: "-450px",
+                    top: "-550px",
                     display: "flex",
                     flexDirection: "column",
-                    // justifyContent: "center", 
+                    justifyContent: "center", 
                     alignItems: "center"
                 }}
             >

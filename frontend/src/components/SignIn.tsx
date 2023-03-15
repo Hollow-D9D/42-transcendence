@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
   const handleClick = () => {
     setIsOpen(true);

@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 
 export const NickUserName: React.FC = () => {
-    const [nickname, setNickname] = useState("John Doe");
-    const [username, setusername] = useState("");
+    const [nickname, setNickname] = useState<string>("John Doe");
+    const [username, setusername] = useState<string>("");
     
     return (
         <div>

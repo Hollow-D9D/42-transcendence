@@ -15,7 +15,7 @@ type SettingProps = {
 
 const SettingPage: React.FC = ({ }) => {
     //   const [updatedSettings, setUpdatedSettings] = useState(settings);
-    const [updatedSettings, setUpdatedSettings] = useState(false);
+    const [updatedSettings, setUpdatedSettings] = useState<boolean>(false);
 
 
     const handleSave = () => {
