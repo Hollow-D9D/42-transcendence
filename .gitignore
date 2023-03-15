@@ -1,48 +1,41 @@
-# *.env
-
-node_modules/
-
-
 # compiled output
-/backend/dist
-/backend/node_modules
+**/dist/
+**/node_modules/
 
 # Logs
-/backend/logs
-/backend/*.log
-/backend/npm-debug.log*
-/backend/pnpm-debug.log*
-/backend/yarn-debug.log*
-/backend/yarn-error.log*
-/backend/lerna-debug.log*
+**/logs
+**/*.log
+**/npm-debug.log*
+**/pnpm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
 
 # OS
-/backend/.DS_Store
+**/.DS_Store
 
 # Tests
-/backend/coverage
-/backend/.nyc_output
+**/coverage
+**/.nyc_output
 
 # IDEs and editors
-/backend/.idea
-/backend/.project
-/backend/.classpath
-/backend/.c9/
-/backend/*.launch
-/backend/.settings/
-/backend/*.sublime-workspace
+**/.idea
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
 
 # IDE - VSCode
-/backend/.vscode/*
-!/backend/.vscode/settings.json
-!/backend/.vscode/tasks.json
-!/backend/.vscode/launch.json
-!/backend/.vscode/extensions.json
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
 
 # configuration files
 # must be uncommented in prod 
-# /backend/.env
+# **/.env
 
 /index.htm
-
-# link - https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-e237d3c2348c471c2c1edfa4984704c39780881c625e85291b343185214d438d&redirect_uri=http://localhost:3000/auth/&response_type=code&scope=public&state=random
