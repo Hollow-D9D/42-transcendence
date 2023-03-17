@@ -49,3 +49,5 @@ services:
     depends_on: 
       - database
     env_file: ${FRONT_PATH}/.env
+    ports:
+      - 8081:3000
