@@ -13,3 +13,7 @@ fclean: clean
 
 .PHONY: re
 re:	fclean all
+
+.PHONY: f
+f:
+	docker cp frontend/. frontend:/app/
