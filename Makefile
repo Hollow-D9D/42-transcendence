@@ -16,4 +16,5 @@ re:	fclean all
 
 .PHONY: f
 f:
-	docker cp frontend/. frontend:/app/
+	cd deploy && docker compose -f docker-compose.yml build frontend && docker compose up -d frontend
+
