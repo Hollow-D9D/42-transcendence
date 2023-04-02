@@ -1,6 +1,7 @@
 import { User } from './user.entity';
+import { Achievement } from './achievement.entity';
 
-const entities = [User];
+const entities = [Achievement, User];
 
-export { User };
+export { Achievement, User };
 export default entities;

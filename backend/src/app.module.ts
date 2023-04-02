@@ -4,7 +4,10 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProfileModule } from './profile/profile.module';
+// import { AchievmentsModule } from './achievments/achievments.module';
 import entities from './typeorm';
+import { AchievementsModule } from './achievements/achievements.module';
 
 @Module({
   imports: [
@@ -19,11 +22,17 @@ import entities from './typeorm';
         database: process.env.DB_NAME,
         entities: entities,
         synchronize: true,
+        seeds: ['src/typeorm/seeds/*{.ts,.js}'],
+        factories: ['src/typeorm/factory/*{.ts,.js}'],
       }),
     }),
+    TypeOrmModule.forFeature(entities),
     CacheModule.register(),
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
+    ProfileModule,
+    AchievementsModule,
+    // AchievmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

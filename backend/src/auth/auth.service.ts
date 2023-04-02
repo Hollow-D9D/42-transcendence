@@ -6,7 +6,6 @@ import { User } from 'src/typeorm';
 import axios from 'axios';
 import { Cache } from 'cache-manager';
 import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
-// import * as QrCode from 'qrcode';
 
 interface user42 {
   login: string;
@@ -84,6 +83,7 @@ export class AuthService {
           list.push(userInfo.login);
         }
         await this.cacheM.set('logged_in', list, 0);
+        console.log('token', token);
         return {
           error: null,
           body: {

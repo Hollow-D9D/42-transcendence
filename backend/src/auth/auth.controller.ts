@@ -4,8 +4,6 @@ import {
   Query,
   UseGuards,
   Headers,
-  Post,
-  Body,
   // Redirect,
 } from '@nestjs/common';
 import { getPayload } from './utils';
@@ -53,5 +51,3 @@ export class AuthController {
     }
   }
 }
-
-
