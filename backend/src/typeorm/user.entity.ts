@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   BaseEntity,
 } from 'typeorm';
-import { Achievement } from './achievement.entity';
+import { Achievement, Friend } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -76,6 +76,36 @@ export class User extends BaseEntity {
     inverseJoinColumn: { name: 'achievement_id', referencedColumnName: 'id' },
   })
   achievements: Achievement[];
+
+  @ManyToMany(() => User, (user) => user.friends, {
+    cascade: false,
+  })
+  @JoinTable({
+    name: 'friends',
+    joinColumn: { name: 'id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'friend_id', referencedColumnName: 'id' },
+  })
+  friends: User[];
+
+  @ManyToMany(() => User, (user) => user.friend_requests, {
+    cascade: false,
+  })
+  @JoinTable({
+    name: 'friend_requests',
+    joinColumn: { name: 'send_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'receive_id', referencedColumnName: 'id' },
+  })
+  friend_requests: User[];
+
+  @ManyToMany(() => User, (user) => user.blocked_users, {
+    cascade: false,
+  })
+  @JoinTable({
+    name: 'blocked_users',
+    joinColumn: { name: 'blocker_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'blocked_id', referencedColumnName: 'id' },
+  })
+  blocked_users: User[];
 
   @CreateDateColumn()
   createdAt: Date;
