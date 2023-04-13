@@ -50,8 +50,6 @@ import myValue, { value1, someFunction } from './exampleModule.js';
 
 ```
 
-In the original code you provided, the **`Chat`** class is a named export, not a default export. That's why you need to use curly braces to import it.
-
 ---
 
 can you tell me how module in JavaScript/TypeScript related to modules/packages in Golang? I want to draw some comparisons to memorize it all better
