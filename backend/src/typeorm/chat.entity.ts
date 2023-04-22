@@ -7,7 +7,7 @@ import {
 import { ChannelMode } from './mode.enum';
 
 @Entity()
-export class chat extends BaseEntity {
+export class Chat extends BaseEntity {
     @PrimaryGeneratedColumn({
         type: 'bigint',
     })
