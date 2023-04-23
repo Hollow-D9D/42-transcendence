@@ -6,6 +6,7 @@ import {
   OneToMany,
   ManyToOne,
   ManyToMany,
+  JoinColumn,
 } from 'typeorm';
 import { ChannelMode } from './mode.enum';
 import { User, MutedUser, Message } from '.';
@@ -56,6 +57,7 @@ export class Chat extends BaseEntity {
   blocked: User[];
 
   @ManyToOne(() => User, (user) => user.chatsOwned, { nullable: true })
+  @JoinColumn({ name: 'owner_id' })
   owner: User | null;
 
   // regular many-to-many relation with User with an extra property (expiration)

@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   BaseEntity,
+  JoinColumn,
 } from 'typeorm';
 import { User, Chat } from '.';
 
@@ -28,8 +29,10 @@ export class MutedUser extends BaseEntity {
   expiration: Date;
 
   @ManyToOne(() => Chat, (chat) => chat.id)
+  @JoinColumn({ name: 'chat_id' })
   chat: Chat;
 
   @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

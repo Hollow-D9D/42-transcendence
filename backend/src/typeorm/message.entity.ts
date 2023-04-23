@@ -3,6 +3,7 @@ import {
   Entity,
   Column,
   ManyToOne,
+  JoinColumn,
   CreateDateColumn,
   BaseEntity,
 } from 'typeorm';
@@ -16,9 +17,11 @@ export class Message extends BaseEntity {
   id: number;
 
   @ManyToOne(() => User, (user) => user.messages)
+  @JoinColumn({ name: 'sender_id' })
   sender: User;
 
   @ManyToOne(() => Chat, (chat) => chat.messages)
+  @JoinColumn({ name: 'chat_id' })
   chat: Chat;
 
   @Column({
