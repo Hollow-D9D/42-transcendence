@@ -3,11 +3,12 @@ import {
   Entity,
   Column,
   ManyToMany,
+  OneToMany,
   JoinTable,
   CreateDateColumn,
   BaseEntity,
 } from 'typeorm';
-import { Achievement, Friend } from '.';
+import { Achievement, Friend, Chat } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -67,6 +68,9 @@ export class User extends BaseEntity {
   })
   ladder_level: number;
 
+  @CreateDateColumn()
+  createdAt: Date;
+
   @ManyToMany(() => Achievement, (achievement) => achievement.users, {
     cascade: false,
   })
@@ -107,6 +111,32 @@ export class User extends BaseEntity {
   })
   blocked_users: User[];
 
-  @CreateDateColumn()
-  createdAt: Date;
+  // CHAT RELATIONS
+
+  @ManyToMany(() => Chat, (chat) => chat.members)
+  @JoinTable({
+    name: 'chat_members',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chats_member_of: Chat[];
+
+  @ManyToMany(() => Chat, (chat) => chat.admins)
+  @JoinTable({
+    name: 'chat_admins',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chats_admined: Chat[];
+
+  @ManyToMany(() => Chat, (chat) => chat.id)
+  @JoinTable({
+    name: 'chat_blocked',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chats_blocked_from: Chat[];
+
+  @OneToMany(() => Chat, (chat) => chat.owner)
+  chats_owned: Chat[];
 }
