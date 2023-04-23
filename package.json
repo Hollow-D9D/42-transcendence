@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "dotenv-webpack": "^8.0.1"
+  }
+}
