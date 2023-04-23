@@ -8,7 +8,7 @@ import {
     ManyToMany,
 } from 'typeorm';
 import { ChannelMode } from './mode.enum';
-import { User, MutedUser } from '.';
+import { User, MutedUser, Message } from '.';
 
 @Entity()
 export class Chat extends BaseEntity {
@@ -63,4 +63,9 @@ export class Chat extends BaseEntity {
     // regular many-to-many relation with User with an extra property (expiration)
     @OneToMany(() => MutedUser, (muteduser) => muteduser)
     mutedUsers: MutedUser[];
+
+    // MESSAGE RELATIONS
+
+    @OneToMany(() => Message, (message) => message.chat)
+    messages: Message[];
 }

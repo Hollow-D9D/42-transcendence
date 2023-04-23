@@ -8,7 +8,7 @@ import {
   CreateDateColumn,
   BaseEntity,
 } from 'typeorm';
-import { Achievement, Friend, Chat, MutedUser } from '.';
+import { Achievement, Friend, Chat, MutedUser, Message } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -143,4 +143,9 @@ export class User extends BaseEntity {
   // regular many-to-many relation with Chat with an extra property (expiration)
   @OneToMany(() => MutedUser, (muteduser) => muteduser.user)
   mutedUsers: MutedUser[];
+
+  // MESSAGE RELATIONS
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
 }
