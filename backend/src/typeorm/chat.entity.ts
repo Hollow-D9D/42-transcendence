@@ -3,11 +3,12 @@ import {
     BaseEntity,
     PrimaryGeneratedColumn,
     Column,
+    OneToMany,
     ManyToOne,
     ManyToMany,
 } from 'typeorm';
 import { ChannelMode } from './mode.enum';
-import { User } from './user.entity';
+import { User, MutedUser } from '.';
 
 @Entity()
 export class Chat extends BaseEntity {
@@ -65,4 +66,8 @@ export class Chat extends BaseEntity {
 
     @ManyToOne(() => User, (user) => user.chats_owned, { nullable: true })
     owner: User | null;
+
+    // regular many-to-many relation with User with an extra property (expiration)
+    @OneToMany(() => MutedUser, (muteduser) => muteduser)
+    mutedUsers: MutedUser[];
 }
