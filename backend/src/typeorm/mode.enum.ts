@@ -1,5 +1,5 @@
 export enum ChannelMode {
-    PUBLIC = 'PUBLIC',
-    PRIVATE = 'PRIVATE',
-    PROTECTED = 'PROTECTED',
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  PROTECTED = 'PROTECTED',
 }

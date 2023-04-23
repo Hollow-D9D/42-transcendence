@@ -1,9 +1,9 @@
 import {
-    PrimaryGeneratedColumn,
-    Entity,
-    Column,
-    ManyToOne,
-    BaseEntity,
+  PrimaryGeneratedColumn,
+  Entity,
+  Column,
+  ManyToOne,
+  BaseEntity,
 } from 'typeorm';
 import { User, Chat } from '.';
 
@@ -16,20 +16,20 @@ import { User, Chat } from '.';
 // More details here: https://archive.is/uRxRY#many-to-many-relations-with-custom-properties
 @Entity()
 export class MutedUser extends BaseEntity {
-    @PrimaryGeneratedColumn({
-        type: 'bigint',
-    })
-    id: number;
+  @PrimaryGeneratedColumn({
+    type: 'bigint',
+  })
+  id: number;
 
-    @Column({
-        type: 'timestamptz',
-        nullable: false,
-    })
-    expiration: Date;
+  @Column({
+    type: 'timestamptz',
+    nullable: false,
+  })
+  expiration: Date;
 
-    @ManyToOne(() => Chat, (chat) => chat.id)
-    chat: Chat;
+  @ManyToOne(() => Chat, (chat) => chat.id)
+  chat: Chat;
 
-    @ManyToOne(() => User, (user) => user.id)
-    user: User;
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
 }
