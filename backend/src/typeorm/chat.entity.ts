@@ -46,16 +46,16 @@ export class Chat extends BaseEntity {
 
     // USER RELATIONS
 
-    @ManyToMany(() => User, (user) => user.chats_member_of)
+    @ManyToMany(() => User, (user) => user.chatsMemberOf)
     members: User[];
 
-    @ManyToMany(() => User, (user) => user.chats_admined)
+    @ManyToMany(() => User, (user) => user.chatsAdmined)
     admins: User[];
 
-    @ManyToMany(() => User, (user) => user.chats_blocked_from)
+    @ManyToMany(() => User, (user) => user.chatsBlockedFrom)
     blocked: User[];
 
-    @ManyToOne(() => User, (user) => user.chats_owned, { nullable: true })
+    @ManyToOne(() => User, (user) => user.chatsOwned, { nullable: true })
     owner: User | null;
 
     // regular many-to-many relation with User with an extra property (expiration)

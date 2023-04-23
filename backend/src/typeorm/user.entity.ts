@@ -119,7 +119,7 @@ export class User extends BaseEntity {
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
   })
-  chats_member_of: Chat[];
+  chatsMemberOf: Chat[];
 
   @ManyToMany(() => Chat, (chat) => chat.admins)
   @JoinTable({
@@ -127,7 +127,7 @@ export class User extends BaseEntity {
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
   })
-  chats_admined: Chat[];
+  chatsAdmined: Chat[];
 
   @ManyToMany(() => Chat, (chat) => chat.id)
   @JoinTable({
@@ -135,10 +135,10 @@ export class User extends BaseEntity {
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
   })
-  chats_blocked_from: Chat[];
+  chatsBlockedFrom: Chat[];
 
   @OneToMany(() => Chat, (chat) => chat.owner)
-  chats_owned: Chat[];
+  chatsOwned: Chat[];
 
   // regular many-to-many relation with Chat with an extra property (expiration)
   @OneToMany(() => MutedUser, (muteduser) => muteduser.user)
