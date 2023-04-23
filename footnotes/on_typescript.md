@@ -203,3 +203,87 @@ const anotherFunction = myObject.myFunction;
 By using the **`(0, anotherFunction)()`** syntax, you ensure that **`anotherFunction`** is called with the global **`this`** context (or **`undefined`** in strict mode) rather than the **`myObject`** context. This can be useful in certain scenarios where you want to avoid issues with an incorrect **`this`** context.
 
 That being said, the **`(0, ...)`** syntax is relatively uncommon and can be confusing. In most cases, you can use other techniques to achieve the same result, such as using **`.bind()`** or arrow functions.
+
+---
+
+how exactly could circular dependencies between the related entities occur if there were no function as the first parameter to the decorator `@ManyToMany`?
+
+---
+
+Circular dependencies occur when two or more modules depend on each other, either directly or indirectly, creating a cycle in the dependency graph. In the context of TypeORM and entity relationships, circular dependencies can occur when Entity A references Entity B, and Entity B references Entity A.
+
+When defining a relationship between entities, the decorator (e.g., `@ManyToMany`) needs to know about the related entity (e.g., `Role`). If you use the related entity directly as an argument, rather than using a function, you can end up with a circular dependency.
+
+Consider the following example without using a function:
+
+```typescript
+// user.entity.ts
+import { Role } from './role.entity';
+
+@Entity()
+export class User {
+  // ...
+
+  @ManyToMany(Role, (role) => role.users) // Directly using the Role entity
+  @JoinTable()
+  roles: Role[];
+}
+
+// role.entity.ts
+import { User } from './user.entity';
+
+@Entity()
+export class Role {
+  // ...
+
+  @ManyToMany(User, (user) => user.roles) // Directly using the User entity
+  users: User[];
+}
+```
+
+In this example, the `User` entity imports the `Role` entity, and the `Role` entity imports the `User` entity. This creates a circular dependency between the two modules.
+
+When the application is built, it may lead to one of the entities being undefined during the evaluation of the other entity's module. This is because the JavaScript/TypeScript module system evaluates modules in a specific order, and when there's a circular dependency, one module might not be fully evaluated before the other.
+
+By using a function as the first parameter of the decorator, you can avoid this issue:
+
+```typescript
+// user.entity.ts
+import { Role } from './role.entity';
+
+@Entity()
+export class User {
+  // ...
+
+  @ManyToMany(() => Role, (role) => role.users) // Using a function to reference the Role entity
+  @JoinTable()
+  roles: Role[];
+}
+
+// role.entity.ts
+import { User } from './user.entity';
+
+@Entity()
+export class Role {
+  // ...
+
+  @ManyToMany(() => User, (user) => user.roles) // Using a function to reference the User entity
+  users: User[];
+}
+```
+
+Using a function to reference the related entity defers the evaluation of the imported entity until the relationship is actually used at runtime. This breaks the cycle in the dependency graph and allows the application to be built and run without issues.
+
+---
+
+"This is because the JavaScript/TypeScript module system evaluates modules in a specific order" -- and this order depends on which module imports another module, correct? i.e. if there are no circular dependencies then the dependency graph that JavaScript/TypeScript module system obtains has no cycles, and thus there exists an order in which the system can build and evaluate everything without no undefined parts
+
+---
+
+Yes, you are correct. The JavaScript/TypeScript module system evaluates modules based on their dependencies. If there are no circular dependencies, the dependency graph will have no cycles, and there will be a definite order in which the modules can be evaluated without encountering undefined parts.
+
+The module evaluation order is determined by traversing the dependency graph in a depth-first manner. When a module is imported, the module system first evaluates all its dependencies (and their dependencies) before evaluating the importing module itself. This ensures that everything a module depends on is properly defined and available before the module is evaluated.
+
+However, when circular dependencies are present, this depth-first traversal can lead to a situation where a module is partially evaluated (i.e., it is still being processed) when another module that depends on it is being evaluated. In such cases, the partially evaluated module might not have all its exports properly defined yet, leading to undefined values or errors.
+
+By ensuring that there are no circular dependencies, you can guarantee that the module evaluation order is well-defined and that the JavaScript/TypeScript module system can build and evaluate everything correctly without any undefined parts.
