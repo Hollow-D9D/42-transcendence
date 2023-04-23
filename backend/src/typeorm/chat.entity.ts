@@ -46,13 +46,6 @@ export class Chat extends BaseEntity {
     })
     password: string | null;
 
-    @Column({
-        type: 'bigint',
-        nullable: true,
-        // no default value specified to use null as one
-    })
-    owner_id: number | null;
-
     // USER RELATIONS
 
     @ManyToMany(() => User, (user) => user.chats_member_of)
