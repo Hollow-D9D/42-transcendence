@@ -22,18 +22,6 @@ export class MutedUser extends BaseEntity {
     id: number;
 
     @Column({
-        nullable: false,
-        default: 0,
-    })
-    chat_id: number;
-
-    @Column({
-        nullable: false,
-        default: 0,
-    })
-    user_id: number;
-
-    @Column({
         type: 'timestamptz',
         nullable: false,
     })

@@ -25,7 +25,6 @@ export class Chat extends BaseEntity {
     group: boolean;
 
     @Column({
-        type: 'string',
         nullable: true,
         // no default value specified to use null as one
     })
@@ -40,7 +39,6 @@ export class Chat extends BaseEntity {
     mode: ChannelMode | null;
 
     @Column({
-        type: 'string',
         nullable: true,
         // no default value specified to use null as one
     })
