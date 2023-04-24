@@ -11,6 +11,9 @@ export class ProfileService {
     private readonly achieveRepo: Repository<Achievement>,
   ) {}
 
+  // TODO: why call it `getProfile` and not just `get`? there's `Profile` in
+  // the name of the service anyway plus there'll probably already be
+  // "profile" somewhere in the endpoint
   async getProfile(login: string) {
     try {
       const user = await this.userRepo.findOne({ where: { login } });
@@ -20,12 +23,17 @@ export class ProfileService {
     }
   }
 
+  // TODO: why `editProf` and not `edit` or `editProfile`?
   async editProf(login: string, data: any) {
     try {
       const user = await this.userRepo.findOne({ where: { login } });
+      // TODO: since `data` is of type `any`, can the user pass some garbage in
+      // the value of one of the keys `nickname`/`avatar_url`/`fullname` to make
+      // the type coercion in assignments in one of the next three lines fail and
+      // thus break our app?
       if (data.nickname !== undefined) user.nickname = data.nickname;
-      if (data.avatar_url !== undefined) user.profpic_url = data.avatar_url;
-      if (data.fullname !== undefined) user.full_name = data.fullname;
+      if (data.avatar_url !== undefined) user.profpic_url = data.avatar_url; // TODO: why `avatar_url` and not `profpic_url`?
+      if (data.fullname !== undefined) user.full_name = data.fullname; // TODO: why `fullname` and not `full_name`?
       user.save();
     } catch (error) {
       throw error;
@@ -34,6 +42,11 @@ export class ProfileService {
 
   async addAchievement(login: string, achievement: number) {
     try {
+      // TODO: this can and probably should get replaced with
+      // const user = await this.userRepo.findOne({
+      //   where: { login },
+      //   relations: ['achievements'],
+      // });
       const user = await this.userRepo
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.achievements', 'achievement')
@@ -51,6 +64,7 @@ export class ProfileService {
 
   async getAchievements(login: string) {
     try {
+      // TODO: same as in addAchievement()
       const user = await this.userRepo
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.achievements', 'achievement')
@@ -68,6 +82,7 @@ export class ProfileService {
    */
   async changeLevel(login: string, amount: number) {
     try {
+      // TODO: same as in addAchievement()
       const user = await this.userRepo
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.achievements', 'achievement')
