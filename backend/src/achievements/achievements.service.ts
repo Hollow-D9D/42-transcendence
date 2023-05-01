@@ -41,7 +41,7 @@ export class AchievementsService {
 
   async seedAchiements() {
     try {
-    //   await this.achieveRepo.clear();
+      //   await this.achieveRepo.clear();
       await Promise.all(
         this.achieves.map(async (achieve) => {
           const newOne = this.achieveRepo.create(achieve);

@@ -101,7 +101,7 @@ export class User extends BaseEntity {
   })
   friend_requests: User[];
 
-  @ManyToMany(() => User, (user) => user.blocked_users, {
+  @ManyToMany(() => User, (user) => user.blockers, {
     cascade: false,
   })
   @JoinTable({
@@ -110,6 +110,9 @@ export class User extends BaseEntity {
     inverseJoinColumn: { name: 'blocked_id', referencedColumnName: 'id' },
   })
   blocked_users: User[];
+
+  @ManyToMany(() => User, (user) => user.blocked_users)
+  blockers: User[];
 
   // CHAT RELATIONS
 

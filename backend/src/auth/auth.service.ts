@@ -13,6 +13,7 @@ interface user42 {
   profpic_url: string;
 }
 
+// TODO: inspect this directory
 @Injectable()
 export class AuthService {
   constructor(
