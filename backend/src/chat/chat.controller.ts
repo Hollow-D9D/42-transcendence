@@ -4,7 +4,7 @@ import { getPayload } from 'src/auth/utils';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
 
-@Controller('profile')
+@Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
