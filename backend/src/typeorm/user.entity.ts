@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   BaseEntity,
 } from 'typeorm';
-import { Achievement, Friend } from '.';
+import { Achievement } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -33,7 +33,6 @@ export class User extends BaseEntity {
   @Column({
     nullable: false,
     default: '',
-    unique: true,
   })
   nickname: string;
 
@@ -82,7 +81,7 @@ export class User extends BaseEntity {
   })
   @JoinTable({
     name: 'friends',
-    joinColumn: { name: 'id', referencedColumnName: 'id' },
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'friend_id', referencedColumnName: 'id' },
   })
   friends: User[];

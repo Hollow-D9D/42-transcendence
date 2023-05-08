@@ -30,6 +30,8 @@ export class AuthController {
       }
       return await this.authService.loginUser(userInfo);
     } catch (err) {
+      console.log('err', err);
+      
       return {
         error: err,
         body: null,

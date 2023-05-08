@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { User } from 'src/typeorm';
 import axios from 'axios';
 import { Cache } from 'cache-manager';
-import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
 
 interface user42 {
   login: string;
@@ -19,7 +18,6 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
-    private readonly twofaService: TwoFactorAuthService,
   ) {}
 
   async auth42(u_code, u_state): Promise<user42> {
@@ -30,9 +28,11 @@ export class AuthService {
         client_id: process.env.API42_CID,
         client_secret: process.env.API42_CSECRET,
         code: u_code,
-        redirect_uri: process.env.API42_REDIRECTURI,
+        redirect_uri: process.env.API42_URL,
         state: u_state,
       });
+      console.log('token', token.data);
+      if (token.data.error) throw new Error(token.data.error);
       me = await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token.data.access_token}`,
@@ -44,7 +44,7 @@ export class AuthService {
         profpic_url: me.data.image.link ? me.data.image.link : null,
       };
     } catch (err) {
-      return null;
+      throw err;
     }
   }
 
@@ -72,6 +72,7 @@ export class AuthService {
         });
         const token = this.jwtService.sign(
           {
+            id: user.id,
             login: userInfo.login,
           },
           { secret: process.env.JWT_SECRET },
