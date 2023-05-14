@@ -142,9 +142,9 @@ export class ChatService {
    * - check that login is the channel owner
    * - check that target is a member of the channel with admin privileges ? remove target from the channel admins
    *
-   * @param login
-   * @param target
-   * @param name
+   * @param login who's trying to remove admin privileges
+   * @param target whose admin privileges are about to get revoked
+   * @param name of the channel
    */
   async revokeAdmin(login: string, target: string, name: string) {
     var channel = await this.channel(name);
@@ -155,6 +155,107 @@ export class ChatService {
       if (isChannelAdmin) {
         channel.admins = channel.admins.filter((user) => user.login !== target);
         await this.chatRepo.save(channel);
+      }
+    }
+  }
+
+  /**
+   * - check that login is a member of the channel
+   * - check that target isn't a member of the channel AND isn't banned from the channel ? add target to the channel
+   *
+   * @param login who's trying to add a user
+   * @param target the to-be member
+   * @param name of the channel
+   */
+  async addToChannel(login: string, target: string, name: string) {
+    var channel = await this.channel(name);
+    const isLoginChannelMember = channel.members.some(
+      (user) => user.login === login,
+    );
+    if (isLoginChannelMember) {
+      const isTargetChannelMember = channel.members.some(
+        (user) => user.login === target,
+      );
+      const isBannedFromChannel = channel.blocked.some(
+        (user) => user.login === target,
+      );
+      if (!isTargetChannelMember && !isBannedFromChannel) {
+        const user = await this.userRepo.findOne({ where: { login: target } });
+        channel.members.push(user);
+        await this.chatRepo.save(channel);
+      }
+    }
+  }
+
+  /**
+   * @param login who's trying to kick a user
+   * @param target the to-be-kicked member
+   * @param name the target channel
+   *
+   * - check that login is an admin of the channel
+   * - check that target is a member of the channel and isn't its owner ? remove target from admins (if relevant) and kick it
+   */
+  async kickFromChannel(login: string, target: string, name: string) {
+    var channel = await this.channel(name);
+    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    if (isChannelAdmin) {
+      const isChannelMember = channel.members.some(
+        (user) => user.login === target,
+      );
+      const isChannelOwner = channel.owner.login === target;
+      if (isChannelMember && !isChannelOwner) {
+        channel.admins = channel.admins.filter((user) => user.login !== target);
+        channel.members = channel.members.filter(
+          (user) => user.login !== target,
+        );
+        await this.chatRepo.save(channel);
+      }
+    }
+  }
+
+  /**
+   * @param login who's trying to ban a user
+   * @param target the to-be-banned member
+   * @param name the target channel
+   *
+   * - check that login is an admin of the channel
+   * - call kick method
+   * - check that target isn't its owner ? ban target
+   */
+  async banFromChannel(login: string, target: string, name: string) {
+    var channel = await this.channel(name);
+    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    if (isChannelAdmin) {
+      this.kickFromChannel(login, target, name);
+      const isChannelOwner = channel.owner.login === target;
+      if (!isChannelOwner) {
+        const user = await this.userRepo.findOne({ where: { login: target } });
+        channel.blocked.push(user);
+        await this.chatRepo.save(channel);
+      }
+    }
+  }
+
+  /**
+   * @param login who's trying to unban a user
+   * @param target the to-be-unbanned member
+   * @param name the target channel
+   *
+   * - check that login is an admin of the channel
+   * - check that target is banned ? unban target
+   */
+  async unbanForChannel(login: string, target: string, name: string) {
+    var channel = await this.channel(name);
+    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    if (isChannelAdmin) {
+      const isBannedFromChannel = channel.blocked.some(
+        (user) => user.login === login,
+      );
+      if (isBannedFromChannel) {
+        channel.blocked = channel.blocked.filter(
+          (user) => user.login != target,
+        );
+        this.chatRepo.save(channel);
       }
     }
   }

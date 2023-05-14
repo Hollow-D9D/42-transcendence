@@ -309,7 +309,7 @@ export class ChatController {
           payload.target,
         ]);
         if (userWithLogin.length !== 2) {
-          // no user with the username login
+          // no user with the username login/target
           return {
             error: new Error('No user with username login/target!'),
             body: null,
@@ -354,7 +354,7 @@ export class ChatController {
           typeof payload.name !== 'string' ||
           typeof payload.target !== 'string'
         ) {
-          // doesn't have a valid channel `name` specified
+          // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
             body: null,
@@ -373,7 +373,7 @@ export class ChatController {
           payload.target,
         ]);
         if (userWithLogin.length !== 2) {
-          // no user with the username login
+          // no user with the username login/target
           return {
             error: new Error('No user with username login/target!'),
             body: null,
@@ -389,4 +389,287 @@ export class ChatController {
       return { error, body: null };
     }
   }
+
+  /**
+   * ADD A USER TO A CHANNEL
+   *
+   * `login` who's trying to add a user
+   * `target` the to-be member
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - proceed to business logic (service.ts)
+   */
+  @Post('addToChannel')
+  @UseGuards(AuthGuard)
+  async addToChannel(@Headers() headers) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (typeof payload.login !== 'string') {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (
+          typeof payload.name !== 'string' ||
+          typeof payload.target !== 'string'
+        ) {
+          // doesn't have a valid channel `name`/`target` user specified
+          return {
+            error: new Error('No valid channel name/target user specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(payload.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          payload.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        this.chatService.addToChannel(
+          payload.login,
+          payload.target,
+          payload.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  /**
+   * KICK A USER FROM A CHANNEL
+   *
+   * `login` who's trying to kick a user
+   * `target` the to-be-kicked member
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - proceed to business logic (service.ts)
+   */
+  @Post('kickFromChannel')
+  @UseGuards(AuthGuard)
+  async kickFromChannel(@Headers() headers) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (typeof payload.login !== 'string') {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (
+          typeof payload.name !== 'string' ||
+          typeof payload.target !== 'string'
+        ) {
+          // doesn't have a valid channel `name`/`target` user specified
+          return {
+            error: new Error('No valid channel name/target user specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(payload.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          payload.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        this.chatService.kickFromChannel(
+          payload.login,
+          payload.target,
+          payload.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  /**
+   * BAN A USER FROM A CHANNEL
+   *
+   * `login` who's trying to ban a user
+   * `target` the to-be-banned member
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - proceed to business logic (service.ts)
+   */
+  @Post('banFromChannel')
+  @UseGuards(AuthGuard)
+  async banFromChannel(@Headers() headers) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (typeof payload.login !== 'string') {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (
+          typeof payload.name !== 'string' ||
+          typeof payload.target !== 'string'
+        ) {
+          // doesn't have a valid channel `name`/`target` user specified
+          return {
+            error: new Error('No valid channel name/target user specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(payload.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          payload.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        this.chatService.banFromChannel(
+          payload.login,
+          payload.target,
+          payload.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  /**
+   * UNBAN A USER FOR A CHANNEL
+   *
+   * `login` who's trying to unban a user
+   * `target` the to-be-unbanned member
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - proceed to business logic (service.ts)
+   */
+  @Post('unbanForChannel')
+  @UseGuards(AuthGuard)
+  async unbanForChannel(@Headers() headers) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (typeof payload.login !== 'string') {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (
+          typeof payload.name !== 'string' ||
+          typeof payload.target !== 'string'
+        ) {
+          // doesn't have a valid channel `name`/`target` user specified
+          return {
+            error: new Error('No valid channel name/target user specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(payload.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          payload.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        this.chatService.unbanForChannel(
+          payload.login,
+          payload.target,
+          payload.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  // @Post()
+  // @UseGuards(AuthGuard)
+  // async grantAdmin(@Headers() headers) {
+  //   try {
+  //     const payload = getPayload(headers);
+  //     if (payload) {
+  //       if (typeof payload.login !== 'string') {
+  //         // shouldn't get here
+  //         return {
+  //           error: new Error('Invalid user info!'),
+  //           body: null,
+  //         };
+  //       }
+  //       if (typeof payload.name !== 'string') {
+  //         // doesn't have a valid channel `name` specified
+  //         return {
+  //           error: new Error('No valid channel name specified!'),
+  //           body: null,
+  //         };
+  //       }
+  //       // continue here
+  //     }
+  //   } catch (error) {
+  //     return { error, body: null };
+  //   }
+  // }
 }
