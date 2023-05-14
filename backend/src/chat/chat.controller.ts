@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Headers, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Headers,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { getPayload } from 'src/auth/utils';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -34,7 +41,7 @@ export class ChatController {
    */
   @Post('create')
   @UseGuards(AuthGuard)
-  async create(@Headers() headers) {
+  async create(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -49,12 +56,12 @@ export class ChatController {
         // add another login if necessary
         var mode: ChannelMode = null;
         // only set `mode` to a non-null value when a user sent something valid
-        if (isValidChannelMode(payload.mode)) {
-          mode = payload.mode as ChannelMode;
+        if (isValidChannelMode(query.mode)) {
+          mode = query.mode as ChannelMode;
         }
         if (!mode) {
           // chat, not a channel
-          if (typeof payload.target === 'string') logins.push(payload.target);
+          if (typeof query.target === 'string') logins.push(query.target);
           // `target` user is expected to be provided
           else
             return {
@@ -79,7 +86,7 @@ export class ChatController {
               body: null,
             };
           }
-          if (this.chatService.isBlocked(payload.login, payload.target)) {
+          if (this.chatService.isBlocked(payload.login, query.target)) {
             // `login` cannot create a chat with `target` that has blocked them
             return {
               error: new Error('You are blocked by the target user!'),
@@ -92,8 +99,8 @@ export class ChatController {
           // `validMode === true` since we expect that `login` provided
           // by ... is always valid
           if (
-            typeof payload.name !== 'string' ||
-            typeof payload.password !== 'string'
+            typeof query.name !== 'string' ||
+            typeof query.password !== 'string'
           ) {
             // doesn't have a valid `name` and `password` specified
             return {
@@ -104,7 +111,7 @@ export class ChatController {
             };
           }
           // check that a chat with this name hasn't already been created
-          const channelWithName = await this.chatService.channel(payload.name);
+          const channelWithName = await this.chatService.channel(query.name);
           if (channelWithName) {
             // channelWithName !== undefined
             return {
@@ -117,7 +124,7 @@ export class ChatController {
           // check the validity of the password provided for PROTECTED channels
           if (
             mode == ChannelMode.PROTECTED &&
-            !this.chatService.isValidPassword(payload.password)
+            !this.chatService.isValidPassword(query.password)
           ) {
             return {
               error: new Error('The password provided is invalid!'),
@@ -126,7 +133,7 @@ export class ChatController {
           }
         }
         // all main checks passed
-        this.chatService.create(users, mode, payload.name, payload.password);
+        this.chatService.create(users, mode, query.name, query.password);
       } else {
         return {
           error: new Error('Invalid input'),
@@ -150,7 +157,7 @@ export class ChatController {
    */
   @Post('leaveChannel')
   @UseGuards(AuthGuard)
-  async leaveChannel(@Headers() headers) {
+  async leaveChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -161,14 +168,14 @@ export class ChatController {
             body: null,
           };
         }
-        if (typeof payload.name !== 'string') {
+        if (typeof query.name !== 'string') {
           // doesn't have a valid channel `name` specified
           return {
             error: new Error('No valid channel name specified!'),
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -177,7 +184,7 @@ export class ChatController {
           };
         }
         if (
-          !(await this.chatService.isChannelMember(payload.name, payload.login))
+          !(await this.chatService.isChannelMember(query.name, payload.login))
         ) {
           // isn't a member of the channel
           return {
@@ -185,7 +192,7 @@ export class ChatController {
             body: null,
           };
         }
-        this.chatService.leaveChannel(payload.login, payload.name);
+        this.chatService.leaveChannel(payload.login, query.name);
       }
     } catch (error) {
       return { error, body: null };
@@ -206,7 +213,7 @@ export class ChatController {
    */
   @Post('joinChannel')
   @UseGuards(AuthGuard)
-  async joinChannel(@Headers() headers) {
+  async joinChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -217,14 +224,14 @@ export class ChatController {
             body: null,
           };
         }
-        if (typeof payload.name !== 'string') {
+        if (typeof query.name !== 'string') {
           // doesn't have a valid channel `name` specified
           return {
             error: new Error('No valid channel name specified!'),
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -241,9 +248,9 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.password !== 'string' ||
-          (!this.chatService.isValidPassword(payload.password) &&
-            payload.password !== '')
+          typeof query.password !== 'string' ||
+          (!this.chatService.isValidPassword(query.password) &&
+            query.password !== '')
         ) {
           // doesn't have a valid/empty-string `password` specified
           return {
@@ -251,11 +258,7 @@ export class ChatController {
             body: null,
           };
         }
-        this.chatService.joinChannel(
-          payload.login,
-          payload.name,
-          payload.password,
-        );
+        this.chatService.joinChannel(payload.login, query.name, query.password);
       }
     } catch (error) {
       return { error, body: null };
@@ -275,7 +278,7 @@ export class ChatController {
    */
   @Post('grantAdmin')
   @UseGuards(AuthGuard)
-  async grantAdmin(@Headers() headers) {
+  async grantAdmin(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -287,8 +290,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -296,7 +299,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -306,7 +309,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -315,11 +318,7 @@ export class ChatController {
             body: null,
           };
         }
-        this.chatService.grantAdmin(
-          payload.login,
-          payload.target,
-          payload.name,
-        );
+        this.chatService.grantAdmin(payload.login, query.target, query.name);
       }
     } catch (error) {
       return { error, body: null };
@@ -339,7 +338,7 @@ export class ChatController {
    */
   @Post('revokeAdmin')
   @UseGuards(AuthGuard)
-  async revokeAdmin(@Headers() headers) {
+  async revokeAdmin(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -351,8 +350,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -360,7 +359,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -370,7 +369,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -379,11 +378,7 @@ export class ChatController {
             body: null,
           };
         }
-        this.chatService.revokeAdmin(
-          payload.login,
-          payload.target,
-          payload.name,
-        );
+        this.chatService.revokeAdmin(payload.login, query.target, query.name);
       }
     } catch (error) {
       return { error, body: null };
@@ -403,7 +398,7 @@ export class ChatController {
    */
   @Post('addToChannel')
   @UseGuards(AuthGuard)
-  async addToChannel(@Headers() headers) {
+  async addToChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -415,8 +410,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -424,7 +419,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -434,7 +429,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -443,11 +438,7 @@ export class ChatController {
             body: null,
           };
         }
-        this.chatService.addToChannel(
-          payload.login,
-          payload.target,
-          payload.name,
-        );
+        this.chatService.addToChannel(payload.login, query.target, query.name);
       }
     } catch (error) {
       return { error, body: null };
@@ -467,7 +458,7 @@ export class ChatController {
    */
   @Post('kickFromChannel')
   @UseGuards(AuthGuard)
-  async kickFromChannel(@Headers() headers) {
+  async kickFromChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -479,8 +470,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -488,7 +479,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -498,7 +489,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -509,8 +500,8 @@ export class ChatController {
         }
         this.chatService.kickFromChannel(
           payload.login,
-          payload.target,
-          payload.name,
+          query.target,
+          query.name,
         );
       }
     } catch (error) {
@@ -531,7 +522,7 @@ export class ChatController {
    */
   @Post('banFromChannel')
   @UseGuards(AuthGuard)
-  async banFromChannel(@Headers() headers) {
+  async banFromChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -543,8 +534,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -552,7 +543,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -562,7 +553,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -573,8 +564,8 @@ export class ChatController {
         }
         this.chatService.banFromChannel(
           payload.login,
-          payload.target,
-          payload.name,
+          query.target,
+          query.name,
         );
       }
     } catch (error) {
@@ -595,7 +586,7 @@ export class ChatController {
    */
   @Post('unbanForChannel')
   @UseGuards(AuthGuard)
-  async unbanForChannel(@Headers() headers) {
+  async unbanForChannel(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
       if (payload) {
@@ -607,8 +598,8 @@ export class ChatController {
           };
         }
         if (
-          typeof payload.name !== 'string' ||
-          typeof payload.target !== 'string'
+          typeof query.name !== 'string' ||
+          typeof query.target !== 'string'
         ) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
@@ -616,7 +607,7 @@ export class ChatController {
             body: null,
           };
         }
-        const channelWithName = await this.chatService.channel(payload.name);
+        const channelWithName = await this.chatService.channel(query.name);
         if (!channelWithName) {
           // no channel with this name
           return {
@@ -626,7 +617,7 @@ export class ChatController {
         }
         const userWithLogin = await this.chatService.users([
           payload.login,
-          payload.target,
+          query.target,
         ]);
         if (userWithLogin.length !== 2) {
           // no user with the username login/target
@@ -637,8 +628,8 @@ export class ChatController {
         }
         this.chatService.unbanForChannel(
           payload.login,
-          payload.target,
-          payload.name,
+          query.target,
+          query.name,
         );
       }
     } catch (error) {
@@ -659,7 +650,7 @@ export class ChatController {
   //           body: null,
   //         };
   //       }
-  //       if (typeof payload.name !== 'string') {
+  //       if (typeof query.name !== 'string') {
   //         // doesn't have a valid channel `name` specified
   //         return {
   //           error: new Error('No valid channel name specified!'),
