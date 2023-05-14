@@ -45,7 +45,7 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
@@ -61,7 +61,7 @@ export class ChatController {
         }
         if (!mode) {
           // chat, not a channel
-          if (typeof query.target === 'string') logins.push(query.target);
+          if (query.target) logins.push(query.target);
           // `target` user is expected to be provided
           else
             return {
@@ -98,10 +98,7 @@ export class ChatController {
           // not checking whether `users.length === 1` in case when
           // `validMode === true` since we expect that `login` provided
           // by ... is always valid
-          if (
-            typeof query.name !== 'string' ||
-            typeof query.password !== 'string'
-          ) {
+          if (!query.name || !query.password) {
             // doesn't have a valid `name` and `password` specified
             return {
               error: new Error(
@@ -161,14 +158,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (typeof query.name !== 'string') {
+        if (!query.name) {
           // doesn't have a valid channel `name` specified
           return {
             error: new Error('No valid channel name specified!'),
@@ -217,14 +214,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (typeof query.name !== 'string') {
+        if (!query.name) {
           // doesn't have a valid channel `name` specified
           return {
             error: new Error('No valid channel name specified!'),
@@ -248,7 +245,7 @@ export class ChatController {
           };
         }
         if (
-          typeof query.password !== 'string' ||
+          !query.password ||
           (!this.chatService.isValidPassword(query.password) &&
             query.password !== '')
         ) {
@@ -282,17 +279,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -342,17 +336,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -402,17 +393,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -462,17 +450,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -526,17 +511,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -590,17 +572,14 @@ export class ChatController {
     try {
       const payload = getPayload(headers);
       if (payload) {
-        if (typeof payload.login !== 'string') {
+        if (!payload.login) {
           // shouldn't get here
           return {
             error: new Error('Invalid user info!'),
             body: null,
           };
         }
-        if (
-          typeof query.name !== 'string' ||
-          typeof query.target !== 'string'
-        ) {
+        if (!query.name || !query.target) {
           // doesn't have a valid channel `name`/`target` user specified
           return {
             error: new Error('No valid channel name/target user specified!'),
@@ -643,14 +622,14 @@ export class ChatController {
   //   try {
   //     const payload = getPayload(headers);
   //     if (payload) {
-  //       if (typeof payload.login !== 'string') {
+  //       if (!payload.login) {
   //         // shouldn't get here
   //         return {
   //           error: new Error('Invalid user info!'),
   //           body: null,
   //         };
   //       }
-  //       if (typeof query.name !== 'string') {
+  //       if (!query.name) {
   //         // doesn't have a valid channel `name` specified
   //         return {
   //           error: new Error('No valid channel name specified!'),
