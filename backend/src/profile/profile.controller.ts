@@ -32,6 +32,12 @@ export class ProfileController {
   @UseGuards(AuthGuard)
   async editNickname(@Headers() headers, @Param() params) {
     try {
+      if (
+        params.newdata.nickname !== undefined &&
+        !this.profileService.isNicknameFree(params.newdata.nickname)
+      ) {
+        return { error: new Error('Nickname already taken!'), body: null };
+      }
       const payload = getPayload(headers);
       await this.profileService.editProf(payload.login, params.newdata);
       return { error: null, body: null };

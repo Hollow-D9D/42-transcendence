@@ -109,4 +109,18 @@ export class ProfileService {
       throw error;
     }
   }
+
+  async isNicknameFree(nickname: string): Promise<boolean> {
+    try {
+      const found = await this.userRepo.findOne({
+        where: { nickname: nickname },
+      });
+      if (!found) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -13,7 +13,6 @@ interface user42 {
   profpic_url: string;
 }
 
-// TODO: inspect this directory
 @Injectable()
 export class AuthService {
   constructor(
@@ -72,9 +71,7 @@ export class AuthService {
           where: { login: userInfo.login },
         });
         const token = this.jwtService.sign(
-          {
-            login: userInfo.login,
-          },
+          { login: userInfo.login },
           { secret: process.env.JWT_SECRET },
         );
         const list: Array<string> = (await this.cacheM.get('logged_in'))
@@ -91,6 +88,11 @@ export class AuthService {
             token,
             two_factor: user.two_factor_token ? true : false,
           },
+        };
+      } else {
+        return {
+          error: null,
+          body: `user ${userInfo.login} created`,
         };
       }
     } catch (err) {

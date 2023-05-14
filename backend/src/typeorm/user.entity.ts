@@ -32,8 +32,8 @@ export class User extends BaseEntity {
   login: string;
 
   @Column({
-    nullable: false,
-    default: '',
+    nullable: true,
+    default: null,
     unique: true,
   })
   nickname: string;

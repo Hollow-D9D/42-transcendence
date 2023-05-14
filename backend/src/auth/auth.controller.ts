@@ -37,6 +37,41 @@ export class AuthController {
     }
   }
 
+  // TODO COMMENT THIS OUT AFTER AUTH IS SET UP AND THE PROJECT IS TO BE EVALUATED
+  @Get('backdoor')
+  async backdoor(@Query() query) {
+    try {
+      const userInfo = {
+        login: query.login,
+        full_name: query.full_name,
+        profpic_url: query.profpic_url,
+      };
+
+      if (!(await this.authService.checkUser(userInfo.login))) {
+        this.authService.createUser(userInfo);
+      }
+      return await this.authService.loginUser(userInfo);
+    } catch (err) {
+      return {
+        error: err,
+        body: null,
+      };
+    }
+  }
+
+  // TODO COMMENT THIS OUT AFTER AUTH IS SET UP AND THE PROJECT IS TO BE EVALUATED
+  @Get('backdoorLogout')
+  async backdoorLogout(@Query() query) {
+    try {
+      return this.authService.logoutUser(query.login);
+    } catch (err) {
+      return {
+        error: err,
+        body: null,
+      };
+    }
+  }
+
   @Get('logout')
   @UseGuards(AuthGuard)
   async getLogout(@Headers() headers) {
