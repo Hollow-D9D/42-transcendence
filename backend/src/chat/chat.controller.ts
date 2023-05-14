@@ -616,6 +616,141 @@ export class ChatController {
     }
   }
 
+  /**
+   * MUTE A CHANNEL USER
+   *
+   * `login` who's trying to mute a user
+   * `target` the to-be-muted member
+   * `duration` of the mute
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - check that duration is a number, in minutes
+   * - proceed to business logic (service.ts)
+   */
+  @Post('muteForChannel')
+  @UseGuards(AuthGuard)
+  async muteForChannel(@Headers() headers, @Query() query) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (!payload.login) {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (!query.name || !query.target || !query.duration) {
+          // doesn't have a valid channel `name`/`target` user/mute `duration` specified
+          return {
+            error: new Error(
+              'No valid channel name/target user/mute duration specified!',
+            ),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(query.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          query.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        const duration = Number(query.duration);
+        if (isNaN(duration)) {
+          // duration isn't a number
+          return {
+            error: new Error('Invalid mute duration specified!'),
+            body: null,
+          };
+        }
+        this.chatService.muteForChannel(
+          payload.login,
+          query.target,
+          duration,
+          query.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  /**
+   * UNMUTE A CHANNEL USER
+   *
+   * `login` who's trying to unmute a user
+   * `target` the to-be-unmuted member
+   * `name` the target channel
+   *
+   * - check that the channel exists
+   * - check that login and target exist
+   * - proceed to business logic (service.ts)
+   */
+  @Post('unmuteForChannel')
+  @UseGuards(AuthGuard)
+  async unmuteForChannel(@Headers() headers, @Query() query) {
+    try {
+      const payload = getPayload(headers);
+      if (payload) {
+        if (!payload.login) {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        if (!query.name || !query.target) {
+          // doesn't have a valid channel `name`/`target` user specified
+          return {
+            error: new Error('No valid channel name/target user specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(query.name);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          query.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          return {
+            error: new Error('No user with username login/target!'),
+            body: null,
+          };
+        }
+        this.chatService.unmuteForChannel(
+          payload.login,
+          query.target,
+          query.name,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
   // @Post()
   // @UseGuards(AuthGuard)
   // async grantAdmin(@Headers() headers) {

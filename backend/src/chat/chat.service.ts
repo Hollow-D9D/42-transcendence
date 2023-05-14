@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Chat, User } from 'src/typeorm';
+import { Chat, User, MutedUser } from 'src/typeorm';
 import { ChannelMode } from 'src/typeorm/channelmode.enum';
 import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,8 @@ export class ChatService {
   constructor(
     @InjectRepository(Chat) private readonly chatRepo: Repository<Chat>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(User)
+    private readonly mutedUserRepo: Repository<MutedUser>,
   ) {}
 
   /**
@@ -258,6 +260,85 @@ export class ChatService {
         this.chatRepo.save(channel);
       }
     }
+  }
+
+  /**
+   * @param login who's trying to mute a user
+   * @param target the to-be-muted member
+   * @param duration of the mute, in minutes
+   * @param name the target channel
+   *
+   * - check that login is an admin of the channel
+   * - check that duration isn't more than 24h and isn't less than 1m
+   * - check that target is a member of the channel and isn't its owner ? mute the user (that is replace the old mute with the new one)
+   */
+  async muteForChannel(
+    login: string,
+    target: string,
+    duration: number,
+    name: string,
+  ) {
+    var channel = await this.channel(name);
+    const isLoginChannelAdmin = channel.admins.some(
+      (user) => user.login === login,
+    );
+    if (!isLoginChannelAdmin) return;
+    if (!Number.isInteger(duration) || duration < 1 || duration > 1440) return;
+    const userToBeMuted = channel.members.find((user) => user.login === target);
+    if (!userToBeMuted) return;
+    const isTargetChannelOwner = channel.owner.login === target;
+    if (isTargetChannelOwner) return;
+    const expiration = new Date( // expiration = now + duration minutes
+      new Date().setMinutes(new Date().getMinutes() + duration),
+    );
+    const alreadyMutedUser = channel.mutedUsers.find(
+      (mutedUser) => mutedUser.user.login === target,
+    );
+    if (alreadyMutedUser) {
+      // update muted user's deadline if found
+      alreadyMutedUser.expiration = expiration;
+      await this.mutedUserRepo.save(alreadyMutedUser);
+    } else {
+      // insert a new muted user entry if not found
+      const mutedUserOpts = {
+        chat: channel,
+        user: userToBeMuted,
+        expiration: expiration,
+      };
+      const mutedUser = this.mutedUserRepo.create(mutedUserOpts);
+      // await this.mutedUserRepo.save(mutedUser); // TODO
+      channel.mutedUsers.push(mutedUser);
+      await this.chatRepo.save(channel);
+    }
+  }
+
+  /**
+   * @param login who's trying to unmute a user
+   * @param target the to-be-unmuted member
+   * @param name the target channel
+   *
+   * - check that login is an admin of the channel
+   * - check that target is a member of the channel and is muted ? unmute
+   */
+  async unmuteForChannel(login: string, target: string, name: string) {
+    var channel = await this.channel(name);
+    const isLoginChannelAdmin = channel.admins.some(
+      (user) => user.login === login,
+    );
+    if (!isLoginChannelAdmin) return;
+    const isTargetChannelMember = channel.members.some(
+      (user) => user.login === target,
+    );
+    if (!isTargetChannelMember) return;
+    const mutedTarget = channel.mutedUsers.find(
+      (mutedUser) => mutedUser.user.login === target,
+    );
+    if (!mutedTarget) return;
+    channel.mutedUsers = channel.mutedUsers.filter(
+      (mutedUser) => mutedUser.user.login !== target,
+    );
+    this.chatRepo.save(channel); // TODO
+    this.mutedUserRepo.remove(mutedTarget); // TODO
   }
 
   async users(logins: string[]): Promise<User[]> {
