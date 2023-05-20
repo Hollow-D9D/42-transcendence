@@ -5,9 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProfileModule } from './profile/profile.module';
-// import { AchievmentsModule } from './achievments/achievments.module';
 import entities from './typeorm';
 import { AchievementsModule } from './achievements/achievements.module';
+import { GameMatchModule } from './game-match/game-match.module';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { AchievementsModule } from './achievements/achievements.module';
     AuthModule,
     ProfileModule,
     AchievementsModule,
-    // AchievmentsModule,
+    GameMatchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

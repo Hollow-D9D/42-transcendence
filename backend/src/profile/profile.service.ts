@@ -23,7 +23,13 @@ export class ProfileService {
   async editProf(login: string, data: any) {
     try {
       const user = await this.userRepo.findOne({ where: { login } });
-      if (data.nickname !== undefined) user.nickname = data.nickname;
+      if (data.nickname !== undefined) {
+        const checkExist = await this.userRepo.findOne({
+          where: { nickname: data.nickname },
+        });
+        if (checkExist) throw new Error('Nickname already exist');
+        user.nickname = data.nickname;
+      }
       if (data.avatar_url !== undefined) user.profpic_url = data.avatar_url;
       if (data.fullname !== undefined) user.full_name = data.fullname;
       user.save();

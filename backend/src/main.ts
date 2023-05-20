@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -12,6 +13,14 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
+
+  const corsOptions: CorsOptions = {
+    origin: '*', // Replace with your allowed origin(s)
+    methods: ['GET', 'POST'], // Specify the allowed HTTP methods
+    // allowedHeaders: ['my-custom-header'], // Specify the allowed custom headers
+    credentials: true, // Set to true if you want to allow sending cookies
+  };
+  app.enableCors();
   await app.listen(3000);
 }
 bootstrap();

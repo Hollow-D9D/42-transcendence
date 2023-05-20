@@ -6,8 +6,9 @@ import {
   JoinTable,
   CreateDateColumn,
   BaseEntity,
+  OneToMany,
 } from 'typeorm';
-import { Achievement } from '.';
+import { Achievement, GameMatch } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -105,6 +106,12 @@ export class User extends BaseEntity {
     inverseJoinColumn: { name: 'blocked_id', referencedColumnName: 'id' },
   })
   blocked_users: User[];
+
+  @OneToMany(() => GameMatch, (gameMatch) => gameMatch.player1)
+  gameMatchesAsPlayer1: GameMatch[];
+
+  @OneToMany(() => GameMatch, (gameMatch) => gameMatch.player2)
+  gameMatchesAsPlayer2: GameMatch[];
 
   @CreateDateColumn()
   createdAt: Date;
