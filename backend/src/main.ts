@@ -21,7 +21,7 @@ async function bootstrap() {
     credentials: true, // Set to true if you want to allow sending cookies
   };
   app.enableCors();
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();
 

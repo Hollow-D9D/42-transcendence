@@ -1,6 +1,6 @@
 import { Controller, Get, Req, Headers, UseGuards } from '@nestjs/common';
 import { TwoFactorAuthService } from './two-factor-auth.service';
-import { getPayload } from 'src/auth/utils';
+import { getPayload } from 'src/utils/auth.utils';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('auth/two-factor')

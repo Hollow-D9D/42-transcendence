@@ -8,6 +8,8 @@ import { ProfileModule } from './profile/profile.module';
 import entities from './typeorm';
 import { AchievementsModule } from './achievements/achievements.module';
 import { GameMatchModule } from './game-match/game-match.module';
+import { ChatModule } from './chat/chat.module';
+import { GameGateway } from './game/game.gateway';
 
 @Module({
   imports: [
@@ -33,13 +35,14 @@ import { GameMatchModule } from './game-match/game-match.module';
     ProfileModule,
     AchievementsModule,
     GameMatchModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GameGateway],
 })
 export class AppModule {
   constructor() {
-    console.log('AppModule initialized');
-    console.log(process.env);
+    // console.log('AppModule initialized');
+    // console.log(process.env);
   }
 }

@@ -8,7 +8,7 @@ import {
   BaseEntity,
   OneToMany,
 } from 'typeorm';
-import { Achievement, GameMatch } from '.';
+import { Achievement, GameMatch, Message, Chat, MutedUser } from '.';
 
 @Entity()
 export class User extends BaseEntity {
@@ -112,6 +112,42 @@ export class User extends BaseEntity {
 
   @OneToMany(() => GameMatch, (gameMatch) => gameMatch.player2)
   gameMatchesAsPlayer2: GameMatch[];
+
+  @ManyToMany(() => Chat, (chat) => chat.members)
+  @JoinTable({
+    name: 'chat_members',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chatsMemberOf: Chat[];
+
+  @ManyToMany(() => Chat, (chat) => chat.admins)
+  @JoinTable({
+    name: 'chat_admins',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chatsAdmined: Chat[];
+
+  @ManyToMany(() => Chat, (chat) => chat.id)
+  @JoinTable({
+    name: 'chat_blocked',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+  })
+  chatsBlockedFrom: Chat[];
+
+  @OneToMany(() => Chat, (chat) => chat.owner)
+  chatsOwned: Chat[];
+
+  // regular many-to-many relation with Chat with an extra property (expiration)
+  @OneToMany(() => MutedUser, (muteduser) => muteduser.user)
+  mutedUsers: MutedUser[];
+
+  // MESSAGE RELATIONS
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
 
   @CreateDateColumn()
   createdAt: Date;

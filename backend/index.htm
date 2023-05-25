@@ -5,7 +5,14 @@
     socket.on('connect', () => {
         console.log('connected');
     });
-    socket.emit('start-game', { login: 'htumanya' });
+    const reponse = socket.emit('start-game', { login: 'htumanya' });
+    console.log(reponse);
+    socket.on('start-game', (data) => {
+        console.log(data);
+    });
+    socket.on('error', (data) => {
+        console.log('error', data);
+    });
     socket.on('disconnect', () => {
         console.log('disconnected');
     });

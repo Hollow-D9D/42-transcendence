@@ -27,7 +27,7 @@ export class AuthService {
         grant_type: 'authorization_code',
         client_id: process.env.API42_CID,
         client_secret: process.env.API42_CSECRET,
-        code: u_code,
+        // code: u_code,
         redirect_uri: process.env.API42_URL,
         state: u_state,
       });
