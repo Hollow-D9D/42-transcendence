@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Cache } from 'cache-manager';
 import { JwtService } from '@nestjs/jwt';
 
@@ -24,6 +24,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   server: Server;
+
+  private rooms: { [roomName: string]: Set<string> } = {};
 
   afterInit() {
     console.log('should be uncommented');
@@ -49,12 +51,71 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  
+
   handleConnection(client: any, ...args: any[]) {
-    throw new Error('Method not implemented.');
+
   }
 
   handleDisconnect(client: any) {
-    throw new Error('Method not implemented.');
+    
+    // this.leaveRoom(client, 'global');
+  }
+
+  private findRoom(client: Socket, login: string) {
+    const rooms = Object.keys(this.rooms);
+    for (const room of rooms) {
+      if (this.rooms[room].has(login)) {
+        return room;
+      }
+    }
+  }
+
+  private joinRoom(client: Socket, roomName: string, login: string): boolean {
+    if (!this.rooms[roomName]) {
+      this.rooms[roomName] = new Set();
+    }
+    const hasPerm = this.chatService.checkPermission(login, +roomName);
+    if (hasPerm) {
+      client.join(roomName);
+      this.rooms[roomName].add(login);
+      return true;
+    }
+    return false;
+  }
+
+  // private leaveRoom(client: Socket, roomName: string, login: string) {
+  //   client.leave(roomName);
+  //   if (this.rooms[roomName]) {
+  //     this.rooms[roomName].delete(login);
+  //     if (this.rooms[roomName].size === 0) {
+  //       delete this.rooms[roomName];
+  //     }
+  //   }
+  // }
+
+  @SubscribeMessage('join_chat')
+  async handleJoin(client: any, payload: any) {
+    const login = payload.login;
+    const roomName = payload.chat_id;
+    if (!login) throwError(client, 'No login');
+    if (!roomName) throwError(client, 'No chat_id');
+
+    if (this.joinRoom(client, roomName, login)) {
+      client.emit('join_chat', { chat_id: roomName });
+    } else {
+      throwError(client, 'No permission');
+    }
+  }
+
+  @SubscribeMessage('leave_chat')
+  async handleLeave(client: any, payload: any) {
+    const login = payload.login;
+    const roomName = payload.chat_id;
+    if (!login) throwError(client, 'No login');
+    if (!roomName) throwError(client, 'No chat_id');
+
+    // this.leaveRoom(client, roomName, login);
   }
 
   @SubscribeMessage('message')
@@ -72,8 +133,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!chat_id) throwError(client, 'No chat_id');
       if (!message) throwError(client, 'No message');
 
-      // await this.chatService.addMessage(chat_id, sender, message);
-      // this.server.to(chat_id).emit('message', { sender, message });
+      await this.chatService.addMessage(chat_id, sender, message);
+      this.server.to(chat_id).emit('message', { sender, message });
     } catch (err) {
       throwError(client, err);
     }

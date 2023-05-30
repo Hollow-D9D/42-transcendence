@@ -19,7 +19,10 @@ export class GameMatchService {
 
   async addToQueue(login: string) {
     try {
-      const queue: Array<User> = (await this.cacheM.get('queue')) || [];
+      const queue: Array<User> =
+        (await this.cacheM.get('queue')) == undefined
+          ? []
+          : await this.cacheM.get('queue');
       if (queue.length > 0) {
         queue.forEach((element) => {
           if (element.login === login) {
@@ -41,7 +44,7 @@ export class GameMatchService {
     try {
       if (queue.length % 2 == 0) {
         const response = await this.startMatch();
-        return { matching: true, ...response };
+        return { matching: true, response };
       }
       return { matching: false };
     } catch (err) {
@@ -49,7 +52,7 @@ export class GameMatchService {
     }
   }
 
-  async startMatch(): Promise<{ player1: User; player2: User }> {
+  async startMatch(): Promise<GameMatch> {
     try {
       const queue: Array<User> = await this.cacheM.get('queue');
       if (queue.length >= 2) {
@@ -58,17 +61,16 @@ export class GameMatchService {
         const match = new GameMatch();
         match.player1 = player1;
         match.player2 = player2;
-        match.save();
+        const newmatch = await match.save();
         await this.cacheM.set('queue', queue);
-        return {
-          player1,
-          player2,
-        };
+        return newmatch;
       }
     } catch (err) {
       throw err;
     }
   }
+
+  // async endMatch(login: string) {}
 
   async cancelMatchLookup(login: string) {
     try {

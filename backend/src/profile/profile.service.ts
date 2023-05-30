@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User, Achievement } from 'src/typeorm';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserStatus } from 'src/typeorm/userstatus.enum';
 
 @Injectable()
 export class ProfileService {
@@ -32,6 +33,16 @@ export class ProfileService {
       }
       if (data.avatar_url !== undefined) user.profpic_url = data.avatar_url;
       if (data.fullname !== undefined) user.full_name = data.fullname;
+      user.save();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async editStatus(login: string, status: UserStatus) {
+    try {
+      const user = await this.userRepo.findOne({ where: { login } });
+      user.status = status;
       user.save();
     } catch (error) {
       throw error;

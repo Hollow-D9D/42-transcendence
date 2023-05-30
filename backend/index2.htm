@@ -5,7 +5,7 @@
     socket.on('connect', () => {
         console.log('connected');
     });
-    const reponse = socket.emit('start-game', { login: 'htumanya' });
+    const reponse = socket.emit('start-game', { login: 'dmkhitar' });
     console.log(reponse);
     socket.on('start-game', (data) => {
         console.log(data);

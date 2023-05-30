@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Achievement, GameMatch, Message, Chat, MutedUser } from '.';
+import { UserStatus } from './userstatus.enum';
 
 @Entity()
 export class User extends BaseEntity {
@@ -66,6 +67,19 @@ export class User extends BaseEntity {
     nullable: false,
   })
   ladder_level: number;
+
+  // IN MINUTES (Every mutch durations sum)
+  @Column({ default: 0 })
+  matchtime: number;
+
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    nullable: false,
+    default: UserStatus.INACTIVE,
+    // no default value specified to use null as one
+  })
+  status: UserStatus;
 
   @ManyToMany(() => Achievement, (achievement) => achievement.users, {
     cascade: false,
