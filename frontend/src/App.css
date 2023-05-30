@@ -1,38 +1,180 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;300;400;500;600;700&family=Raleway:wght@400;500&family=Roboto:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap");
+:root {
+  /* Text */
+  --text-color-white: #dadada;
+  --text-color-blue: #b9c5ff;
+  --text-color-gray: #31353c;
+  /* Basic */
+  --basic-color-background: #292d32;
+  --basic-color-green: #33ff00;
+  --basic-color-yellow: #fee440;
+  --basic-color-red: #ff0000;
+  /* Cards */
+  --cards-color-gray-up: #2e3238;
+  --cards-color-gray: #31353c;
+  --cards-color-blue: #4361ee;
+  /* Buttons */
+  --buttons-color-icons: #f2f2f2;
+  --buttons-color-pink: #f72585;
+  --buttons-color-blue: #5d76ec;
+  --buttons-color-blue-selected: #3c58dd;
+  --buttons-color-blue-disabled: #506df3;
+  --buttons-color-gray-disabled: #3b4048;
+  /* Styles */
+  --styles-halo-blue: radial-gradient(
+    100% 110.77% at 0% 2.02%,
+    #4361ee 0%,
+    rgba(41, 45, 50, 0) 100%
+  );
+  --styles-halo-linear-blue: linear-gradient(
+    358.71deg,
+    rgba(8, 16, 46, 0.5) 0%,
+    rgba(0, 0, 0, 0.1) 0.01%,
+    rgba(67, 97, 238, 0.5) 100%
+  );
+  --styles-linear-blue: linear-gradient(135deg, #4361ee 0%, #6982f5 100%);
+  --styles-linear-transp-blue: linear-gradient(
+    135deg,
+    rgba(60, 88, 221, 0) 0%,
+    #3c58dd 100%
+  );
+  --styles-linear-light-blue: linear-gradient(
+    180deg,
+    #50caff -11.53%,
+    #4361ee 100%
+  );
+}
+
+/* ///////////////////////////////////// */
+
+/* GENERAL CLASSES */
+
 .App {
-  text-align: center;
+  background-color: var(--basic-color-background);
+  font-family: "Roboto" sans-serif;
+  color: var(--text-color-white);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* .Home {
+  height: 100%;
+  width: 100%;
+} */
+
+.IBM-text {
+  font-family: "IBM Plex Mono";
+  font-weight: 400;
+  letter-spacing: -0.4px;
+  color: var(--text-color-white);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.ROBOTO-text {
+  font-family: "Roboto", sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.4px;
+  color: var(--text-color-white);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.wrapper {
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  display: flex;
+}
+
+.content {
+  font-family: "Roboto", sans-serif;
+  padding-left: 20px;
+  letter-spacing: -0.4px;
+}
+
+/* //////////////////////////////////////////////////// */
+
+/* EXISTING CLASSES */
+
+.text-button {
+  font-size: 13px;
+}
+
+.text-button:hover {
+  color: var(--buttons-color-pink);
+  text-decoration: underline;
+  transition: 0.2 ease;
+}
+
+.submit-button {
+  margin-left: 30px;
+  background: var(--buttons-color-pink);
+  box-shadow: 2px 3.5px 15px #1f2427, -2px -3.5px 15px #485057;
+  transition: 0.2s ease;
+  border: none;
+  outline: none;
+  color: var(--text-color-white);
+}
+
+.submit-button:hover {
+  background: #3c58dd;
+  box-shadow: inset 2px 3.5px 15px rgba(15, 21, 49, 0.25),
+    inset -2px -3.5px 15px #556fe8;
+  color: var(--text-color-white);
+  border-color: none;
+  outline: 0;
+}
+
+.submit-button:focus {
+  margin-left: 30px;
+  background: var(--buttons-color-blue);
+  box-shadow: 2px 3.5px 15px #1f2427, -2px -3.5px 15px #485057;
+  transition: 0.2s ease;
+  border: none;
+  outline: none;
+  color: var(--text-color-white);
+}
+
+.submit-button:active {
+  color: var(--text-color-white);
+  background-color: #3c58dd;
+  box-shadow: inset 2px 3.5px 15px rgba(15, 21, 49, 0.25),
+    inset -2px -3.5px 15px #556fe8;
+  border-color: none;
+  outline: 0;
+}
+
+.btn {
+  border-radius: 12.5px;
+}
+
+.link-primary {
+  cursor: pointer;
+}
+
+/* a:link {
+  color: var(--buttons-color-blue);
+}
+
+/* visited link */
+/* a:visited {
+color: var(--text-color-white);
+} */
+
+/* mouse over link */
+a:hover {
+  color: var(--buttons-color-blue-disabled);
+}
+
+/* selected link */
+/* a:active { */
+/* color: var(--basic-color-green); */
+/* } */
+
+.active-class {
+  color: #4361ee;
+}
+.not-active-class {
   color: white;
 }
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.toast-container
+{
+  z-index: 999;
 }

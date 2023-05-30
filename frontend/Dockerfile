@@ -1,15 +1,11 @@
-FROM node:19-alpine
+## FRONT 2👨🏻
+
+FROM node:lts-alpine
+
+COPY ./     /app/
 
 WORKDIR /app
 
-COPY . .
+RUN yarn install
 
-RUN npm ci
-
-RUN npm run build
-
-ENV NODE_ENV production
-
-EXPOSE 3000
-
-CMD [ "npx", "serve", "build" ]
+CMD ["yarn", "run", "build"]
