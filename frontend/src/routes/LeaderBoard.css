@@ -3,7 +3,7 @@
 
 :root {
   --dark-red: hsl(0, 90%, 4%);
-  --neon-pink: hsl(303, 100%, 73%);
+  --yellowish: hsl(70, 46%, 40%);
 }
 
 .background {
@@ -14,7 +14,7 @@
   overflow: overlay;
   margin: auto auto;
   background: black;
-  background-image: radial-gradient(circle at 50% 0%, rgba(192,69,69,1) 0%, rgba(57,80,127,0.85) 40%, rgba(25,48,49,1) 100%);
+  background-image: radial-gradient(circle at 50% 0%, rgb(161, 211, 63) 0%, rgba(17, 63, 70, 0.85) 40%, rgb(45, 155, 160) 100%);
   color: white;
 }
 
@@ -30,8 +30,16 @@
   .leardboard-logo b{
     font: 500 100px "Clip";
     color: #fee;
-    text-shadow: 0 -40px 100px, 0 0 2px, 0 0 1em var(--neon-pink), 0 0 0.5em var(--neon-pink), 0 0 0.1em var(--neon-pink), 8px 10px 5px rgb(182, 52, 52);
-  }
+    text-shadow: 0 -40px 100px, 0 0 2px, 0 0 1em var(--yellowish), 0 0 0.5em var(--yellowish), 0 0 0.1em var(--yellowish), 8px 10px 5px rgb(110, 144, 37);
+	/* text-shadow: 
+	0 -20px 50px rgba(0, 0, 0, 0.8),
+	0 0 2px rgba(0, 0, 0, 0.5),
+	0 0 0.5em rgba(255, 0, 0, 0.8),
+	0 0 0.2em rgba(255, 0, 0, 0.8),
+	0 0 0.1em rgba(255, 0, 0, 0.8),
+	8px 10px 5px rgba(0, 0, 0, 0.2); */
+
+	}
   .leardboard-logo b span{
     animation: blink linear infinite 2s;
   }

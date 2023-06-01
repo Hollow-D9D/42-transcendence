@@ -2,8 +2,8 @@ version: "3"
 name: "transcendence"
 
 services:
-  # https://www.tomray.dev/nestjs-docker-production
-  # https://www.docker.com/blog/how-to-use-the-postgres-docker-official-image/
+
+# DB
   database:
     image: database:v1
     container_name: database
@@ -16,21 +16,13 @@ services:
         target: /var/lib/postgresql/data
         bind:
           create_host_path: true
-    # https://docs.docker.com/engine/reference/builder/#healthcheck
-    # https://github.com/peter-evans/docker-compose-healthcheck
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 1s
       timeout: 5s
       retries: 10
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    depends_on: 
-      - database
-    ports:
-      - 8080:8080
+
+# BACKEND
   backend:
     image: backend:v1
     container_name: backend
@@ -40,14 +32,38 @@ services:
     restart: always
     depends_on: 
       - database
+    networks:
+      - backend
     env_file: ${BACK_PATH}/.env
+  
+# FRONTEND
   frontend:
     image: frontend:v1
     container_name: frontend
-    build: ${FRONT_PATH}
-    restart: always
-    depends_on: 
-      - database
-    env_file: ${FRONT_PATH}/.env
+    build:
+      context: ${FRONT_PATH}
+      dockerfile: ${FRONT_PATH}/Dockerfile
+    working_dir: /app
+    command: sh -c "yarn install
+                    && yarn run build
+                    && yarn global add serve
+                    && serve -s build -l 3000"
+    environment:
+      - PUBLIC_URL=${FRONT_URL}
+      - REACT_APP_BACKEND_URL=${BACK_URL}
+      - REACT_APP_BACKEND_SOCKET=${SOCKET_URL}
+    volumes:
+      - ${FRONT_PATH}:/app
     ports:
-      - 8081:3000
+      # - "$HOST_IP:3000:3000"
+      - "3000:3000"
+    # restart: unless-stopped
+    networks:
+      - backend
+    depends_on:
+      - backend
+    # env_file: ${FRONT_PATH}/.env
+
+
+networks:
+  backend:
