@@ -28,7 +28,7 @@ export default function ChatRoom({current, show, role, outsider, setSettingReque
         setSettingRequest: () => void,
         blockedList: []}) {
 
-        const email = localStorage.getItem("userEmail");
+        const email = localStorage.getItem("userNickname");
     
     return(
         <>

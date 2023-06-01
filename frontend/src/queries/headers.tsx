@@ -6,7 +6,7 @@ export const authHeader = () => {
 };
 
 export const authContentHeader = () => {
-  let token = "bearer " + localStorage.getItem("userToken");
+  let token = "Bearer " + localStorage.getItem("userToken");
   let myHeaders = new Headers();
   myHeaders.append("Authorization", token);
   myHeaders.append("Content-Type", "application/json");

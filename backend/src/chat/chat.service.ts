@@ -344,21 +344,21 @@ export class ChatService {
   }
 
   async addMessage(chat_id: number, sender_login: string, message: string) {
-    try {
-      const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
-      if (!chat) throw new Error('No chat with this id!');
-      const sender = await this.userRepo.findOne({
-        where: { login: sender_login },
-      });
-      if (!sender) throw new Error('No user found!');
-      const msg = this.messageRepo.create({
-        chat_id: chat.id,
-        sender_id: sender.id,
-        content: message,
-      });
-    } catch (err) {
-      throw err;
-    }
+    // try {
+    //   const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
+    //   if (!chat) throw new Error('No chat with this id!');
+    //   const sender = await this.userRepo.findOne({
+    //     where: { login: sender_login },
+    //   });
+    //   if (!sender) throw new Error('No user found!');
+    //   const msg = this.messageRepo.create({
+    //     chat_id: chat.id,
+    //     sender_id: sender.id,
+    //     content: message,
+    //   });
+    // } catch (err) {
+    //   throw err;
+    // }
   }
 
   async users(logins: string[]): Promise<User[]> {

@@ -27,6 +27,7 @@ export default function UserPrivateProfile() {
     email: localStorage.getItem("userEmail"),
     userName: localStorage.getItem("userName"),
     auth: localStorage.getItem("userAuth"),
+    avatar: localStorage.getItem("userPicture"),
   };
 
   const [userInfo, setUserInfo] = useState(userInfoInit);
@@ -44,15 +45,26 @@ export default function UserPrivateProfile() {
   const [avatarFetched, setAvatarFetched] = useState(false);
 
   useEffect(() => {
+    // const getAvatar = async () => {
+    //   const result_1: undefined | string | Blob | MediaSource =
+    //     await getAvatarQuery();
+    //   if (result_1 !== undefined && result_1 instanceof Blob) {
+    //     setAvatarURL(URL.createObjectURL(result_1));
+    //   } else //if (result_1 === "error")
+    //   {
+    //     setAvatarURL(
+    //       "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
+    //     );
+    //   }
     const getAvatar = async () => {
-      const result_1: undefined | string | Blob | MediaSource =
-        await getAvatarQuery();
-      if (result_1 !== undefined && result_1 instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result_1));
-      } else if (result_1 === "error")
+      if (userInfo.avatar) {
+        setAvatarURL(userInfo.avatar);
+      } else //if (result_1 === "error")
+      {
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
         );
+      }
     };
     getAvatar();
   }, [avatarFetched]);
@@ -93,10 +105,10 @@ export default function UserPrivateProfile() {
           <Col className=" content">
             <div className="profile-username-text">
               @
-              {userInfo && userInfo.userName
-                ? userInfo.userName.length > 10
-                  ? userInfo!.userName.substring(0, 7) + "..."
-                  : userInfo!.userName
+              {userInfo && userInfo.email
+                ? userInfo.email.length > 20
+                  ? userInfo!.email.substring(0, 15) + "..."
+                  : userInfo!.email
                 : null}
             </div>
             <span
@@ -120,11 +132,11 @@ export default function UserPrivateProfile() {
                   <Row className="wrapper p-3">
                     <Col className="text-wrapper">
                       <div className="IBM-text" style={{ fontSize: "20px" }}>
-                        USERNAME
+                        Full Name
                       </div>
                       <div className="ROBOTO-text" style={{ fontSize: "15px" }}>
                         {userInfo && userInfo.userName
-                          ? userInfo.userName.length > 10
+                          ? userInfo.userName.length > 20
                             ? userInfo!.userName.substring(0, 7) + "..."
                             : userInfo!.userName
                           : null}
@@ -150,7 +162,7 @@ export default function UserPrivateProfile() {
                   <Row className="wrapper p-3">
                     <Col className="text-wrapper">
                       <div className="IBM-text" style={{ fontSize: "20px" }}>
-                        EMAIL
+                        Nickname
                       </div>
                       <div className="ROBOTO-text" style={{ fontSize: "15px" }}>
                         {userInfo.email}

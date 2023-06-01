@@ -28,7 +28,7 @@ export default function Preview ({ current, onSelect, onNewRoomRequest, updateSt
         blockedList: []}) {
 
     const [roomPreview, setPreviews] = useState<chatPreview[]>([]);
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
     const { show } = useContextMenu();
     const [hide, setHide] = useState<any>();
     const [menuEvent, setMenuEvent] = useState<any>(null);
@@ -201,7 +201,7 @@ function ChatSearch({onSearchMyChat, onSearchPublicChat, updateStatus}
         updateStatus: number}) {
 
     const [suggestion, setSug] = useState<oneSuggestion[]>([]);
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
 
     useEffect(() => {
         if (updateStatus === 0)

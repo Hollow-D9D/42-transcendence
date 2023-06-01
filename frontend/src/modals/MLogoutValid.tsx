@@ -11,7 +11,7 @@ export function MLogoutValid(props: any) {
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">Log Out</Modal.Title>
       </Modal.Header>
-      <Modal.Body>Do you wish to log out ?</Modal.Body>
+      <Modal.Body>Do you wish to ut ?</Modal.Body>
       <Modal.Footer>
         <Button variant="outline-danger" onClick={props.onHide}>
           No

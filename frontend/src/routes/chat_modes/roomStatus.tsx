@@ -42,7 +42,7 @@ export default function RoomStatus({current, role, outsider, updateStatus, block
     const [add, setAdd] = useState<boolean>(false);
     const [invitationTag, setTag] = useState<Tag[]>([]);
  
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
 
     useEffect(() => {
         if (current)
@@ -196,7 +196,7 @@ function Status({users, current, role, blockedList}
         role: string,
         blockedList: []}) {
     
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
     const [selData, setSelData] = useState<any>(null);
     const { show } = useContextMenu();
     const [hide, setHide] = useState<any>();
@@ -381,7 +381,7 @@ function OneStatus({data, setSelData, setHide, blockedList}
         setHide: (d: any) => void,
         blockedList: [] }) {
 
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
     const [avatarURL, setAvatarURL] = useState("");
     const usersStatus = useContext(UsersStatusCxt);
     const [status, setStatus] = useState("");
@@ -454,7 +454,7 @@ function JoinChannel({channelId, outsider, isPassword}
     : { channelId: number | undefined,
         outsider: boolean | undefined,
         isPassword: boolean | undefined}) {
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
     const [password, setPass] = useState("");
     
     const handleSetPass = (event: any) => {

@@ -3,13 +3,13 @@ import { Col, Card, Row, Form } from "react-bootstrap";
 import { NotifCxt } from "../../../App";
 import {
   updateUsernameQuery,
-  updateEmailQuery,
+  updateNicknameQuery,
 } from "../../../queries/updateUserQueries";
 
 export const ModifyEntry = (props: any) => {
   const notif = useContext(NotifCxt);
   const initialValues = {
-    email: "",
+    nickname: "",
     userName: "",
   };
 
@@ -45,25 +45,25 @@ export const ModifyEntry = (props: any) => {
       };
       updateUsername();
     }
-    if (userInput.email) {
-      const updateEmail = async () => {
-        const result = await updateEmailQuery(userInput.email);
+    if (userInput.nickname || userInput.nickname === "") {
+      const updateNickname = async () => {
+        const result = await updateNicknameQuery(userInput.nickname);
         if (result !== "error") {
           const button = document.getElementById("handleChange");
           if (button) {
-            button.setAttribute("name", "email");
-            button.setAttribute("value", userInput.email);
+            button.setAttribute("name", "nickname");
+            button.setAttribute("value", userInput.nickname);
             props.changeUserInfoHook(e);
             props.onClick();
           }
         } else {
           notif?.setNotifText(
-            "Email already taken. Please enter another email."
+            "nickname already taken. Please enter another nickname."
           );
           notif?.setNotifShow(true);
         }
       };
-      updateEmail();
+      updateNickname();
     }
   };
   return (
@@ -115,7 +115,7 @@ const SpecificEntry = (props: any) => {
     return (
       <EntryIsEmail
         setUserInput={props.setUserInput}
-        modifyInput={props.userInput.email}
+        modifyInput={props.userInput.nickname}
       />
     );
   if (props.toEdit === "USERNAME")
@@ -152,14 +152,14 @@ const EntryIsEmail = (props: any) => {
     <div>
       <Form.Group className="mb-3">
         <Form.Label className="IBM-text" style={{ fontSize: "20px" }}>
-          EMAIL
+          nickname
         </Form.Label>
         <Form.Control
-          type="email"
-          placeholder="new email"
+          type="nickname"
+          placeholder="new nickname"
           onChange={props.setUserInput}
           value={props.modifyInput}
-          name="email"
+          name="nickname"
         />
       </Form.Group>
     </div>

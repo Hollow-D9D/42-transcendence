@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
   const config = new DocumentBuilder()
     .setTitle('Pong game')
     .setDescription('42 ft_transcendence project')
