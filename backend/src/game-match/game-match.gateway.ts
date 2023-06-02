@@ -7,11 +7,13 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { GameMatchService } from './game-match.service';
+import { ProfileService } from 'src/profile/profile.service';
 import { Server, Socket } from 'socket.io';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { JwtService } from '@nestjs/jwt';
-import { log } from 'console';
+import { UserStatus } from 'src/typeorm/userstatus.enum';
+import { throwError } from 'src/utils/gateway.utils';
 
 interface UserSocket {
   login: string;
@@ -20,10 +22,11 @@ interface UserSocket {
 
 @WebSocketGateway({ cors: true })
 export class GameMatchGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit /* OnGatewayConnection, OnGatewayDisconnect */
 {
   constructor(
     private readonly gameMatchService: GameMatchService,
+    private readonly profileService: ProfileService,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly jwtService: JwtService,
   ) {
@@ -57,26 +60,38 @@ export class GameMatchGateway
     });
   }
 
-  handleConnection(client: Socket) {
-    // console.log('Client connected:', client.id);
-    // Additional logic for handling connection
-  }
+  // handleConnection(client: Socket) {
+  //   // console.log('Client connected:', client.id);
+  //   // Additional logic for handling connection
+  // }
 
-  handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client.id);
-    // Additional logic for handling disconnection
-  }
+  // handleDisconnect(client: Socket) {
+  //   console.log('Client disconnected:', client.id);
+  //   // Additional logic for handling disconnection
+  // }
 
   @SubscribeMessage('start-game')
   async handleStartGame(client: Socket, payload: any) {
-    console.log('start-game', payload);
-    if (!payload.login)
-      client.emit('start-game', {
-        error: new Error('No login provided!'),
-        body: null,
-      });
-    const reponse = await this.gameMatchService.addToQueue(payload.login);
-    client.emit('start-game', { error: null, body: reponse });
+    try {
+      console.log('start-game', payload);
+      if (!payload.login) throw new Error('No login provided!');
+      const response = await this.gameMatchService.addToQueue(payload.login);
+      if (response.matching)
+        this.profileService.editStatus(payload.login, UserStatus.INGAME);
+      client.emit('start-game', { error: null, body: response });
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
+  @SubscribeMessage('end-game')
+  async handleEndGame(client: Socket, payload: any) {
+    try {
+      if (!payload.login) throw new Error('No login provided!');
+      // const reponse = await 
+    } catch (err) {
+      throwError(client, err.message);
+    }
   }
 
   @SubscribeMessage('new-connection')

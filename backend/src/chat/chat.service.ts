@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Chat, User, MutedUser, Message } from 'src/typeorm';
+import * as bcrypt from 'bcrypt';
 import { ChannelMode } from 'src/typeorm/channelmode.enum';
 import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,27 +28,34 @@ export class ChatService {
     name: string,
     password: string,
   ) {
-    // null
-    const entityLike = {
-      group: false,
-      members: users,
-      mode: null,
-      name: null,
-      password: null,
-      owner: null,
-    };
-    if (mode !== null) {
-      // create a channel
-      entityLike.group = true;
-      entityLike.mode = mode;
-      entityLike.name = name;
-      if (mode === ChannelMode.PROTECTED) entityLike.password = password; // TODO: replace with the hashed one
-      entityLike.owner = users[0]; // the first one is `login` from request
-      // TODO: check that the fail condition works properly
+    try {
+      // null
+      const entityLike = {
+        group: false,
+        members: users,
+        mode: null,
+        name: null,
+        password: null,
+        owner: null,
+      };
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      if (mode !== null) {
+        // create a channel
+        entityLike.group = true;
+        entityLike.mode = mode;
+        entityLike.name = name;
+        if (mode === ChannelMode.PROTECTED)
+          entityLike.password = hashedPassword;
+        entityLike.owner = users[0]; // the first one is `login` from request
+        // TODO: check that the fail condition works properly
+      }
+      // no else since no new fields need to be added for chats
+      const newOne = this.chatRepo.create(entityLike);
+      await this.chatRepo.save(newOne);
+    } catch (err) {
+      throw err;
     }
-    // no else since no new fields need to be added for chats
-    const newOne = this.chatRepo.create(entityLike);
-    await this.chatRepo.save(newOne);
   }
 
   /**
@@ -97,7 +105,7 @@ export class ChatService {
         // TODO: replace with the hashed one
         if (
           (channel.mode === ChannelMode.PROTECTED &&
-            channel.password === password) ||
+            (await bcrypt.compare(password, channel.password))) ||
           channel.mode === ChannelMode.PUBLIC
         ) {
           const user = await this.userRepo.findOne({
@@ -343,22 +351,29 @@ export class ChatService {
     this.mutedUserRepo.remove(mutedTarget); // TODO
   }
 
+  /**
+   * ADDING A MESSAGE FROM USER TO CHAT
+   *
+   * @param chat_id
+   * @param sender_login
+   * @param message
+   */
   async addMessage(chat_id: number, sender_login: string, message: string) {
-    // try {
-    //   const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
-    //   if (!chat) throw new Error('No chat with this id!');
-    //   const sender = await this.userRepo.findOne({
-    //     where: { login: sender_login },
-    //   });
-    //   if (!sender) throw new Error('No user found!');
-    //   const msg = this.messageRepo.create({
-    //     chat_id: chat.id,
-    //     sender_id: sender.id,
-    //     content: message,
-    //   });
-    // } catch (err) {
-    //   throw err;
-    // }
+    try {
+      const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
+      if (!chat) throw new Error('No chat with this id!');
+      const sender = await this.userRepo.findOne({
+        where: { login: sender_login },
+      });
+      if (!sender) throw new Error('No user found!');
+      const msg = this.messageRepo.create({
+        chat_id: chat.id,
+        sender_id: sender.id,
+        content: message,
+      });
+    } catch (err) {
+      throw err;
+    }
   }
 
   async users(logins: string[]): Promise<User[]> {
