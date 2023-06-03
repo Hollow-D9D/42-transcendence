@@ -31,7 +31,7 @@ export class ProfileService {
         if (checkExist) throw new Error('Nickname already exist');
         user.nickname = data.nickname;
       }
-      if (data.avatar_url !== undefined) user.profpic_url = data.avatar_url;
+      if (data.avatar_url !== undefined) user.profpic_url = "http://localhost:3001/" + data.avatar_url;
       if (data.fullname !== undefined) user.full_name = data.fullname;
       user.save();
     } catch (error) {

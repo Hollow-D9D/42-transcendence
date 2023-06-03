@@ -66,7 +66,7 @@ import { useContext, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { NotifCxt } from "../App";
 import { uploadAvatarQuery } from "../queries/avatarQueries";
-
+import axios from 'axios'
 export function MUploadAvatar(props: any) {
   const notif = useContext(NotifCxt);
   const [newAvatar, setNewAvatar] = useState<any>();
@@ -79,40 +79,31 @@ export function MUploadAvatar(props: any) {
     if (newAvatar) {
       const uploadAvatar = async () => {
         try {
-          const imagePath = `/upload/${newAvatar.name}`; // Path to the image in the /public/upload folder
-          await saveImageToPublicFolder(newAvatar); // Save the image to the /public/upload folder
-          const result_1 = await uploadAvatarQuery(imagePath); // Send the image path to the backend
-          if (result_1 !== "error") {
-            props.isAvatarUpdated();
-            props.onHide();
-          } else {
-            notif?.setNotifText(
-              "Unable to upload avatar. Please try again later."
-            );
-            notif?.setNotifShow(true);
-          }
+          // const imagePath = `/upload/${newAvatar.name}`; // Path to the image in the /public/upload folder
+          
+          const fileName = await uploadAvatarQuery(newAvatar); // Send the image path to the backend
+          console.log(localStorage.getItem("userToken"));
+          
+          const response = await axios.get("http://localhost:3001/profile/editNickname", {
+            headers: {
+              "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
+              "Content-Type": "application/json"
+            },
+            params: {
+              newdata: { avatar_url: fileName }
+            }
+          });
+          console.log(response);
+          
+          props.isAvatarUpdated();
+          props.onHide();
+          
         } catch (error) {
-          console.error("Error uploading avatar:", error);
           notif?.setNotifText("Error uploading avatar. Please try again later.");
           notif?.setNotifShow(true);
         }
       };
       uploadAvatar();
-    }
-  };
-
-  const saveImageToPublicFolder = async (file: any) => {
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      await fetch("/upload", {
-        method: "POST",
-        body: formData,
-      });
-    } catch (error) {
-      console.error("Error saving image:", error);
-      throw error;
     }
   };
 

@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 const authFileHeader = () => {
   let token = "bearer " + localStorage.getItem("userToken");
   let myHeaders = new Headers();
@@ -5,11 +7,16 @@ const authFileHeader = () => {
   return myHeaders;
 };
 
-export const uploadAvatarQuery = (fileInput: any) => {
-  var formdata = new FormData();
-
-  formdata.append("avatar", fileInput, "name.png");
-  return fetchAvatar("POST", formdata, authFileHeader(), "avatar");
+export const uploadAvatarQuery = async (file: any) => {
+  try {
+    const formData = new FormData();
+    formData.append("image", file, file.name);
+    const fileProps = await axios.post("http://localhost:3001/profile/upload", formData);
+    return fileProps.data.fileName;
+  } catch (error) {
+    console.error("Error saving image:", error);
+    throw error;
+  }
 };
 
 export const getAvatarQuery = () => {
@@ -24,6 +31,30 @@ export const getUserAvatarQuery = (otherId: number) => {
   header.append("Content-Type", "application/json");
   return fetchAvatar("POST", body, header, "getavatar");
 };
+
+export const fetchAvatarFromServer = async () => {
+
+  let src = "";
+  try {
+    const reponse = await fetch("http://localhost:3001/profile/getProfPic", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
+        "Content-Type": "multipart/form-data"
+      }
+    })
+    if (reponse.ok) {
+      const blob = await reponse.blob()
+      src = URL.createObjectURL(blob);
+      localStorage.setItem("userPicture", src);
+
+      
+    }
+    return src
+  }
+  catch (err) {
+    console.log(err);
+  }
+}
 
 const fetchAvatar = async (
   method: string,

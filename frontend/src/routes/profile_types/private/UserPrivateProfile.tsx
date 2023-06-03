@@ -3,7 +3,7 @@ import { Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Activate2FA } from "../../../modals/MActivateTwoFA";
 import { MUploadAvatar } from "../../../modals/MUploadAvatar";
-import { getAvatarQuery } from "../../../queries/avatarQueries";
+import { fetchAvatarFromServer, getAvatarQuery } from "../../../queries/avatarQueries";
 import { ModifyEntry } from "./ModifyUserInfo";
 import { TwoFA } from "./TwoFA";
 import { UsersRelations } from "./users_relations/UsersRelations";
@@ -68,8 +68,14 @@ export default function UserPrivateProfile() {
       }
     };
     getAvatar();
+    console.log(avatarURL);
+    
   }, [avatarFetched]);
 
+  useEffect(()=>{
+    fetchAvatarFromServer()
+  }, [])
+  
   return (
     <main>
       <MUploadAvatar
@@ -93,7 +99,8 @@ export default function UserPrivateProfile() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
-            >
+              >
+               <img src={avatarURL}/>
               <input
                 type="image"
                 alt="avatar of user"
