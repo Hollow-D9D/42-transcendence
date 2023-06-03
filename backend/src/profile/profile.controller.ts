@@ -2,7 +2,6 @@ import { Controller, Get, Param, Headers, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { getPayload } from 'src/utils/auth.utils';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserStatus } from 'src/typeorm/userstatus.enum';
 
 @Controller('profile')
 export class ProfileController {
@@ -24,30 +23,6 @@ export class ProfileController {
           },
         };
       return { error: new Error('No user found!'), body: null };
-    } catch (error) {
-      return { error, body: null };
-    }
-  }
-
-  @Get('isActive')
-  @UseGuards(AuthGuard)
-  async isActive(@Headers() headers) {
-    try {
-      const payload = getPayload(headers);
-      this.profileService.editStatus(payload.login, UserStatus.ACTIVE);
-      return { error: null, body: null };
-    } catch (error) {
-      return { error, body: null };
-    }
-  }
-
-  @Get('isInactive')
-  @UseGuards(AuthGuard)
-  async isInactive(@Headers() headers) {
-    try {
-      const payload = getPayload(headers);
-      this.profileService.editStatus(payload.login, UserStatus.INACTIVE);
-      return { error: null, body: null };
     } catch (error) {
       return { error, body: null };
     }

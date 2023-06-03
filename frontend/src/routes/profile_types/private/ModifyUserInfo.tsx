@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Col, Card, Row, Form } from "react-bootstrap";
 import { NotifCxt } from "../../../App";
 import {
-  updateUsernameQuery,
+  // updateUsernameQuery,
   updateNicknameQuery,
 } from "../../../queries/updateUserQueries";
 
@@ -17,6 +17,8 @@ export const ModifyEntry = (props: any) => {
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
+    console.log("name::::::::", name, value)
+    console.log("nickname:::::::::", userInput.nickname)
     setUserInput({
       ...userInput,
       [name]: value,
@@ -25,29 +27,30 @@ export const ModifyEntry = (props: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    if (userInput.userName) {
-      const updateUsername = async () => {
-        const result = await updateUsernameQuery(userInput.userName);
-        if (result !== "error") {
-          const button = document.getElementById("handleChange");
-          if (button) {
-            button.setAttribute("name", "userName");
-            button.setAttribute("value", userInput.userName);
-            props.changeUserInfoHook(e);
-            props.onClick();
-          }
-        } else {
-          notif?.setNotifText(
-            "Username already taken. Please enter another username."
-          );
-          notif?.setNotifShow(true);
-        }
-      };
-      updateUsername();
-    }
+    // if (userInput.userName) {
+    //   const updateUsername = async () => {
+    //     const result = await updateUsernameQuery(userInput.userName);
+    //     if (result !== "error") {
+    //       const button = document.getElementById("handleChange");
+    //       if (button) {
+    //         button.setAttribute("name", "userName");
+    //         button.setAttribute("value", userInput.userName);
+    //         props.changeUserInfoHook(e);
+    //         props.onClick();
+    //       }
+    //     } else {
+    //       notif?.setNotifText(
+    //         "Username already taken. Please enter another username."
+    //       );
+    //       notif?.setNotifShow(true);
+    //     }
+    //   };
+    //   updateUsername();
+    // }
     if (userInput.nickname || userInput.nickname === "") {
       const updateNickname = async () => {
         const result = await updateNicknameQuery(userInput.nickname);
+        console.log("update:::::::::", result)
         if (result !== "error") {
           const button = document.getElementById("handleChange");
           if (button) {
@@ -58,7 +61,7 @@ export const ModifyEntry = (props: any) => {
           }
         } else {
           notif?.setNotifText(
-            "nickname already taken. Please enter another nickname."
+            "Nickname already taken. Please enter another nickname."
           );
           notif?.setNotifShow(true);
         }
@@ -152,7 +155,7 @@ const EntryIsEmail = (props: any) => {
     <div>
       <Form.Group className="mb-3">
         <Form.Label className="IBM-text" style={{ fontSize: "20px" }}>
-          nickname
+          NICKNAME
         </Form.Label>
         <Form.Control
           type="nickname"

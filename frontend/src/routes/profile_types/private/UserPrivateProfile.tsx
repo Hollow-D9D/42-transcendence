@@ -25,6 +25,7 @@ export default function UserPrivateProfile() {
 
   const userInfoInit = {
     email: localStorage.getItem("userEmail"),
+    nickname: localStorage.getItem("userNickname"),
     userName: localStorage.getItem("userName"),
     auth: localStorage.getItem("userAuth"),
     avatar: localStorage.getItem("userPicture"),
@@ -142,7 +143,7 @@ export default function UserPrivateProfile() {
                           : null}
                       </div>
                     </Col>
-                    <Col className=" text-right">
+                    {/* <Col className=" text-right">
                       <button
                         type="button"
                         className="btn btn-sm submit-button float-end"
@@ -155,7 +156,7 @@ export default function UserPrivateProfile() {
                       >
                         Edit
                       </button>
-                    </Col>
+                    </Col> */}
                   </Row>
                 </div>
                 <div>
@@ -165,7 +166,7 @@ export default function UserPrivateProfile() {
                         Nickname
                       </div>
                       <div className="ROBOTO-text" style={{ fontSize: "15px" }}>
-                        {userInfo.email}
+                        {userInfo.nickname}
                       </div>
                     </Col>
                     <Col className=" text-right">
@@ -192,7 +193,7 @@ export default function UserPrivateProfile() {
             </Card>
           </Col>
           {showFriends ? <UsersRelations /> : null}
-          {showUsername ? (
+          {/* {showUsername ? (
             <ModifyEntry
               toEdit="USERNAME"
               onClick={() => {
@@ -201,7 +202,7 @@ export default function UserPrivateProfile() {
               }}
               changeUserInfoHook={changeUserInfoHook}
             />
-          ) : null}
+          ) : null} */}
           {showEmail ? (
             <ModifyEntry
               toEdit="EMAIL"

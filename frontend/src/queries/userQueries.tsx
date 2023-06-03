@@ -41,7 +41,7 @@ export const storeUserInfo = (result: any) => {
   // localStorage.setItem("userID", result.id);
   // localStorage.setItem("userToken", result.userToken);
   localStorage.setItem("userName", result.full_name || "");
-  localStorage.setItem("userNickname", "");
+  localStorage.setItem("userNickname", result.nickname || result.login);
   localStorage.setItem("userEmail", result.login);
   localStorage.setItem("userPicture", result.profpic_url);
   localStorage.setItem("userGamesWon", result.gamesWon);
