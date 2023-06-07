@@ -12,6 +12,7 @@ export const uploadAvatarQuery = async (file: any) => {
     const formData = new FormData();
     formData.append("image", file, file.name);
     const fileProps = await axios.post("http://localhost:3001/profile/upload", formData);
+    console.log("fileProps:::::", fileProps)
     return fileProps.data.fileName;
   } catch (error) {
     console.error("Error saving image:", error);
@@ -46,8 +47,6 @@ export const fetchAvatarFromServer = async () => {
       const blob = await reponse.blob()
       src = URL.createObjectURL(blob);
       localStorage.setItem("userPicture", src);
-
-      
     }
     return src
   }

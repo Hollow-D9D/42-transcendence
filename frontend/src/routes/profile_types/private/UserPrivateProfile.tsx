@@ -3,7 +3,6 @@ import { Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Activate2FA } from "../../../modals/MActivateTwoFA";
 import { MUploadAvatar } from "../../../modals/MUploadAvatar";
-import { fetchAvatarFromServer, getAvatarQuery } from "../../../queries/avatarQueries";
 import { ModifyEntry } from "./ModifyUserInfo";
 import { TwoFA } from "./TwoFA";
 import { UsersRelations } from "./users_relations/UsersRelations";
@@ -46,22 +45,12 @@ export default function UserPrivateProfile() {
   const [avatarFetched, setAvatarFetched] = useState(false);
 
   useEffect(() => {
-    // const getAvatar = async () => {
-    //   const result_1: undefined | string | Blob | MediaSource =
-    //     await getAvatarQuery();
-    //   if (result_1 !== undefined && result_1 instanceof Blob) {
-    //     setAvatarURL(URL.createObjectURL(result_1));
-    //   } else //if (result_1 === "error")
-    //   {
-    //     setAvatarURL(
-    //       "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
-    //     );
-    //   }
-    const getAvatar = async () => {
-      if (userInfo.avatar) {
-        setAvatarURL(userInfo.avatar);
-      } else //if (result_1 === "error")
-      {
+    const getAvatar = () => {
+      console.log("BUlki")
+      if (localStorage.getItem("userPicture") !== '') {
+        setAvatarURL(localStorage.getItem("userPicture") || "hambal");
+        console.log(avatarURL, "??");
+      } else {
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
         );
@@ -69,13 +58,9 @@ export default function UserPrivateProfile() {
     };
     getAvatar();
     console.log(avatarURL);
-    
+
   }, [avatarFetched]);
 
-  useEffect(()=>{
-    fetchAvatarFromServer()
-  }, [])
-  
   return (
     <main>
       <MUploadAvatar
@@ -99,8 +84,7 @@ export default function UserPrivateProfile() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
-              >
-               <img src={avatarURL}/>
+            >
               <input
                 type="image"
                 alt="avatar of user"

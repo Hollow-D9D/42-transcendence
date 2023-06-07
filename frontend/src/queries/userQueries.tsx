@@ -1,5 +1,4 @@
 import { authHeader } from "./headers";
-import { fetchAvatarFromServer } from './avatarQueries'
 process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
 export const getUserBlocked = () => {
@@ -38,11 +37,7 @@ const fetchGet = async (url: string, callback: any) => {
 };
 
 export const storeUserInfo = (result: any) => {
-  // localStorage.setItem("userID", result.id);
-  // localStorage.setItem("userToken", result.userToken);
-  console.log("asasasas");
-  
-  fetchAvatarFromServer()
+  localStorage.setItem("userPicture",result.profpic_url);
   localStorage.setItem("userName", result.full_name || "");
   localStorage.setItem("userNickname", result.nickname || result.login);
   localStorage.setItem("userEmail", result.login);

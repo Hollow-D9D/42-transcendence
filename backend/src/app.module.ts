@@ -10,9 +10,14 @@ import { AchievementsModule } from './achievements/achievements.module';
 import { GameMatchModule } from './game-match/game-match.module';
 import { ChatModule } from './chat/chat.module';
 import { GameGateway } from './game/game.gateway';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: () => ({

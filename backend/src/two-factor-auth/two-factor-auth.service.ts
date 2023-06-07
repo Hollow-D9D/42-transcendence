@@ -13,16 +13,22 @@ export class TwoFactorAuthService {
   async generateSecret(login: string): Promise<any> {
     try {
       const secret = speakeasy.generateSecret();
+      let secretCode = secret.ascii;
+
+      const user = await this.userRepo.findOne({ where: { login } });
+      if (!user.two_factor_token)
+        user.two_factor_token = secretCode;
+      else
+        secretCode = user.two_factor_token;
+      user.save();
+
       const otpauthUrl = speakeasy.otpauthURL({
-        secret: secret.ascii,
+        secret: secretCode,
         label: `htumanya's ft_transcendence`,
         algorithm: 'sha1',
       });
-      const user = await this.userRepo.findOne({ where: { login } });
-      user.two_factor_token = secret.ascii;
-      user.save();
       const qrCode = await QRCode.toDataURL(otpauthUrl);
-      return { secret: secret.ascii, qrCode };
+      return { secret: secretCode, qrCode };
     } catch (err) {
       throw err;
     }

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Res, Param, Headers, Header, UseGuards, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Res,
+  Param,
+  Headers,
+  Header,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  Query,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { getPayload } from 'src/utils/auth.utils';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -6,8 +18,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { File } from 'multer';
-import * as fs from 'fs'
+import * as fs from 'fs';
 import { response } from 'express';
+import { log } from 'console';
 
 @Controller('profile')
 export class ProfileController {
@@ -16,29 +29,29 @@ export class ProfileController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('image', {
-        storage: diskStorage({
-            destination: './public/upload', // Specify the destination folder
-            filename: (req, file, cb) => {
-                const fileName = `${Date.now()}-${file.originalname}`;
-                
-                cb(null, fileName); // Set the filename
-            },
-        }),
-        fileFilter: (_, file, cb) => {
-            const allowedExtensions = ['.jpg', '.jpeg', '.png'];
-            const ext = extname(file.originalname);
-            if (allowedExtensions.includes(ext)) {
-                cb(null, true);
-            } else {
-                cb(new Error('Only JPG, JPEG, and PNG files are allowed'), false);
-            }
+      storage: diskStorage({
+        destination: './public/upload', // Specify the destination folder
+        filename: (req, file, cb) => {
+          const fileName = `${Date.now()}-${file.originalname}`;
+
+          cb(null, fileName); // Set the filename
         },
-        limits: {
-            fileSize: 1024 * 1024, // Limit file size to 1MB
-        },
+      }),
+      fileFilter: (_, file, cb) => {
+        const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+        const ext = extname(file.originalname);
+        if (allowedExtensions.includes(ext)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only JPG, JPEG, and PNG files are allowed'), false);
+        }
+      },
+      limits: {
+        fileSize: 1024 * 1024 * 25, // Limit file size to 1MB
+      },
     }),
-    )
-    uploadFile(@UploadedFile() file: File) {
+  )
+  uploadFile(@UploadedFile() file: File) {
     return {
       originalName: file.originalname,
       fileName: file.filename,
@@ -52,19 +65,18 @@ export class ProfileController {
     try {
       const payload = getPayload(headers);
       const { user } = await this.profileService.getProfile(payload.login);
-      
-      if (!user.profpic_url.startsWith("http")) {
+
+      if (!user.profpic_url.startsWith('http')) {
         fs.readFile(`src/upload/${user.profpic_url}`, (err, data) => {
           console.log('data', data, 'err', err);
-          
-          if(err)
-            throw new Error('Image not found');
+
+          if (err) throw new Error('Image not found');
           else {
-            response.setHeader('Content-Type', 'image/png')
-            response.send(data)
+            response.setHeader('Content-Type', 'image/png');
+            response.send(data);
             // return { error : null, imageData: data }
           }
-        })
+        });
       }
       return { error: new Error('No user found!'), body: null };
     } catch (error) {
@@ -102,7 +114,7 @@ export class ProfileController {
       return { error: null, body: null };
     } catch (error) {
       console.log(error);
-      
+
       return { error, body: null };
     }
   }

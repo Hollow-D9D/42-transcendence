@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User, Achievement } from 'src/typeorm';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserStatus } from 'src/typeorm/userstatus.enum';
+import { share } from 'rxjs';
 
 @Injectable()
 export class ProfileService {
@@ -31,7 +32,8 @@ export class ProfileService {
         if (checkExist) throw new Error('Nickname already exist');
         user.nickname = data.nickname;
       }
-      if (data.avatar_url !== undefined) user.profpic_url = "http://localhost:3001/" + data.avatar_url;
+      if (data.avatar_url !== undefined)
+        user.profpic_url = 'http://localhost:3001/upload/' + data.avatar_url;
       if (data.fullname !== undefined) user.full_name = data.fullname;
       user.save();
     } catch (error) {
@@ -111,4 +113,12 @@ export class ProfileService {
       throw error;
     }
   }
+
+  async getAvatar(username: string, size: number) {
+    const user = await this.userRepo.findOne({ where: { login: username } });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user.profpic_url  }
 }
