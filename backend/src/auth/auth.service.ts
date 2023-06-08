@@ -84,7 +84,6 @@ export class AuthService {
           list.push(userInfo.login);
         }
         await this.cacheM.set('logged_in', list, 0);
-        console.log('token', token);
         return {
           error: null,
           body: {

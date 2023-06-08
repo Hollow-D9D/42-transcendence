@@ -14,13 +14,12 @@ export class FriendsService {
    * @param login string
    * @returns arrray of Friend instances
    */
-  async getFriends(user_id: number) {
+  async getFriends(login: string) {
     try {
       const user = await this.userRepo.findOne({
-        where: { id: user_id },
-        relations: ['friends'],
+        where: { login },
+        relations: ['friends', 'friend_requests'],
       });
-      console.log(user);
       return user;
     } catch (error) {
       console.log(error);

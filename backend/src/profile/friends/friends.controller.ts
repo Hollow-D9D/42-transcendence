@@ -17,7 +17,7 @@ export class FriendsController {
   async getFriends(@Headers() headers) {
     try {
       const payload = getPayload(headers);
-      return await this.friendsService.getFriends(payload.id);
+      return await this.friendsService.getFriends(payload.login);
     } catch (error) {
       return { error, body: null };
     }

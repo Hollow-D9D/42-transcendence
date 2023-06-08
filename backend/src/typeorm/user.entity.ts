@@ -45,6 +45,12 @@ export class User extends BaseEntity {
   profpic_url: string;
 
   @Column({
+    nullable: false,
+    default: false,
+  })
+  is2fa: boolean;
+
+  @Column({
     select: false,
     nullable: true,
   })

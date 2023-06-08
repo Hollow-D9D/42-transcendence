@@ -79,6 +79,7 @@ export class GameMatchGateway
       if (response.matching)
         this.profileService.editStatus(payload.login, UserStatus.INGAME);
       client.emit('start-game', { error: null, body: response });
+      //notify opponent
     } catch (err) {
       throwError(client, err.message);
     }
@@ -88,6 +89,7 @@ export class GameMatchGateway
   async handleEndGame(client: Socket, payload: any) {
     try {
       if (!payload.login) throw new Error('No login provided!');
+      this.checkEndGamValid(payload.stats);
       // const reponse = await 
     } catch (err) {
       throwError(client, err.message);

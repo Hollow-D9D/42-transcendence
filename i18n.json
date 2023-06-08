@@ -1,0 +1,12 @@
+{
+  "locales": [
+    "hy",
+    "ru",
+    "en"
+  ],
+  "defaultLocale": "hy",
+  "localeDetection": false,
+  "pages": {
+    "*": ["common"]
+  }
+}

@@ -70,7 +70,14 @@ export class GameMatchService {
     }
   }
 
-  // async endMatch(login: string) {}
+  async endMatch(match_id: number) {
+    try {
+      await GameMatch.delete({ id: match_id });
+      
+    } catch (err) {
+      throw err;
+    }
+  }
 
   async cancelMatchLookup(login: string) {
     try {

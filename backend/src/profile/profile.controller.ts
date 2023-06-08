@@ -19,8 +19,6 @@ export class ProfileController {
           error: null,
           body: {
             user,
-            // TODO: add achienvements
-            // TODO: add match history
           },
         };
       return { error: new Error('No user found!'), body: null };

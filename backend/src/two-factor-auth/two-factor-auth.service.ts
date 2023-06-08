@@ -28,6 +28,16 @@ export class TwoFactorAuthService {
     }
   }
 
+  async enableTwoFactor(login: string) {
+    try {
+      const user = await this.userRepo.findOne({ where: { login: login } });
+      user.is2fa = true;
+      await this.userRepo.save(user);
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async removeTwoFactor(login: string) {
     try {
       const user = await this.userRepo.findOne({ where: { login: login } });
