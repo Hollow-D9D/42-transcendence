@@ -35,12 +35,26 @@ export const twoFAAuth = (
 };
 
 /* Turn on 2FA for signed in user */
-export const twoFAOn = (code: string) => {
-  let raw = JSON.stringify({
-    twoFAcode: code,
-  });
-  console.log("TURN ON");
-  return fetchPost(raw, "turn-on", null);
+export const twoFAOn = async (code: string) => {
+  // let raw = JSON.stringify({
+  //   twoFAcode: code,
+  // });
+  try {
+    
+    const response = await axios.get(`http://localhost:3001/auth/two-factor/enable?token=${code}`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
+        "Content-Type": "application/json"
+      },
+    })
+    console.log(response);
+    
+    return response;
+  } catch(err) {
+    console.log(err);
+  }
+  // console.log("TURN ON");
+  // return fetchPost(raw, "turn-on", null);
 };
 
 export const twoFAOff = () => {

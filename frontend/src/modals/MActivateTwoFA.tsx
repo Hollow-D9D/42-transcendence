@@ -11,6 +11,7 @@ export function Activate2FA(props: any) {
   const handleInputChange = (e: any) => {
     const { value } = e.target;
     setCodeModal(value);
+    
   };
 
   const getQRCode = async () => {

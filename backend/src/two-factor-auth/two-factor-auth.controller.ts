@@ -23,17 +23,20 @@ export class TwoFactorAuthController {
   async enableTwoFactor(@Req() req): Promise<any> {
     const payload = getPayload(req.headers);
     const { token } = req.query;
-
-    const isTokenValid = this.twoFactorAuthService.verifyToken(
+    
+    const isTokenValid = await this.twoFactorAuthService.verifyToken(
       token,
       payload.login,
     );
+    console.log(isTokenValid);
+    
     if (isTokenValid) {
       await this.twoFactorAuthService.enableTwoFactor(payload.login);
       return { error: null, body: null };
     }
     return { error: new Error('Invalid token!'), body: null };
   }
+
   @Get('verify')
   @UseGuards(AuthGuard)
   async verifyToken(@Req() req): Promise<any> {
