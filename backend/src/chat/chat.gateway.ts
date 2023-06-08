@@ -75,12 +75,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!this.rooms[roomName]) {
       this.rooms[roomName] = new Set();
     }
-    const hasPerm = this.chatService.checkPermission(login, +roomName);
-    if (hasPerm) {
-      client.join(roomName);
-      this.rooms[roomName].add(login);
-      return true;
-    }
+    // const hasPerm = this.chatService.checkPermission(login, +roomName);
+    // if (hasPerm) {
+    //   client.join(roomName);
+    //   this.rooms[roomName].add(login);
+    //   return true;
+    // }
     return false;
   }
 

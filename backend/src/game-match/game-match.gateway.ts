@@ -21,9 +21,7 @@ interface UserSocket {
 }
 
 @WebSocketGateway({ cors: true })
-export class GameMatchGateway
-  implements OnGatewayInit /* OnGatewayConnection, OnGatewayDisconnect */
-{
+export class GameMatchGateway implements OnGatewayInit {
   constructor(
     private readonly gameMatchService: GameMatchService,
     private readonly profileService: ProfileService,
@@ -89,7 +87,7 @@ export class GameMatchGateway
   async handleEndGame(client: Socket, payload: any) {
     try {
       if (!payload.login) throw new Error('No login provided!');
-      this.checkEndGamValid(payload.stats);
+      // this.checkEndGamValid(payload.stats);
       // const reponse = await 
     } catch (err) {
       throwError(client, err.message);

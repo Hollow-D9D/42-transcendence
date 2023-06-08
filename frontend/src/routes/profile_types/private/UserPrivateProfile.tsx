@@ -3,7 +3,6 @@ import { Container, Row, Col, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Activate2FA } from "../../../modals/MActivateTwoFA";
 import { MUploadAvatar } from "../../../modals/MUploadAvatar";
-import { getAvatarQuery } from "../../../queries/avatarQueries";
 import { ModifyEntry } from "./ModifyUserInfo";
 import { TwoFA } from "./TwoFA";
 import { UsersRelations } from "./users_relations/UsersRelations";
@@ -25,8 +24,10 @@ export default function UserPrivateProfile() {
 
   const userInfoInit = {
     email: localStorage.getItem("userEmail"),
+    nickname: localStorage.getItem("userNickname"),
     userName: localStorage.getItem("userName"),
     auth: localStorage.getItem("userAuth"),
+    avatar: localStorage.getItem("userPicture"),
   };
 
   const [userInfo, setUserInfo] = useState(userInfoInit);
@@ -44,17 +45,20 @@ export default function UserPrivateProfile() {
   const [avatarFetched, setAvatarFetched] = useState(false);
 
   useEffect(() => {
-    const getAvatar = async () => {
-      const result_1: undefined | string | Blob | MediaSource =
-        await getAvatarQuery();
-      if (result_1 !== undefined && result_1 instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result_1));
-      } else if (result_1 === "error")
+    const getAvatar = () => {
+      console.log("BUlki")
+      if (localStorage.getItem("userPicture") !== '') {
+        setAvatarURL(localStorage.getItem("userPicture") || "hambal");
+        console.log(avatarURL, "??");
+      } else {
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
         );
+      }
     };
     getAvatar();
+    console.log(avatarURL);
+
   }, [avatarFetched]);
 
   return (
@@ -93,10 +97,10 @@ export default function UserPrivateProfile() {
           <Col className=" content">
             <div className="profile-username-text">
               @
-              {userInfo && userInfo.userName
-                ? userInfo.userName.length > 10
-                  ? userInfo!.userName.substring(0, 7) + "..."
-                  : userInfo!.userName
+              {userInfo && userInfo.email
+                ? userInfo.email.length > 20
+                  ? userInfo!.email.substring(0, 15) + "..."
+                  : userInfo!.email
                 : null}
             </div>
             <span
@@ -120,17 +124,17 @@ export default function UserPrivateProfile() {
                   <Row className="wrapper p-3">
                     <Col className="text-wrapper">
                       <div className="IBM-text" style={{ fontSize: "20px" }}>
-                        USERNAME
+                        Full Name
                       </div>
                       <div className="ROBOTO-text" style={{ fontSize: "15px" }}>
                         {userInfo && userInfo.userName
-                          ? userInfo.userName.length > 10
+                          ? userInfo.userName.length > 20
                             ? userInfo!.userName.substring(0, 7) + "..."
                             : userInfo!.userName
                           : null}
                       </div>
                     </Col>
-                    <Col className=" text-right">
+                    {/* <Col className=" text-right">
                       <button
                         type="button"
                         className="btn btn-sm submit-button float-end"
@@ -143,17 +147,17 @@ export default function UserPrivateProfile() {
                       >
                         Edit
                       </button>
-                    </Col>
+                    </Col> */}
                   </Row>
                 </div>
                 <div>
                   <Row className="wrapper p-3">
                     <Col className="text-wrapper">
                       <div className="IBM-text" style={{ fontSize: "20px" }}>
-                        EMAIL
+                        Nickname
                       </div>
                       <div className="ROBOTO-text" style={{ fontSize: "15px" }}>
-                        {userInfo.email}
+                        {userInfo.nickname}
                       </div>
                     </Col>
                     <Col className=" text-right">
@@ -180,7 +184,7 @@ export default function UserPrivateProfile() {
             </Card>
           </Col>
           {showFriends ? <UsersRelations /> : null}
-          {showUsername ? (
+          {/* {showUsername ? (
             <ModifyEntry
               toEdit="USERNAME"
               onClick={() => {
@@ -189,7 +193,7 @@ export default function UserPrivateProfile() {
               }}
               changeUserInfoHook={changeUserInfoHook}
             />
-          ) : null}
+          ) : null} */}
           {showEmail ? (
             <ModifyEntry
               toEdit="EMAIL"

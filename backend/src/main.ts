@@ -2,10 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { AppModule } from './app.module';
-import { urlencoded, json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  process.env.REACT_APP_BACKEND_URL = 'http://localhost:3001';
   const config = new DocumentBuilder()
     .setTitle('Pong game')
     .setDescription('42 ft_transcendence project')

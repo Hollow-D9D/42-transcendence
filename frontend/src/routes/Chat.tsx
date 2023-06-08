@@ -19,7 +19,7 @@ export default function Chat() {
     const [updateStatus, setUpdateStatus] = useState(0);
     const [blockedList, setBlockedList] = useState<[]>([]);
     const notif = useContext(NotifCxt);
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
 
     useEffect(() => {
 

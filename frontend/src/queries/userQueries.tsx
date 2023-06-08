@@ -1,4 +1,5 @@
 import { authHeader } from "./headers";
+process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
 export const getUserBlocked = () => {
   return fetchGet("get_blocked", storeFriendsInfo);
@@ -17,7 +18,7 @@ export const getLeaderBoard = () => {
 };
 
 const fetchGet = async (url: string, callback: any) => {
-  let fetchUrl = process.env.REACT_APP_BACKEND_URL + "/users/" + url;
+  let fetchUrl = process.env.REACT_APP_BACKEND_URL + "/profile";
   try {
     const response = await fetch(fetchUrl, {
       method: "GET",
@@ -36,10 +37,10 @@ const fetchGet = async (url: string, callback: any) => {
 };
 
 export const storeUserInfo = (result: any) => {
-  localStorage.setItem("userID", result.id);
-  localStorage.setItem("userName", result.username);
-  localStorage.setItem("userEmail", result.email);
-  localStorage.setItem("userPicture", result.avatar);
+  localStorage.setItem("userPicture",result.profpic_url);
+  localStorage.setItem("userName", result.full_name || "");
+  localStorage.setItem("userNickname", result.nickname || result.login);
+  localStorage.setItem("userEmail", result.login);
   localStorage.setItem("userGamesWon", result.gamesWon);
   localStorage.setItem("userGamesLost", result.gamesLost);
   localStorage.setItem("userGamesPlayed", result.gamesPlayed);

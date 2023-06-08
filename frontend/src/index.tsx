@@ -16,6 +16,7 @@ import { BlockedList } from "./routes/profile_types/private/users_relations/Bloc
 import { FriendsList } from "./routes/profile_types/private/users_relations/FriendsList";
 import { PendingList } from "./routes/profile_types/private/users_relations/PendingList";
 import UserPublicProfile from "./routes/profile_types/public/UserPublicProfile";
+import AuthRedirect from "./routes/Auth/Redirect"
 import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -39,6 +40,8 @@ root.render(
             <Route path="signup" element={<SignUp />} />
             <Route path="*" element={<Navigate to="/auth/signin" />} />
           </Route>
+          <Route path="/auth/redirect" element={ <AuthRedirect/> }></Route>
+
 
           <Route
             path="app"

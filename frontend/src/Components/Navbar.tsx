@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../globals/contexts";
 import { MLogoutValid } from "../modals/MLogoutValid";
 import "./Navbar.css";
+import axios from "axios";
+
 
 const GetIcons = (props: any) => {
   const navigate = useNavigate();
@@ -30,9 +32,21 @@ const GetIcons = (props: any) => {
       <MLogoutValid
         show={modalShow}
         onHide={() => setModalShow(false)}
-        onSubmit={() => {
+        onSubmit={async() => {
+          console.log("logging otu");
+          try{
+            const res = await axios.get(`http://localhost:3001/logout`, {
+            headers: {
+              // Add your headers here
+              'authorization': `Bearer ${localStorage.getItem('userToken')}`,
+              "Content-Type": "application/json",
+            },
+          });
+          }
+          catch(err){ console.log("logout::::::::::::::::", err)}
           setModalShow(false);
-          auth.signout(() => navigate("/auth/signin"));
+          localStorage.clear();
+          navigate("/auth/signin");
         }}
       />
       <div>

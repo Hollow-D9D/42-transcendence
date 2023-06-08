@@ -13,7 +13,7 @@ export function NewRoomCard({newRoomRequest, onNewRoomRequest, updateStatus}
     : { newRoomRequest: boolean,
         onNewRoomRequest: () => void,
         updateStatus: number}) {
-    const email = localStorage.getItem("userEmail");
+    const email = localStorage.getItem("userNickname");
     const [userTag, setUserTag] = useState<Tag[]>([]);
     const [roomName, setRoomName] = useState("");
     const [roomPass, setRoomPass] = useState("");

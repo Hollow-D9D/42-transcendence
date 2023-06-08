@@ -22,22 +22,23 @@ export class AuthService {
 
   async auth42(u_code, u_state): Promise<user42> {
     let me: any;
-    try {
+    try {      
       const token = await axios.post('https://api.intra.42.fr/oauth/token', {
         grant_type: 'authorization_code',
         client_id: process.env.API42_CID,
         client_secret: process.env.API42_CSECRET,
-        // code: u_code,
+        code: u_code,
         redirect_uri: process.env.API42_URL,
         state: u_state,
       });
-      console.log('token', token.data);
+      // console.log('token::::::::', token.data);
       if (token.data.error) throw new Error(token.data.error);
       me = await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token.data.access_token}`,
         },
       });
+      // console.log("auth42::::::::", me.data.login, me.data.displayname, me.data.image.link)
       return {
         login: me.data.login ? me.data.login : null,
         full_name: me.data.displayname ? me.data.displayname : null,

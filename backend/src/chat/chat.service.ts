@@ -359,35 +359,21 @@ export class ChatService {
    * @param message
    */
   async addMessage(chat_id: number, sender_login: string, message: string) {
-    try {
-      const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
-      if (!chat) throw new Error('No chat with this id!');
-      const sender = await this.userRepo.findOne({
-        where: { login: sender_login },
-      });
-      if (!sender) throw new Error('No user found!');
-      const msg = new Message();
-      msg.sender = sender;
-      msg.content = message;
-      msg.chat = chat;
-      chat.messages.push(msg);
-      await this.chatRepo.save(chat);
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  async checkPermission(login: string, chat_id: number) {
-    try {
-      const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
-      if (!chat) throw new Error('No chat with this id!');
-      for (const member of chat.members) {
-        if (member.login === login) return true;
-      }
-      return false;
-    } catch (err) {
-      throw err;
-    }
+    // try {
+    //   const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
+    //   if (!chat) throw new Error('No chat with this id!');
+    //   const sender = await this.userRepo.findOne({
+    //     where: { login: sender_login },
+    //   });
+    //   if (!sender) throw new Error('No user found!');
+    //   const msg = this.messageRepo.create({
+    //     chat_id: chat.id,
+    //     sender_id: sender.id,
+    //     content: message,
+    //   });
+    // } catch (err) {
+    //   throw err;
+    // }
   }
 
   async users(logins: string[]): Promise<User[]> {

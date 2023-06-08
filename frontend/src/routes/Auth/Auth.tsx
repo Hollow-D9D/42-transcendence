@@ -16,7 +16,7 @@ export default function Auth() {
   let navigate = useNavigate();
   let auth = useAuth();
   let location = useLocation();
-  const hrefURL = process.env.REACT_APP_BACKEND_URL + "/auth/42";
+  const hrefURL = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-9bf87a7dc6727592572c086dcb74d50c619a0e3065ade141ccb0b92282caaf07&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fredirect&response_type=code&state=absjhasagsgsajg";
 
   // Use a callback to avoid re-rendering
   const userSignIn = useCallback(() => {

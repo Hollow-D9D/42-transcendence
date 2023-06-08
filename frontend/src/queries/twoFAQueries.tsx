@@ -1,8 +1,23 @@
 import { storeToken } from "./authQueries";
 import { getUserData } from "./userQueries";
+import axios from 'axios';
 
 /* Generate 2FA QR code */
-export const twoFAGenerate = () => {
+export const twoFAGenerate = async () => {
+  try {
+    const response = await axios.get("http://localhost:3001/auth/two-factor", {
+      headers: {
+        "authorization" : `Bearer ${ localStorage.getItem('userToken') }`
+      }
+    });
+    console.log("we've got there", response.data);
+    return response.data.body.qrCode;
+  } catch (err) {
+    console.log(err);
+    
+  }
+  
+
   return fetchPost(null, "generate", null);
 };
 
