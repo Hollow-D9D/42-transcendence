@@ -120,5 +120,6 @@ export class ProfileService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    return user.profpic_url  }
+    return user.profpic_url;
+  }
 }
