@@ -82,4 +82,19 @@ export class FriendsController {
       return { error, body: null };
     }
   }
+
+  @Get('searchUsers')
+  @UseGuards(AuthGuard)
+  async searchUsers(@Headers() headers, @Query() query) {
+    try {
+      const payload = getPayload(headers);
+      console.log("users::",query.login);
+      const users = await this.friendsService.searchUsers(query.login);
+      console.log("users::::::", users);
+      
+      return { error: null, body: users };
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
 }

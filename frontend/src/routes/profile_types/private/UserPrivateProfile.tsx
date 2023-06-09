@@ -9,6 +9,7 @@ import { UsersRelations } from "./users_relations/UsersRelations";
 import IconPen from "../../../ressources/icons/Icon_Pen.svg";
 import "../Profiles.css";
 import { COnUserSimple } from "../../../ContextMenus/COnUserSimple";
+import { AddFriend } from "./users_relations/AddFriend";
 
 export default function UserPrivateProfile() {
   const navigate = useNavigate();
@@ -46,7 +47,6 @@ export default function UserPrivateProfile() {
 
   useEffect(() => {
     const getAvatar = () => {
-      console.log("BUlki")
       if (localStorage.getItem("userPicture") !== '') {
         setAvatarURL(localStorage.getItem("userPicture") || "hambal");
         console.log(avatarURL, "??");
@@ -134,20 +134,6 @@ export default function UserPrivateProfile() {
                           : null}
                       </div>
                     </Col>
-                    {/* <Col className=" text-right">
-                      <button
-                        type="button"
-                        className="btn btn-sm submit-button float-end"
-                        onClick={(e: any) => {
-                          e.preventDefault();
-                          setShowUsername(true);
-                          setShowFriends(false);
-                          setShowEmail(false);
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </Col> */}
                   </Row>
                 </div>
                 <div>
@@ -183,17 +169,6 @@ export default function UserPrivateProfile() {
               </Card.Body>
             </Card>
           </Col>
-          {showFriends ? <UsersRelations /> : null}
-          {/* {showUsername ? (
-            <ModifyEntry
-              toEdit="USERNAME"
-              onClick={() => {
-                onClickEditUsername();
-                onClickShowFriends();
-              }}
-              changeUserInfoHook={changeUserInfoHook}
-            />
-          ) : null} */}
           {showEmail ? (
             <ModifyEntry
               toEdit="EMAIL"
@@ -204,6 +179,10 @@ export default function UserPrivateProfile() {
               changeUserInfoHook={changeUserInfoHook}
             />
           ) : null}
+          <Col className="col-6">
+            {showFriends ? <UsersRelations /> : null}
+            {showFriends ? <AddFriend /> : null}
+          </Col>
         </Row>
       </Container>
     </main>

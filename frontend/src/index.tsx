@@ -18,6 +18,7 @@ import { PendingList } from "./routes/profile_types/private/users_relations/Pend
 import UserPublicProfile from "./routes/profile_types/public/UserPublicProfile";
 import AuthRedirect from "./routes/Auth/Redirect"
 import "./index.css";
+import { AddFriend } from "./routes/profile_types/private/users_relations/AddFriend";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
@@ -57,6 +58,7 @@ root.render(
               <Route path="friends" element={<FriendsList />} />
               <Route path="pending" element={<PendingList />} />
               <Route path="blocked" element={<BlockedList />} />
+              <Route path="addFriend" element={<AddFriend />} />
             </Route>
             <Route path="public/:userName" element={<UserPublicProfile />} />
             <Route

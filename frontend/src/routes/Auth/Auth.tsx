@@ -7,7 +7,8 @@ import { IUserInfo } from "../../globals/Interfaces";
 import { signUp, signIn } from "../../queries/authQueries";
 import { GUserInputsRefs } from "../../globals/variables";
 import { useAuth } from "../../globals/contexts";
-import { getLeaderBoard, getUserData } from "../../queries/userQueries";
+import { getUserData } from "../../queries/userQueries";
+// import { getLeaderBoard, getUserData } from "../../queries/userQueries";
 import "./Auth.css";
 import { NotifCxt } from "../../App";
 
@@ -47,7 +48,7 @@ export default function Auth() {
             "Unable to retrieve your informations. Please try again later!"
           );
         } else {
-          await getLeaderBoard();
+          // await getLeaderBoard();
           userSignIn();
           notif?.setNotifText(
             "Welcome " + localStorage.getItem("userName") + "!"

@@ -20,11 +20,19 @@ export const FriendsList = () => {
 
   useEffect(() => {
     const fetchDataFriends = async () => {
-      const id = localStorage.getItem("userID");
-      if (id) {
-        const result = await getUserFriends(+id);
-        if (result !== "error") return result;
-      }
+      // const id = localStorage.getItem("userID");
+      // console.log("Id:::::::", id)
+      // console.log("fetchDataFriends:::::::::::");
+
+      // if (id) {
+      //   const result = await getUserFriends(+id);
+      //   if (result !== "error") return result;
+      // }
+
+      console.log("fetchDataFriends:::::::::::");
+
+      const result = await getUserFriends();
+      if (result !== "error") return result;
     };
 
     const fetchDataFriendsAvatar = async (otherId: number) => {
@@ -37,7 +45,7 @@ export const FriendsList = () => {
 
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-
+      console.log("fetchData::::::::")
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {

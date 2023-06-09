@@ -57,8 +57,20 @@ export const twoFAOn = async (code: string) => {
   // return fetchPost(raw, "turn-on", null);
 };
 
-export const twoFAOff = () => {
-  return fetchPost(null, "turn-off", null);
+export const twoFAOff = async () => {
+  try {
+    const response = await axios.get(`http://localhost:3001/auth/two-factor/remove`, {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
+        "Content-Type": "application/json"
+      },
+    })
+    console.log(response);
+    
+    return response;
+  } catch(err) {
+    console.log(err);
+  }
 };
 
 const authRawHeader = () => {

@@ -32,7 +32,7 @@ export function Activate2FA(props: any) {
     e.preventDefault();
     const twoFAActivate = async () => {
       const result = await twoFAOn(FACodeModal);
-      if (!result) {
+      if (result?.data.error) {
         notif?.setNotifText("Wrong code. Please try again.");
         notif?.setNotifShow(true);
       } else {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { log } from 'console';
 
@@ -106,6 +106,18 @@ export class FriendsService {
       user.friends = user.friends.filter((friend) => friend.id !== friend_id);
       user.save();
     } catch (err) {
+      throw err;
+    }
+  }
+
+  async searchUsers(login: string){
+    try{
+      console.log(login);
+      const users = await this.userRepo.find({
+        where : { login : Like(`%${login}%`)},
+      });
+      return users;
+    }catch (err) {
       throw err;
     }
   }

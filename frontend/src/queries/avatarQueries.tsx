@@ -33,27 +33,27 @@ export const getUserAvatarQuery = (otherId: number) => {
   return fetchAvatar("POST", body, header, "getavatar");
 };
 
-export const fetchAvatarFromServer = async () => {
+// export const fetchAvatarFromServer = async () => {
 
-  let src = "";
-  try {
-    const reponse = await fetch("http://localhost:3001/profile/getProfPic", {
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-        "Content-Type": "multipart/form-data"
-      }
-    })
-    if (reponse.ok) {
-      const blob = await reponse.blob()
-      src = URL.createObjectURL(blob);
-      localStorage.setItem("userPicture", src);
-    }
-    return src
-  }
-  catch (err) {
-    console.log(err);
-  }
-}
+//   let src = "";
+//   try {
+//     const reponse = await fetch("http://localhost:3001/profile/getProfPic", {
+//       headers: {
+//         "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
+//         "Content-Type": "multipart/form-data"
+//       }
+//     })
+//     if (reponse.ok) {
+//       const blob = await reponse.blob()
+//       src = URL.createObjectURL(blob);
+//       localStorage.setItem("userPicture", src);
+//     }
+//     return src
+//   }
+//   catch (err) {
+//     console.log(err);
+//   }
+// }
 
 const fetchAvatar = async (
   method: string,

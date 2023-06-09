@@ -7,6 +7,7 @@ import {
   blockUserQuery,
   unblockUserQuery,
   addFriendQuery,
+  acceptFriendQuery,
   denyInviteQuery,
 } from "../../../../queries/userFriendsQueries";
 
@@ -14,6 +15,7 @@ export const DisplayRow = (props: any) => {
   const { show } = useContextMenu();
 
   function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: number) {
+    console.log("display menu")
     e.preventDefault();
     show(e, {
       id: "onUserSimple",
@@ -35,29 +37,27 @@ export const DisplayRow = (props: any) => {
             }
           >
             <div
-              className={`profile-pic-wrapper ${
-                props.userModel.status === 2 ? "ingame" : ""
-              }`}
+              className={`profile-pic-wrapper ${props.userModel.status === 2 ? "ingame" : ""
+                }`}
             >
               <div
                 className="profile-pic-inside-sm"
                 style={{
-                  backgroundImage: `url("${props.userModel.avatar}")`,
+                  backgroundImage: `url("${props.userModel.profpic_url}")`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
               ></div>
             </div>
             <div
-              className={`status-private ${
-                props.userModel.status === 1
+              className={`status-private ${props.userModel.status === 1
                   ? "online"
                   : props.userModel.status === 2
-                  ? "ingame"
-                  : props.userModel.status === 0
-                  ? "offline"
-                  : ""
-              }`}
+                    ? "ingame"
+                    : props.userModel.status === 0
+                      ? "offline"
+                      : ""
+                }`}
             ></div>
           </Col>
           <Col
@@ -69,10 +69,10 @@ export const DisplayRow = (props: any) => {
           >
             <div className="profile-username-text" style={{ fontSize: "15px" }}>
               @
-              {props.userModel && props.userModel.username
-                ? props.userModel.username.length > 10
-                  ? props.userModel.username.substring(0, 7) + "..."
-                  : props.userModel.username
+              {props.userModel && props.userModel.login
+                ? props.userModel.login.length > 10
+                  ? props.userModel.login.substring(0, 7) + "..."
+                  : props.userModel.login
                 : null}
             </div>
           </Col>
@@ -98,7 +98,13 @@ export const DisplayRow = (props: any) => {
                 hook={props.hook}
                 state={props.state}
               />
-            ) : null}
+            ) : props.listType === "addFriend" ? (
+              <ButtonsAdding 
+              id={props.userModel.id}
+              username={props.userModel.username}
+              />
+            )
+              : null}
           </Col>
         </Row>
       </Container>
@@ -200,8 +206,8 @@ const ButtonsPending = (props: any) => {
 
   const handleClickAccept = (e: any) => {
     e.preventDefault();
-    const addFriend = async () => {
-      const result = await addFriendQuery(props.id);
+    const acceptFriend = async () => {
+      const result = await acceptFriendQuery(props.id);
       if (result !== "error") {
         notif?.setNotifText(props.username + " added as friend!");
         props.hook(!props.state);
@@ -211,7 +217,7 @@ const ButtonsPending = (props: any) => {
         );
       notif?.setNotifShow(true);
     };
-    addFriend();
+    acceptFriend();
   };
 
   const handleClickIgnore = (e: any) => {
@@ -250,6 +256,67 @@ const ButtonsPending = (props: any) => {
           Ignore
         </button>
       </Col>
+    </main>
+  );
+};
+
+
+const ButtonsAdding = (props: any) => {
+  console.log("ButtonsAdding::::::")
+  const notif = useContext(NotifCxt);
+
+  const handleClickAccept = (e: any) => {
+    e.preventDefault();
+    const addFriend = async () => {
+      const result = await addFriendQuery(props.id);
+      if (result !== "error") {
+        notif?.setNotifText(props.username + " added as friend!");
+        props.hook(!props.state);
+      } else
+        notif?.setNotifText(
+          "Could not accept friend request from " + props.username + " :(."
+        );
+      notif?.setNotifShow(true);
+    };
+    addFriend();
+  };
+
+  // const handleClickIgnore = (e: any) => {
+  //   e.preventDefault();
+  //   const ignoreFriend = async () => {
+  //     const result = await denyInviteQuery(props.id);
+  //     if (result !== "error") {
+  //       notif?.setNotifText("Request from " + props.username + " ignored.");
+  //       props.hook(!props.state);
+  //     } else
+  //       notif?.setNotifText(
+  //         "Could not ignore request from " + props.username + " :(."
+  //       );
+  //     notif?.setNotifShow(true);
+  //   };
+  //   ignoreFriend();
+  // };
+
+  return (
+    <main>
+      <Col className="float-end">
+        <button
+          type="button"
+          className="IBM-text btn btn-sm text-button"
+          onClick={(e) => handleClickAccept(e)}
+        >
+          Send Request
+        </button>
+      </Col>
+      {/* <Col className="float-end">
+        <button
+          type="button"
+          className="IBM-text btn btn-sm text-button"
+          onClick={(e) => handleClickIgnore(e)}
+        >
+          Ignore
+        </button>
+      </Col> */}
     </main>
   );
 };

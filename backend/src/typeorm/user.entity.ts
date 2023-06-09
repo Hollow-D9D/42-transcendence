@@ -51,7 +51,6 @@ export class User extends BaseEntity {
   is2fa: boolean;
 
   @Column({
-    select: false,
     nullable: true,
   })
   two_factor_token: string;

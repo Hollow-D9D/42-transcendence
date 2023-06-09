@@ -16,6 +16,7 @@ import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getUserFriends } from "../../../queries/userFriendsQueries";
 
 export default function DisplayUserFriends(props: any) {
+  console.log("props:::::", props.userInfo)
   const usersStatus = useContext(UsersStatusCxt);
   const [friendsList, setFriendsList] = useState<ItableRow[] | undefined>(
     undefined
@@ -28,7 +29,9 @@ export default function DisplayUserFriends(props: any) {
 
   useEffect(() => {
     const fetchDataFriends = async () => {
-      const result = await getUserFriends(props.userInfo.id);
+      console.log("fetchDataFriends:::::::")
+      // const result = await getUserFriends(props.userInfo.id);
+      const result = await getUserFriends();
       if (result !== "error") return result;
     };
 
@@ -42,7 +45,7 @@ export default function DisplayUserFriends(props: any) {
 
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-
+      console.log("display fetchData:::::::")
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {
@@ -136,7 +139,7 @@ export default function DisplayUserFriends(props: any) {
 const DisplayFriendsRow = (props: any) => {
   const { show } = useContextMenu();
   const navigate = useNavigate();
-
+  console.log("DisplayFriendsRow:::::::")
   function displayMenu(
     e: React.MouseEvent<HTMLElement>,
     targetUserId: number,

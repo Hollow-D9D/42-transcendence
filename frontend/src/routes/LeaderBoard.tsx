@@ -1,6 +1,6 @@
 import "./LeaderBoard.css"
 import { useEffect, useState } from "react";
-import { getLeaderBoard } from "../queries/userQueries";
+import { getAchievements } from "../queries/userQueries";
 import { getUserAvatarQuery } from "../queries/avatarQueries";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +20,7 @@ export default function LeaderBoard() {
 
     useEffect(() => {
       const updateLeaderBoard = async () => {
-        const result = await getLeaderBoard();
+        const result = await getAchievements();
         if (result !== "error") {
           setData(result);
           setFetched(true);
@@ -33,17 +33,16 @@ export default function LeaderBoard() {
     return (
         <div className="background">
             <div className="leardboard-logo">
-                <b>L<span>ea</span>d<span>e</span><span>r</span>  </b>
-                <b>B<span>oa</span>r<span>d</span></b>
+                <b>A<span>ch</span>i<span>e</span><span>v</span>e<span>me</span>n<span>ts</span></b>
             </div>
             <div className="block"/>
             {
                 data == null || data.length === 0 ?
                 <div className="leardboard-logo" style={{marginTop: "160px", height: "60px"}}>
-                    <b style={{font: "500 65px \"Clip\""}}><span>N</span>o  </b>
+                    {/* <b style={{font: "500 65px \"Clip\""}}><span>N</span>o  </b>
                     <b style={{font: "500 65px \"Clip\""}}>G<span>am</span><span>e</span>  </b>
                     <b style={{font: "500 65px \"Clip\""}}>Re<span>co</span>r<span>d</span>     </b>
-                    <b style={{font: "500 65px \"Clip\""}}><span>Y</span>e<span>t</span></b>
+                    <b style={{font: "500 65px \"Clip\""}}><span>Y</span>e<span>t</span></b> */}
                 </div>
                 :
                 <div className="leaderboard">

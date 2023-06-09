@@ -43,7 +43,7 @@ const GetIcons = (props: any) => {
             },
           });
           }
-          catch(err){ console.log("logout::::::::::::::::", err)}
+          catch(err){ console.log(err)}
           setModalShow(false);
           localStorage.clear();
           navigate("/auth/signin");

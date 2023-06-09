@@ -27,26 +27,6 @@ export const ModifyEntry = (props: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    // if (userInput.userName) {
-    //   const updateUsername = async () => {
-    //     const result = await updateUsernameQuery(userInput.userName);
-    //     if (result !== "error") {
-    //       const button = document.getElementById("handleChange");
-    //       if (button) {
-    //         button.setAttribute("name", "userName");
-    //         button.setAttribute("value", userInput.userName);
-    //         props.changeUserInfoHook(e);
-    //         props.onClick();
-    //       }
-    //     } else {
-    //       notif?.setNotifText(
-    //         "Username already taken. Please enter another username."
-    //       );
-    //       notif?.setNotifShow(true);
-    //     }
-    //   };
-    //   updateUsername();
-    // }
     if (userInput.nickname || userInput.nickname === "") {
       const updateNickname = async () => {
         const result = await updateNicknameQuery(userInput.nickname);

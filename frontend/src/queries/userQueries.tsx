@@ -13,7 +13,7 @@ export const getUserData = () => {
   return fetchGet("me", storeUserInfo);
 };
 
-export const getLeaderBoard = () => {
+export const getAchievements = () => {
   return fetchGet("get_leaderboard", storeLeaderBoardInfo);
 };
 
@@ -37,14 +37,20 @@ const fetchGet = async (url: string, callback: any) => {
 };
 
 export const storeUserInfo = (result: any) => {
-  localStorage.setItem("userPicture",result.profpic_url);
+
+  localStorage.setItem("userPicture", result.profpic_url);
   localStorage.setItem("userName", result.full_name || "");
-  localStorage.setItem("userNickname", result.nickname || result.login);
   localStorage.setItem("userEmail", result.login);
+  if (result.nickname !== "") {
+    localStorage.setItem("userNickname", result.nickname);
+  }
+  else {
+    localStorage.setItem("userNickname", result.login);
+  }
   localStorage.setItem("userGamesWon", result.gamesWon);
   localStorage.setItem("userGamesLost", result.gamesLost);
   localStorage.setItem("userGamesPlayed", result.gamesPlayed);
-  localStorage.setItem("userAuth", result.twoFA);
+  localStorage.setItem("userAuth", result.is2fa);
 };
 
 export const storeFriendsInfo = (result: any) => {
