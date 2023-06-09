@@ -18,7 +18,7 @@ export class FriendsService {
     try {
       const user = await this.userRepo.findOne({
         where: { login },
-        relations: ['friends', 'friend_requests'],
+        relations: ['friends', 'friend_requests', 'blocked_users'],
       });
       return user;
     } catch (error) {

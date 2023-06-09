@@ -74,20 +74,30 @@ export class GameMatchGateway implements OnGatewayInit {
       console.log('start-game', payload);
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
-      if (response.matching)
-        this.profileService.editStatus(payload.login, UserStatus.INGAME);
-      client.emit('start-game', { error: null, body: response });
-      //notify opponent
+      if (response.matching) {
+        this.startGameUpdate(response.response.player1.login);
+        this.startGameUpdate(response.response.player2.login);
+      }
     } catch (err) {
       throwError(client, err.message);
     }
+  }
+
+  async startGameUpdate(login: string) {
+    const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
+    userSockets.forEach((userSocket) => {
+      if (userSocket.login === login) {
+        userSocket.socket.emit('start-game', { login });
+      }
+    });
+    this.profileService.editStatus(login, UserStatus.INGAME);
   }
 
   @SubscribeMessage('end-game')
   async handleEndGame(client: Socket, payload: any) {
     try {
       if (!payload.login) throw new Error('No login provided!');
-      // this.checkEndGamValid(payload.stats);
+      this.checkEndGameValid(payload.stats);
       // const reponse = await 
     } catch (err) {
       throwError(client, err.message);
