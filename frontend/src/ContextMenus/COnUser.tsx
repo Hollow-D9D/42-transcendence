@@ -31,7 +31,7 @@ export const COnUser = (props: any) => {
           window.location.reload();
         }}
       >
-        see profile
+        see profile agnes
       </Item>
       <Item
         onClick={({ props }) => {

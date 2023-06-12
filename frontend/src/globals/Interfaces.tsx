@@ -21,7 +21,7 @@ export interface IUserInfo {
 
 export interface ItableRow {
   key: number;
-  userModel: { username: string; avatar: string; id: number; status: number };
+  userModel: { login: string; profpic_url: string; id: number; status: number };
 }
 
 export interface IUserStatus {
@@ -41,6 +41,7 @@ export interface userModel {
   rank: number;
   score: number;
   winRate: number;
+  nickname: string;
 }
 
 export interface gameModel {

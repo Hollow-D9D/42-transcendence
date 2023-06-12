@@ -21,7 +21,7 @@ export default function AuthRedirect() {
               "Content-Type": "application/json",
             },
           });
-
+          
           const token = (res.data.body.token) ? res.data.body.token : null;
           if (token) {
             const profile = await axios.get(`http://localhost:3001/profile`, {

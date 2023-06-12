@@ -14,7 +14,7 @@ export default function DisplayGamesStats(props: any) {
     const getPlayedGamesStats = async () => {
       const result_1 = await getGameStats(props.userInfo.id);
       if (result_1 !== "error") {
-        setGames(result_1);
+        // setGames(result_1);
       } else console.log("Could not get games stats.");
     };
     getPlayedGamesStats();

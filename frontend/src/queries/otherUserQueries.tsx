@@ -1,10 +1,28 @@
 import { authContentHeader } from "./headers";
 
-export const getOtherUser = (otherUsername: number) => {
-  let body = JSON.stringify({
-    otherId: otherUsername,
-  });
-  return fetchGetOtherUser("get_user", body);
+export const getOtherUser = async(otherUsername: string) => {
+  // let body = JSON.stringify({
+  //   login: otherUsername,
+  // });
+  try {
+    console.log("mdaaa: " + otherUsername);
+    
+    const response = await fetch(`http://localhost:3001/profile/PublicProfile?login=${otherUsername}`, {
+      method: "GET",
+      headers: authContentHeader(),
+      redirect: "follow",
+    });
+    const result = await response.json();
+    // console.log("result::::", result)
+    if (!response.ok) {
+      console.log("POST error on ");
+      return "error";
+    }
+    return result;
+  } catch (error) {
+    return console.log("error", error);
+  }
+  // return fetchGetOtherUser("get_user", body);
 };
 
 const fetchGetOtherUser = async (url: string, body: any) => {

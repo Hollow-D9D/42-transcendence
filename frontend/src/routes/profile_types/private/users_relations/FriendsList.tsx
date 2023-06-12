@@ -29,7 +29,7 @@ export const FriendsList = () => {
       //   if (result !== "error") return result;
       // }
 
-      console.log("fetchDataFriends:::::::::::");
+      //console.log("fetchDataFriends:::::::::::");
 
       const result = await getUserFriends();
       if (result !== "error") return result;
@@ -45,15 +45,15 @@ export const FriendsList = () => {
 
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-      console.log("fetchData::::::::")
+     // console.log("fetchData::::::::")
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { login: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedFriends[i].id;
-          newRow.userModel.username = fetchedFriends[i].username;
+          newRow.userModel.login = fetchedFriends[i].username;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -65,8 +65,8 @@ export const FriendsList = () => {
           let avatar = await fetchDataFriendsAvatar(fetchedFriends[i].id);
 
           if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+            newRow.userModel.profpic_url = URL.createObjectURL(avatar);
+          else if (avatar) newRow.userModel.profpic_url = avatar;
           friends.push(newRow);
         }
       }

@@ -34,15 +34,15 @@ export const PendingList = () => {
 
     const fetchData = async () => {
       let fetchedPending = await fetchDataPending();
-
+      
       if (fetchedPending !== undefined && fetchedPending.length !== 0) {
         for (let i = 0; i < fetchedPending.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { login: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedPending[i].id;
-          newRow.userModel.username = fetchedPending[i].username;
+          newRow.userModel.login = fetchedPending[i].nickname;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -51,11 +51,11 @@ export const PendingList = () => {
             if (found) newRow.userModel.status = found.userModel.status;
           }
 
-          let avatar = await fetchDataPendingAvatar(fetchedPending[i].id);
+          // let avatar = await fetchDataPendingAvatar(fetchedPending[i].id);
 
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+          // if (avatar !== undefined && avatar instanceof Blob)
+            newRow.userModel.profpic_url = fetchedPending[i].profpic_url;
+          // else if (avatar) newRow.userModel.avatar = avatar;
           pending.push(newRow);
         }
       }

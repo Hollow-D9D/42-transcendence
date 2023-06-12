@@ -10,6 +10,7 @@ interface user42 {
   login: string;
   full_name: string;
   profpic_url: string;
+  nickname: string;
 }
 
 @Injectable()
@@ -41,6 +42,7 @@ export class AuthService {
       // console.log("auth42::::::::", me.data.login, me.data.displayname, me.data.image.link)
       return {
         login: me.data.login ? me.data.login : null,
+        nickname: me.data.login ? me.data.login : null,
         full_name: me.data.displayname ? me.data.displayname : null,
         profpic_url: me.data.image.link ? me.data.image.link : null,
       };
@@ -110,7 +112,7 @@ export class AuthService {
       const user = await this.userRepo.findOne({
         where: { login: login },
       });
-      console.log("user:::::::::", user);
+      // console.log("user:::::::::", user);
       return {
         error: null,
         body: null,

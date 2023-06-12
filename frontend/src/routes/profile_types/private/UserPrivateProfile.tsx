@@ -49,7 +49,7 @@ export default function UserPrivateProfile() {
     const getAvatar = () => {
       if (localStorage.getItem("userPicture") !== '') {
         setAvatarURL(localStorage.getItem("userPicture") || "hambal");
-        console.log(avatarURL, "??");
+        // console.log(avatarURL, "??");
       } else {
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
@@ -57,7 +57,7 @@ export default function UserPrivateProfile() {
       }
     };
     getAvatar();
-    console.log(avatarURL);
+    // console.log(avatarURL);
 
   }, [avatarFetched]);
 

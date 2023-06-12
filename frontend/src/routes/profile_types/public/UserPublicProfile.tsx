@@ -24,18 +24,21 @@ const userInfoInit: userModel = {
   rank: 0,
   score: 0,
   winRate: 0,
+  nickname: "",
 };
 
 const initializeUser = (result: any, setUserInfo: any) => {
+  
   userInfoInit.id = result.id;
-  userInfoInit.username = result.username;
-  userInfoInit.avatar = result.avatar;
+  userInfoInit.username = result.login;
+  userInfoInit.avatar = result.profpic_url;
   userInfoInit.friends = result.frirends;
   userInfoInit.gamesLost = result.gamesLost;
   userInfoInit.gamesPlayed = result.gamesPlayed;
   userInfoInit.gamesWon = result.gamesWon;
   userInfoInit.playTime = result.playTime;
   userInfoInit.rank = result.rank;
+  userInfoInit.nickname = result.nickname;
   userInfoInit.score = result.score;
   userInfoInit.winRate = result.winRate === null ? 0 : result.winRate;
   setUserInfo(userInfoInit);
@@ -51,18 +54,11 @@ export default function UserProfile() {
   const [avatarURL, setAvatarURL] = useState("");
   const [isUser, setIsUser] = useState(true);
   const [status, setStatus] = useState(0);
-
+  
+  console.log("initializeUser", params);
   useEffect(() => {
     const getAvatar = async () => {
-      console.log("fetch avatar of :", userInfoInit.id);
-      const result_1: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(userInfoInit.id);
-      if (result_1 !== undefined && result_1 instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result_1));
-      } else if (result_1 === "error")
-        setAvatarURL(
-          "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
-        );
+        setAvatarURL(userInfo.avatar);
     };
     if (isFetched && userInfoInit.id) getAvatar();
   }, [isFetched]);
@@ -70,10 +66,12 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchIsUser = async () => {
       let result;
+      
       if (!isFetched && params.userName !== undefined) {
-        result = await getOtherUser(+params.userName);
+        result = await getOtherUser(params.userName);
+        console.log("useEffect result::::", result.body.user);
         if (result !== "error") {
-          initializeUser(result, setUserInfo);
+          initializeUser(result.body.user, setUserInfo);
           setIsFetched(true);
         } else setIsUser(false);
       }
@@ -141,6 +139,9 @@ export default function UserProfile() {
                   <div className="public-rank-text">
                     {userInfo.rank ? `Rank #${userInfo.rank}` : "unranked"}
                   </div>
+                  <div className="public-nickname-text">
+                    {userInfo.nickname}
+                  </div>
                   <div
                     className="IBM-text"
                     style={{ fontSize: "0.8em", fontWeight: "400" }}
@@ -156,7 +157,7 @@ export default function UserProfile() {
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
                   <Col className="">
-                    {status === 2 ? (
+                    {/* {status === 2 ? (
                       <OverlayTrigger overlay={renderTooltip("Watch game")}>
                         <div
                           id="clickableIcon"
@@ -172,7 +173,7 @@ export default function UserProfile() {
                       <div className="buttons-round-big-disabled float-end">
                         <i className="bi bi-caret-right-square-fill big-icons" />
                       </div>
-                    )}
+                    )} */}
                     <OverlayTrigger overlay={renderTooltip("Add friend")}>
                       <div
                         id="clickableIcon"

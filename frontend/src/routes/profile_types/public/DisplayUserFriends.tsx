@@ -16,7 +16,7 @@ import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getUserFriends } from "../../../queries/userFriendsQueries";
 
 export default function DisplayUserFriends(props: any) {
-  console.log("props:::::", props.userInfo)
+  // console.log("props:::::", props.userInfo)
   const usersStatus = useContext(UsersStatusCxt);
   const [friendsList, setFriendsList] = useState<ItableRow[] | undefined>(
     undefined
@@ -29,7 +29,7 @@ export default function DisplayUserFriends(props: any) {
 
   useEffect(() => {
     const fetchDataFriends = async () => {
-      console.log("fetchDataFriends:::::::")
+      // console.log("fetchDataFriends:::::::")
       // const result = await getUserFriends(props.userInfo.id);
       const result = await getUserFriends();
       if (result !== "error") return result;
@@ -45,18 +45,19 @@ export default function DisplayUserFriends(props: any) {
 
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-      console.log("display fetchData:::::::")
+      // console.log("display fetchData:::::::")
+      
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { login: "", profpic_url: "", id: 0, status: -1 },
           };
 
-          let avatar = await fetchDataFriendsAvatar(fetchedFriends[i].id);
+          // let avatar = await fetchDataFriendsAvatar(fetchedFriends[i].id);
 
           newRow.userModel.id = fetchedFriends[i].id;
-          newRow.userModel.username = fetchedFriends[i].username;
+          newRow.userModel.login = fetchedFriends[i].username;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -64,9 +65,10 @@ export default function DisplayUserFriends(props: any) {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+          // if (avatar !== undefined && avatar instanceof Blob)
+          
+          newRow.userModel.profpic_url = fetchedFriends[i].profpic_url;
+          // else if (avatar) newRow.userModel.avatar = avatar;
           friends.push(newRow);
         }
       }
@@ -139,7 +141,7 @@ export default function DisplayUserFriends(props: any) {
 const DisplayFriendsRow = (props: any) => {
   const { show } = useContextMenu();
   const navigate = useNavigate();
-  console.log("DisplayFriendsRow:::::::")
+  //console.log("DisplayFriendsRow:::::::")
   function displayMenu(
     e: React.MouseEvent<HTMLElement>,
     targetUserId: number,

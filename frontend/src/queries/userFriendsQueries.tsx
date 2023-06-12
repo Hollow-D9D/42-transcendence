@@ -10,7 +10,7 @@ process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 // };
 
 export const getUserFriends = async () => {
-  console.log("getUserFriends")
+  // console.log("getUserFriends")
 
   try {
     const response = await fetch("http://localhost:3001/profile/friends", {
@@ -19,7 +19,7 @@ export const getUserFriends = async () => {
       redirect: "follow",
     });
     const result = await response.json();
-    console.log("result::::", result)
+    // console.log("result::::", result)
     if (!response.ok) {
       console.log("POST error on ");
       return "error";

@@ -13,18 +13,18 @@ import {
 
 export const DisplayRow = (props: any) => {
   const { show } = useContextMenu();
-
-  function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: number) {
-    console.log("display menu")
+  // console.log("props:::", props)
+  function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: string) {
+    // console.log("display menu", targetUser)
     e.preventDefault();
     show(e, {
       id: "onUserSimple",
       props: {
-        who: targetUser,
+        userName: targetUser,
       },
     });
   }
-
+  
   return (
     <main>
       <Container className="">
@@ -33,7 +33,7 @@ export const DisplayRow = (props: any) => {
             className="col-auto profile-pic-round-sm"
             id="clickableIcon"
             onClick={(e: React.MouseEvent<HTMLElement>) =>
-              displayMenu(e, props.userModel.id)
+              displayMenu(e, props.userModel.login)
             }
           >
             <div
@@ -64,7 +64,7 @@ export const DisplayRow = (props: any) => {
             className="content"
             id="clickableIcon"
             onClick={(e: React.MouseEvent<HTMLElement>) =>
-              displayMenu(e, props.userModel.id)
+              displayMenu(e, props.userModel.login)
             }
           >
             <div className="profile-username-text" style={{ fontSize: "15px" }}>
@@ -80,28 +80,28 @@ export const DisplayRow = (props: any) => {
             {props.listType === "friends" ? (
               <ButtonsFriends
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.uselogin}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "blocked" ? (
               <ButtonsBlocked
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "pending" ? (
               <ButtonsPending
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "addFriend" ? (
               <ButtonsAdding 
               id={props.userModel.id}
-              username={props.userModel.username}
+              username={props.userModel.login}
               />
             )
               : null}
@@ -262,7 +262,7 @@ const ButtonsPending = (props: any) => {
 
 
 const ButtonsAdding = (props: any) => {
-  console.log("ButtonsAdding::::::")
+  // console.log("ButtonsAdding::::::")
   const notif = useContext(NotifCxt);
 
   const handleClickAccept = (e: any) => {
@@ -270,11 +270,11 @@ const ButtonsAdding = (props: any) => {
     const addFriend = async () => {
       const result = await addFriendQuery(props.id);
       if (result !== "error") {
-        notif?.setNotifText(props.username + " added as friend!");
+        notif?.setNotifText(props.userModel.login + " added as friend!");
         props.hook(!props.state);
       } else
         notif?.setNotifText(
-          "Could not accept friend request from " + props.username + " :(."
+          "Could not accept friend request from " + props.userModel.login + " :(."
         );
       notif?.setNotifShow(true);
     };
@@ -300,6 +300,7 @@ const ButtonsAdding = (props: any) => {
   return (
     <main>
       <Col className="float-end">
+        {
         <button
           type="button"
           className="IBM-text btn btn-sm text-button"
@@ -307,6 +308,8 @@ const ButtonsAdding = (props: any) => {
         >
           Send Request
         </button>
+
+        }
       </Col>
       {/* <Col className="float-end">
         <button

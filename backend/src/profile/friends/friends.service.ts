@@ -37,7 +37,7 @@ export class FriendsService {
     try {
       if (user_id == friend_id) throw new Error('cannot same user as friends');
       const user = await this.userRepo.findOne({
-        where: { id: user_id },
+        where: { id: friend_id },
         relations: ['friend_requests'],
       });
       user.friend_requests.forEach((friend) => {
@@ -46,7 +46,7 @@ export class FriendsService {
         }
       });
       const friendUser = await this.userRepo.findOne({
-        where: { id: friend_id },
+        where: { id: user_id },
       });
       user.friend_requests.push(friendUser);
       user.save();
@@ -65,6 +65,16 @@ export class FriendsService {
   async acceptFriendRequest(user_id: number, friend_id: number) {
     try {
       if (user_id == friend_id) throw new Error('cannot same user as friends');
+      await this.adding_friend(user_id, friend_id);
+      await this.adding_friend(friend_id, user_id);
+
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async adding_friend(user_id:number, friend_id: number) {
+    try {
       const user = await this.userRepo.findOne({
         where: { id: user_id },
         relations: ['friend_requests', 'friends'],
@@ -77,8 +87,8 @@ export class FriendsService {
       );
       user.friends.push(friendUser);
       user.save();
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      throw err;
     }
   }
 

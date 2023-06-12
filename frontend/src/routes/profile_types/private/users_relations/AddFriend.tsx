@@ -63,7 +63,7 @@ export const AddFriend: React.FC = () => {
                   onChange={handleSearchChange}
                 />
               </Form>
-            <SearchResultDisplay array={array}/>
+              <SearchResultDisplay array={array} />
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -74,27 +74,27 @@ export const AddFriend: React.FC = () => {
 
 const SearchResultDisplay = (props: any) => {
   const [isUpdated, setUpdate] = useState(false)
-  console.log(props);
+  // console.log(props);
   return (
-      <div style={{ overflowY: "auto", overflowX: "hidden" }}>
-          {props.array?.length !== 0 ? (
-              props.array.filter((e : any) => {
-                return localStorage.getItem("userEmail") !== e.login;
-              }).map((h: any, index: any) => {
-                  console.log("h:", h.login, "index:", index)
-                  return (
-                      <DisplayRow
-                          listType={"addFriend"}
-                          hook={setUpdate}
-                          state={isUpdated}
-                          key={index}
-                          userModel={h}
-                      />
-                  );
-              })
-          ) : (
-              <span>No friend requests.</span>
-          )}
-      </div>
+    <div style={{ overflowY: "auto", overflowX: "hidden" }}>
+      {props.array?.length !== 0 ? (
+        props.array.filter((e: any) => {
+          return localStorage.getItem("userEmail") !== e.login;
+        }).map((h: any, index: any) => {
+          console.log("h:", h)
+          return (
+            <DisplayRow
+              listType={"addFriend"}
+              hook={setUpdate}
+              state={isUpdated}
+              key={index}
+              userModel={h}
+            />
+          );
+        })
+      ) : (
+        <span>No friend requests.</span>
+      )}
+    </div>
   );
 }
