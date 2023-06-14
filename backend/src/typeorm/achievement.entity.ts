@@ -20,6 +20,13 @@ export class Achievement extends BaseEntity {
     nullable: false,
     default: '',
   })
+  alias: string;
+
+  @Column({
+    type: String,
+    nullable: false,
+    default: '',
+  })
   name: string;
 
   @Column({

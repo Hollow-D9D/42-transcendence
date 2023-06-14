@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/typeorm';
 import axios from 'axios';
 import { Cache } from 'cache-manager';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 interface user42 {
   login: string;
@@ -19,11 +20,12 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
+    private readonly achieveService: AchievementsService,
   ) {}
 
   async auth42(u_code, u_state): Promise<user42> {
     let me: any;
-    try {      
+    try {
       const token = await axios.post('https://api.intra.42.fr/oauth/token', {
         grant_type: 'authorization_code',
         client_id: process.env.API42_CID,
@@ -63,7 +65,9 @@ export class AuthService {
   createUser(userInfo: any) {
     console.log('creating user');
     const newUser = this.userRepo.create(userInfo);
-    this.userRepo.save(newUser);
+    this.userRepo.insert(newUser).then((res) => {
+      this.achieveService.addAchievement(res.identifiers[0].id, 'first_login');
+    });
   }
 
   async loginUser(userInfo: any) {

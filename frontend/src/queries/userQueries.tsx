@@ -38,8 +38,19 @@ export const getUserData = () => {
   return fetchGet("me", storeUserInfo);
 };
 
-export const getAchievements = () => {
-  return fetchGet("get_leaderboard", storeLeaderBoardInfo);
+export const getAchievements = async () => {
+  try {
+    const achieves = await axios.get("http://localhost:3001/profile/getAchievements", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+      },
+    })
+    return achieves.data.body.achievements;
+  } catch (err) {
+    console.log(err);
+    return "error";
+    
+  }
 };
 
 const fetchGet = async (url: string, callback: any) => {

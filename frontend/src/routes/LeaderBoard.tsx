@@ -48,10 +48,11 @@ export default function LeaderBoard() {
                 <div className="leaderboard">
                     <div className="list">
                         {
-                            data?.map((one:gameRecord, rank) => {
+                            // data?.map((one:gameRecord, rank) => {
+                            data?.map((one: any, rank) => {
                                 return( 
                                 <div key={rank}>
-                                    <OneRow
+                                    {/* <OneRow
                                         id={one.id}
                                         rank={one.rank}
                                         winRate={Number((one.winRate))}
@@ -60,6 +61,14 @@ export default function LeaderBoard() {
                                         gamesLost={one.gamesLost}
                                         gamesPlayed={one.gamesPlayed}
                                         head={false}
+                                    /> */}
+                                    <OneRow
+                                        id={one.id}
+                                        rank={15}
+                                        name={one.name}
+                                        icon={one.icon}
+                                        description={one.description}
+                                        // head={false}
                                     />
                                 </div>
                             )})
@@ -71,15 +80,22 @@ export default function LeaderBoard() {
     )
 }
 
-function OneRow({rank, id, username, winRate, gamesWon, gamesLost, gamesPlayed, head}
-    : { rank: number,
-        id: number,
-        username: string,
-        winRate: number,
-        gamesWon: number,
-        gamesLost: number,
-        gamesPlayed: number,
-        head: boolean} ) {
+// function OneRow({rank, id, username, winRate, gamesWon, gamesLost, gamesPlayed, head}
+function OneRow({rank, name, id, description, icon}
+    // : { rank: number,
+    //     id: number,
+    //     username: string,
+    //     winRate: number,
+    //     gamesWon: number,
+    //     gamesLost: number,
+    //     gamesPlayed: number,
+    //     head: boolean} ) {
+
+    : { id: number,
+        rank: number,
+        name: string,
+        description: string,
+        icon: string} ) {
 
         const [avatarURL, setAvatarURL] = useState("");
         const navigate = useNavigate();
@@ -99,51 +115,54 @@ function OneRow({rank, id, username, winRate, gamesWon, gamesLost, gamesPlayed, 
         switch(rank) {
             case 1:
                 return(
-                <div className="top first"
-                    onClick = {
-                    () => navigate("/app/public/" + id)}>
-                    <div className="top-avatar"
-                        style={{backgroundImage: `url("${avatarURL}")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center"}}/>
-                    <div className="top-info">
-                        <div className="top-username">{username}</div>
-                        <BadgeReward rank={rank}/>
-                        <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
-                    </div>
-                </div>
+                // <div className="top first"
+                //     onClick = {
+                //     () => navigate("/app/public/" + id)}>
+                //     <div className="top-avatar"
+                //         style={{backgroundImage: `url("${avatarURL}")`,
+                //         backgroundSize: "cover",
+                //         backgroundPosition: "center"}}/>
+                //     <div className="top-info">
+                //         <div className="top-username">{username}</div>
+                //         <BadgeReward rank={rank}/>
+                //         <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
+                //     </div>
+                // </div>
+                <></>
                 );
             case 2:
                 return(
-                <div className="top second"
-                    onClick = {
-                    () => navigate("/app/public/" + id)}>
-                    <div className="top-avatar"
-                        style={{backgroundImage: `url("${avatarURL}")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center"}}/>
-                    <div className="top-info">
-                        <div className="top-username">{username}</div>
-                        <BadgeReward rank={rank}/>
-                        <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
-                    </div>
-                </div>
+                // <div className="top second"
+                //     onClick = {
+                //     () => navigate("/app/public/" + id)}>
+                //     <div className="top-avatar"
+                //         style={{backgroundImage: `url("${avatarURL}")`,
+                //         backgroundSize: "cover",
+                //         backgroundPosition: "center"}}/>
+                //     <div className="top-info">
+                //         <div className="top-username">{username}</div>
+                //         <BadgeReward rank={rank}/>
+                //         <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
+                //     </div>
+                // </div>
+                <></>
                 );
             case 3:
                 return(
-                <div className="top third"
-                    onClick = {
-                    () => navigate("/app/public/" + id)}>
-                    <div className="top-avatar"
-                        style={{backgroundImage: `url("${avatarURL}")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center"}}/>
-                    <div className="top-info">
-                        <div className="top-username">{username}</div>
-                        <BadgeReward rank={rank}/>
-                        <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
-                    </div>
-                </div>
+                // <div className="top third"
+                //     onClick = {
+                //     () => navigate("/app/public/" + id)}>
+                //     <div className="top-avatar"
+                //         style={{backgroundImage: `url("${avatarURL}")`,
+                //         backgroundSize: "cover",
+                //         backgroundPosition: "center"}}/>
+                //     <div className="top-info">
+                //         <div className="top-username">{username}</div>
+                //         <BadgeReward rank={rank}/>
+                //         <div className="top-record">{gamesWon}/{gamesLost}/{gamesPlayed} {winRate === 0 ? 0: winRate.toFixed(2)}</div>
+                //     </div>
+                // </div>
+                <></>
                 );
             default:
                 return (
@@ -153,19 +172,23 @@ function OneRow({rank, id, username, winRate, gamesWon, gamesLost, gamesPlayed, 
                         <div className="index">#{rank}</div>
                         <div className="id">{id}</div>
                         <div className="user">
-                            {!head ? 
+                            {/* {!head ?  */}
                                 <div className="avatar"
-                                    style={{backgroundImage: `url("${avatarURL}")`,
+                                    style={{backgroundImage: `url("${icon}")`,
                                     backgroundSize: "cover",
-                                    backgroundPosition: "center"}}/> : <></>}
-                            <div className="username">{username}</div>
+                                    backgroundPosition: "center"}}/> 
+                                    {/* : <></> */}
+                                    {/* } */}
+                            <div className="username">{name}</div>
+                            <div className="record"></div>
+                            <div className="description">{description}</div>
                         </div>
-                        <div className="record">
+                        {/* <div className="record">
                             {gamesWon}/{gamesLost}/{gamesPlayed}
                         </div>
                         <div className="rate">
                             {winRate === 0 ? 0: winRate.toFixed(2)}
-                        </div>
+                        </div> */}
                     </div>
                 )
         }
