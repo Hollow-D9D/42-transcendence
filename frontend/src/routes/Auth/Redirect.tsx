@@ -21,6 +21,7 @@ export default function AuthRedirect() {
               "Content-Type": "application/json",
             },
           });
+          console.log(res);
           
           const token = (res.data.body.token) ? res.data.body.token : null;
           if (token) {
