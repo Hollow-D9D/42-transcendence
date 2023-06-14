@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { Card, Container, Nav, Form, FormControl, Navbar } from "react-bootstrap";
 import axios from "axios";
 import { DisplayRow } from "./DisplayRowUsers";
+import { getUserFriends } from "../../../../queries/userFriendsQueries";
 
 export const AddFriend: React.FC = () => {
   const [array, setArray] = useState([])
@@ -18,34 +19,18 @@ export const AddFriend: React.FC = () => {
         }
       });
       if (response) {
-        setArray(response.data.body)
+        let users = response.data.body;
+        const fetchedFriends = await getUserFriends();
+        users = users.filter(async (e: any) => {
+          if (await isInArray(fetchedFriends, e))
+            e.isFriend = true;
+          else
+            e.isFriend = false;
+        })
+        setArray(users)
       }
     }
   };
-
-  // useEffect(() => {
-  //   console.log("res", array)
-  //   return (
-  //     <div style={{ overflowY: "auto", overflowX: "hidden" }}>
-  //       {array?.length !== 0 ? (
-  //         array!.map((h: any, index: any) => {
-  //           console.log("h:", h.login, "index:", index)
-  //           return (
-  //             <DisplayRow
-  //               listType={"addFriend"}
-  //               // hook={setUpdate}
-  //               // state={isUpdated}
-  //               key={index}
-  //               userModel={h.userModel}
-  //             />
-  //           );
-  //         })
-  //       ) : (
-  //         <span>No friend requests.</span>
-  //       )}
-  //     </div>
-  //   );
-  // })
 
   return (
     <Card className="p-4 modify-card" style={{ height: "200px" }}>
@@ -72,21 +57,29 @@ export const AddFriend: React.FC = () => {
   );
 };
 
+const isInArray = async (fetchedFriends: Array<any>, h: any) => {
+  let bool = false;
+  fetchedFriends.forEach((e: any) => {    
+    if (e.login === h.login)
+    {
+      bool = true;
+    }
+  })
+  return bool;
+}
+
 const SearchResultDisplay = (props: any) => {
-  const [isUpdated, setUpdate] = useState(false)
-  // console.log(props);
   return (
     <div style={{ overflowY: "auto", overflowX: "hidden" }}>
       {props.array?.length !== 0 ? (
         props.array.filter((e: any) => {
           return localStorage.getItem("userEmail") !== e.login;
         }).map((h: any, index: any) => {
-          console.log("h:", h)
+          
           return (
             <DisplayRow
               listType={"addFriend"}
-              hook={setUpdate}
-              state={isUpdated}
+              isFriend={ h.isFriend }
               key={index}
               userModel={h}
             />

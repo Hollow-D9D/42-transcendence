@@ -3,7 +3,6 @@ import { Container, Row, Col, OverlayTrigger } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import DisplayGamesStats from "./DisplayGamesStats";
 import { IUserStatus, userModel } from "../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getOtherUser } from "../../../queries/otherUserQueries";
 import DisplayUserFriends from "./DisplayUserFriends";
 import { COnUser } from "../../../ContextMenus/COnUser";
@@ -11,6 +10,7 @@ import { renderTooltip } from "../../../Components/SimpleToolTip";
 import { NotifCxt, UsersStatusCxt } from "../../../App";
 import { addFriendQuery } from "../../../queries/userFriendsQueries";
 import "./UserPublicProfile.css";
+import { getUserFriends } from "../../../queries/userFriendsQueries";
 
 const userInfoInit: userModel = {
   id: 0,
@@ -25,14 +25,15 @@ const userInfoInit: userModel = {
   score: 0,
   winRate: 0,
   nickname: "",
+  // isFriend: false,
 };
 
-const initializeUser = (result: any, setUserInfo: any) => {
-  
+const initializeUser = async (result: any, setUserInfo: any) => {
+
   userInfoInit.id = result.id;
   userInfoInit.username = result.login;
   userInfoInit.avatar = result.profpic_url;
-  userInfoInit.friends = result.frirends;
+  userInfoInit.friends = result.friends;
   userInfoInit.gamesLost = result.gamesLost;
   userInfoInit.gamesPlayed = result.gamesPlayed;
   userInfoInit.gamesWon = result.gamesWon;
@@ -51,33 +52,48 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<userModel>(userInfoInit);
   const [isFetched, setIsFetched] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
   const [avatarURL, setAvatarURL] = useState("");
   const [isUser, setIsUser] = useState(true);
   const [status, setStatus] = useState(0);
-  
-  console.log("initializeUser", params);
+
+
   useEffect(() => {
     const getAvatar = async () => {
-        setAvatarURL(userInfo.avatar);
+      setAvatarURL(userInfo.avatar);
     };
     if (isFetched && userInfoInit.id) getAvatar();
   }, [isFetched]);
 
   useEffect(() => {
+    const fetchDataFriends = async () => {
+      const result = await getUserFriends();
+      if (result !== "error") {
+        result.forEach((e: any) => {
+          if (e.login === userInfo.username) {
+            setIsFriend(true);
+          }
+        })
+        setUserInfo(userInfo);
+      };
+    }
+    fetchDataFriends();
+  })
+
+  useEffect(() => {
     const fetchIsUser = async () => {
       let result;
-      
+
       if (!isFetched && params.userName !== undefined) {
         result = await getOtherUser(params.userName);
-        console.log("useEffect result::::", result.body.user);
         if (result !== "error") {
           initializeUser(result.body.user, setUserInfo);
+
           setIsFetched(true);
         } else setIsUser(false);
       }
     };
     fetchIsUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetched, usersStatus]);
 
   useEffect(() => {
@@ -86,10 +102,10 @@ export default function UserProfile() {
       found = usersStatus.find((x: IUserStatus) => x.key === userInfo.id);
       if (found) setStatus(found.userModel.status);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usersStatus, isFetched, userInfo]);
 
   const handleClickFriend = (otherId: number, otherUsername: string) => {
+
     const addFriend = async () => {
       const result = await addFriendQuery(otherId);
       if (result !== "error") {
@@ -98,10 +114,6 @@ export default function UserProfile() {
       notif?.setNotifShow(true);
     };
     addFriend();
-  };
-
-  const handleClickWatch = (otherId: number) => {
-    navigate("/app/watch", { replace: false });
   };
 
   let myId: number = 0;
@@ -115,7 +127,7 @@ export default function UserProfile() {
           className="p-5"
           style={{ display: "flex", justifyContent: "center" }}
         >
-          <COnUser />
+          <COnUser userModel={userInfo} />
           <div className="public-left">
             <Container className="p-5">
               <Row className="wrapper public-profile-header">
@@ -132,9 +144,9 @@ export default function UserProfile() {
                 <Col md="auto" className="">
                   <div className="public-username-text">
                     @
-                    {userInfo.username.length > 10
-                      ? userInfo.username.substring(0, 7) + "..."
-                      : userInfo.username}
+                    {userInfo.nickname.length > 10
+                      ? userInfo.nickname.substring(0, 7) + "..."
+                      : userInfo.nickname}
                   </div>
                   <div className="public-rank-text">
                     {userInfo.rank ? `Rank #${userInfo.rank}` : "unranked"}
@@ -149,10 +161,10 @@ export default function UserProfile() {
                     {status === 1
                       ? "online"
                       : status === 2
-                      ? "playing"
-                      : status === 0
-                      ? "offline"
-                      : ""}
+                        ? "playing"
+                        : status === 0
+                          ? "offline"
+                          : ""}
                   </div>
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
@@ -174,17 +186,19 @@ export default function UserProfile() {
                         <i className="bi bi-caret-right-square-fill big-icons" />
                       </div>
                     )} */}
-                    <OverlayTrigger overlay={renderTooltip("Add friend")}>
-                      <div
-                        id="clickableIcon"
-                        className="buttons-round-big float-end"
-                        onClick={(e: any) => {
-                          handleClickFriend(userInfo.id, userInfo.username);
-                        }}
-                      >
-                        <i className="bi bi-person-plus-fill big-icons" />
-                      </div>
-                    </OverlayTrigger>
+                    {!isFriend ?
+                      <OverlayTrigger overlay={renderTooltip("Add friend")}>
+                        <div
+                          id="clickableIcon"
+                          className="buttons-round-big float-end"
+                          onClick={(e: any) => {
+                            handleClickFriend(userInfo.id, userInfo.username);
+                          }}
+                        >
+                          <i className="bi bi-person-plus-fill big-icons" />
+                        </div>
+                      </OverlayTrigger> : null}
+
                   </Col>
                 )}
               </Row>

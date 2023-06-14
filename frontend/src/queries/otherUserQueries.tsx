@@ -1,9 +1,6 @@
 import { authContentHeader } from "./headers";
 
 export const getOtherUser = async(otherUsername: string) => {
-  // let body = JSON.stringify({
-  //   login: otherUsername,
-  // });
   try {
     console.log("mdaaa: " + otherUsername);
     
@@ -13,7 +10,6 @@ export const getOtherUser = async(otherUsername: string) => {
       redirect: "follow",
     });
     const result = await response.json();
-    // console.log("result::::", result)
     if (!response.ok) {
       console.log("POST error on ");
       return "error";
@@ -22,7 +18,6 @@ export const getOtherUser = async(otherUsername: string) => {
   } catch (error) {
     return console.log("error", error);
   }
-  // return fetchGetOtherUser("get_user", body);
 };
 
 const fetchGetOtherUser = async (url: string, body: any) => {

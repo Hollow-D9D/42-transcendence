@@ -21,7 +21,7 @@ export interface IUserInfo {
 
 export interface ItableRow {
   key: number;
-  userModel: { login: string; profpic_url: string; id: number; status: number };
+  userModel: { login: string; nickname: string, profpic_url: string; id: number; status: number };
 }
 
 export interface IUserStatus {
@@ -42,6 +42,7 @@ export interface userModel {
   score: number;
   winRate: number;
   nickname: string;
+  // isFriend: boolean;
 }
 
 export interface gameModel {

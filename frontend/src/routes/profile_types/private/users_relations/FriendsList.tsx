@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import { ItableRow, IUserStatus } from "../../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../../queries/avatarQueries";
 import { getUserFriends } from "../../../../queries/userFriendsQueries";
 import { DisplayRow } from "./DisplayRowUsers";
 import { UsersStatusCxt } from "../../../../App";
@@ -20,40 +19,22 @@ export const FriendsList = () => {
 
   useEffect(() => {
     const fetchDataFriends = async () => {
-      // const id = localStorage.getItem("userID");
-      // console.log("Id:::::::", id)
-      // console.log("fetchDataFriends:::::::::::");
-
-      // if (id) {
-      //   const result = await getUserFriends(+id);
-      //   if (result !== "error") return result;
-      // }
-
-      //console.log("fetchDataFriends:::::::::::");
-
       const result = await getUserFriends();
       if (result !== "error") return result;
     };
 
-    const fetchDataFriendsAvatar = async (otherId: number) => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(otherId);
-      if (result !== "error") return result;
-      else
-        return "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg";
-    };
-
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-     // console.log("fetchData::::::::")
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { login: "", profpic_url: "", id: 0, status: -1 },
+            userModel: { login: "", nickname: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedFriends[i].id;
-          newRow.userModel.login = fetchedFriends[i].username;
+          newRow.userModel.login = fetchedFriends[i].login;
+          newRow.userModel.nickname = fetchedFriends[i].nickname;
+
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -61,12 +42,7 @@ export const FriendsList = () => {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-
-          let avatar = await fetchDataFriendsAvatar(fetchedFriends[i].id);
-
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.profpic_url = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.profpic_url = avatar;
+          newRow.userModel.profpic_url = fetchedFriends[i].profpic_url;
           friends.push(newRow);
         }
       }
@@ -75,7 +51,6 @@ export const FriendsList = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdated, usersStatus]);
 
   return (
@@ -102,5 +77,3 @@ export const FriendsList = () => {
     </div>
   );
 };
-
-//isFetched === "error" to add

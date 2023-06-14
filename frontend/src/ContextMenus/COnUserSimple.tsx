@@ -13,7 +13,7 @@ export const COnUserSimple = (props: any) => {
           window.location.reload();
         }}
       >
-        see profile zzz
+        see profile
       </Item>
     </Menu>
   );

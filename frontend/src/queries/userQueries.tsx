@@ -2,8 +2,21 @@ import { authHeader } from "./headers";
 import axios from "axios";
 process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
-export const getUserBlocked = () => {
-  return fetchGet("get_blocked", storeFriendsInfo);
+export const getUserBlocked = async() => {
+  try {
+    const friends = await axios.get("http://localhost:3001/profile/friends", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+      },
+    })
+    console.log(friends.data);
+    
+    return friends.data.blocked_users;
+  } catch (err) {
+    console.log(err);
+    return "error";
+    
+  }
 };
 
 export const getUserPending = async () => {

@@ -12,10 +12,9 @@ import {
 } from "../../../../queries/userFriendsQueries";
 
 export const DisplayRow = (props: any) => {
+
   const { show } = useContextMenu();
-  // console.log("props:::", props)
   function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: string) {
-    // console.log("display menu", targetUser)
     e.preventDefault();
     show(e, {
       id: "onUserSimple",
@@ -24,7 +23,7 @@ export const DisplayRow = (props: any) => {
       },
     });
   }
-  
+
   return (
     <main>
       <Container className="">
@@ -51,12 +50,12 @@ export const DisplayRow = (props: any) => {
             </div>
             <div
               className={`status-private ${props.userModel.status === 1
-                  ? "online"
-                  : props.userModel.status === 2
-                    ? "ingame"
-                    : props.userModel.status === 0
-                      ? "offline"
-                      : ""
+                ? "online"
+                : props.userModel.status === 2
+                  ? "ingame"
+                  : props.userModel.status === 0
+                    ? "offline"
+                    : ""
                 }`}
             ></div>
           </Col>
@@ -70,9 +69,9 @@ export const DisplayRow = (props: any) => {
             <div className="profile-username-text" style={{ fontSize: "15px" }}>
               @
               {props.userModel && props.userModel.login
-                ? props.userModel.login.length > 10
-                  ? props.userModel.login.substring(0, 7) + "..."
-                  : props.userModel.login
+                ? props.userModel.nickname.length > 10
+                  ? props.userModel.nickname.substring(0, 7) + "..."
+                  : props.userModel.nickname
                 : null}
             </div>
           </Col>
@@ -80,7 +79,7 @@ export const DisplayRow = (props: any) => {
             {props.listType === "friends" ? (
               <ButtonsFriends
                 id={props.userModel.id}
-                username={props.uselogin}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
@@ -99,9 +98,10 @@ export const DisplayRow = (props: any) => {
                 state={props.state}
               />
             ) : props.listType === "addFriend" ? (
-              <ButtonsAdding 
-              id={props.userModel.id}
-              username={props.userModel.login}
+              <ButtonsAdding
+                id={props.userModel.id}
+                username={props.userModel.login}
+                isFriend={props.userModel.isFriend}
               />
             )
               : null}
@@ -299,18 +299,29 @@ const ButtonsAdding = (props: any) => {
 
   return (
     <main>
-      <Col className="float-end">
-        {
-        <button
+
+      {!props.isFriend ?
+        <Col className="float-end">
+          <button
+            type="button"
+            className="IBM-text btn btn-sm text-button"
+            onClick={(e) => handleClickAccept(e)}
+          >
+            Send Request
+          </button>
+        </Col>
+        : "Friends"
+      }
+      {/* <Col className="float-end">
+        {(!props.isFriend) && (<button
           type="button"
           className="IBM-text btn btn-sm text-button"
           onClick={(e) => handleClickAccept(e)}
         >
           Send Request
-        </button>
+        </button>)}
+      </Col> */}
 
-        }
-      </Col>
       {/* <Col className="float-end">
         <button
           type="button"

@@ -39,10 +39,11 @@ export const BlockedList = () => {
         for (let i = 0; i < fetchedBlocked.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { login: "", profpic_url: "", id: 0, status: -1 },
+            userModel: { login: "", nickname: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedBlocked[i].id;
-          newRow.userModel.login = fetchedBlocked[i].username;
+          newRow.userModel.login = fetchedBlocked[i].login;
+          newRow.userModel.nickname = fetchedBlocked[i].nickname;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -51,11 +52,11 @@ export const BlockedList = () => {
             if (found) newRow.userModel.status = found.userModel.status;
           }
 
-          let avatar = await fetchDataBlockedAvatar(fetchedBlocked[i].id);
+          // let avatar = await fetchDataBlockedAvatar(fetchedBlocked[i].id);
 
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.profpic_url = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.profpic_url = avatar;
+          // if (avatar !== undefined && avatar instanceof Blob)
+            newRow.userModel.profpic_url = fetchedBlocked[i].profpic_url;
+          // else if (avatar) newRow.userModel.profpic_url = avatar;
           blocked.push(newRow);
         }
       }
