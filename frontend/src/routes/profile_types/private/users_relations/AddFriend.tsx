@@ -18,6 +18,7 @@ export const AddFriend: React.FC = () => {
           login: e.target.value
         }
       });
+
       if (response) {
         let users = response.data.body;
         const fetchedFriends = await getUserFriends();
@@ -57,7 +58,7 @@ export const AddFriend: React.FC = () => {
   );
 };
 
-const isInArray = async (fetchedFriends: Array<any>, h: any) => {
+export const isInArray = async (fetchedFriends: Array<any>, h: any) => {
   let bool = false;
   fetchedFriends.forEach((e: any) => {    
     if (e.login === h.login)

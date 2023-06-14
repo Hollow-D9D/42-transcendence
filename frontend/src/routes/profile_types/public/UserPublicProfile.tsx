@@ -11,7 +11,8 @@ import { NotifCxt, UsersStatusCxt } from "../../../App";
 import { addFriendQuery } from "../../../queries/userFriendsQueries";
 import "./UserPublicProfile.css";
 import { getUserFriends } from "../../../queries/userFriendsQueries";
-
+import { isInArray } from "../private/users_relations/AddFriend"
+import { log } from "console";
 const userInfoInit: userModel = {
   id: 0,
   username: "",
@@ -56,7 +57,27 @@ export default function UserProfile() {
   const [avatarURL, setAvatarURL] = useState("");
   const [isUser, setIsUser] = useState(true);
   const [status, setStatus] = useState(0);
+  const [array, setArray] = useState([])
 
+
+  useEffect(() => {
+    const fetchDataFriends = async () => {
+      let users = [];
+      const result = await getUserFriends();
+      if (result !== "error") {
+        users = result.map(async (e: any) => {
+          if (await isInArray(result, e))
+            e.isFriend = true;
+          else
+            e.isFriend = false;
+        })
+        setArray(users);
+        console.log("array:::::::", array);
+        
+      };
+    }
+    fetchDataFriends();
+  })
 
   useEffect(() => {
     const getAvatar = async () => {
@@ -65,20 +86,6 @@ export default function UserProfile() {
     if (isFetched && userInfoInit.id) getAvatar();
   }, [isFetched]);
 
-  useEffect(() => {
-    const fetchDataFriends = async () => {
-      const result = await getUserFriends();
-      if (result !== "error") {
-        result.forEach((e: any) => {
-          if (e.login === userInfo.username) {
-            setIsFriend(true);
-          }
-        })
-        setUserInfo(userInfo);
-      };
-    }
-    fetchDataFriends();
-  })
 
   useEffect(() => {
     const fetchIsUser = async () => {

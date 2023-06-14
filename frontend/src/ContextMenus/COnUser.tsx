@@ -17,8 +17,6 @@ export const COnUser = (props: any) => {
       const result = await getUserFriends();
       if (result !== "error") {
         result.forEach((e: any) => {
-          console.log(e.login, props.userModel.username);
-
           if (e.login === props.userModel.username) {
             setIsFriend(true);
           }
