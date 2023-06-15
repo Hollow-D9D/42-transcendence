@@ -5,11 +5,16 @@ services:
 
 # DB
   database:
-    image: database:v1
+    image: postgres:15-alpine
     container_name: database
-    build: ${DB_PATH}
+    # build: ${DB_PATH}
     restart: always
+    user: postgres
     env_file: ${DB_PATH}/.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: u8Wqc7ABxC6RxxenPCT&
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - type: bind
         source: ${PGDATA_PATH}
@@ -62,7 +67,7 @@ services:
       - backend
     depends_on:
       - backend
-    # env_file: ${FRONT_PATH}/.env
+    env_file: ${FRONT_PATH}/.env
 
 
 networks:
