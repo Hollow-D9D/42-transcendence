@@ -2,8 +2,6 @@ import { authContentHeader } from "./headers";
 
 export const getOtherUser = async(otherUsername: string) => {
   try {
-    console.log("mdaaa: " + otherUsername);
-    
     const response = await fetch(`http://localhost:3001/profile/PublicProfile?login=${otherUsername}`, {
       method: "GET",
       headers: authContentHeader(),

@@ -42,7 +42,8 @@ export interface userModel {
   score: number;
   winRate: number;
   nickname: string;
-  // isFriend: boolean;
+  isFriend: boolean;
+  paramName: string;
 }
 
 export interface gameModel {
