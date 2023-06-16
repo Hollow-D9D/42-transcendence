@@ -9,8 +9,6 @@ export const getUserBlocked = async() => {
         Authorization: `Bearer ${localStorage.getItem('userToken')}`,
       },
     })
-    console.log(friends.data);
-    
     return friends.data.blocked_users;
   } catch (err) {
     console.log(err);

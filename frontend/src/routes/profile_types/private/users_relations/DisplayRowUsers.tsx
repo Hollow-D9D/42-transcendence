@@ -12,7 +12,6 @@ import {
 } from "../../../../queries/userFriendsQueries";
 
 export const DisplayRow = (props: any) => {
-
   const { show } = useContextMenu();
   function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: string) {
     e.preventDefault();
@@ -262,7 +261,6 @@ const ButtonsPending = (props: any) => {
 
 
 const ButtonsAdding = (props: any) => {
-  // console.log("ButtonsAdding::::::")
   const notif = useContext(NotifCxt);
 
   const handleClickAccept = (e: any) => {
@@ -281,22 +279,6 @@ const ButtonsAdding = (props: any) => {
     addFriend();
   };
 
-  // const handleClickIgnore = (e: any) => {
-  //   e.preventDefault();
-  //   const ignoreFriend = async () => {
-  //     const result = await denyInviteQuery(props.id);
-  //     if (result !== "error") {
-  //       notif?.setNotifText("Request from " + props.username + " ignored.");
-  //       props.hook(!props.state);
-  //     } else
-  //       notif?.setNotifText(
-  //         "Could not ignore request from " + props.username + " :(."
-  //       );
-  //     notif?.setNotifShow(true);
-  //   };
-  //   ignoreFriend();
-  // };
-
   return (
     <main>
 
@@ -310,27 +292,8 @@ const ButtonsAdding = (props: any) => {
             Send Request
           </button>
         </Col>
-        : "Friends"
+        : ""
       }
-      {/* <Col className="float-end">
-        {(!props.isFriend) && (<button
-          type="button"
-          className="IBM-text btn btn-sm text-button"
-          onClick={(e) => handleClickAccept(e)}
-        >
-          Send Request
-        </button>)}
-      </Col> */}
-
-      {/* <Col className="float-end">
-        <button
-          type="button"
-          className="IBM-text btn btn-sm text-button"
-          onClick={(e) => handleClickIgnore(e)}
-        >
-          Ignore
-        </button>
-      </Col> */}
     </main>
   );
 };

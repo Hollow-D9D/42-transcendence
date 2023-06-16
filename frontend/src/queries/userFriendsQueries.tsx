@@ -125,13 +125,6 @@ export const unblockUserQuery = async (otherId: number) => {
   }
 };
 
-// export const cancelInviteQuery = (otherId: number) => {
-//   let body = JSON.stringify({
-//     otherId: otherId,
-//   });
-//   return fetchGet("cancel_invite", authContentHeader, body);
-// };
-
 export const denyInviteQuery = async (otherId: number) => {
   try {
     const response = await fetch(`http://localhost:3001/profile/friends/decline?friend_id=${otherId}`, {
@@ -148,25 +141,3 @@ export const denyInviteQuery = async (otherId: number) => {
     return console.log("error", error);
   }
 };
-
-// const fetchGet = async (url: string, header: any, body: any) => {
-//   let fetchUrl = "http://localhost:3001/profile/friends";
-
-//   try {
-//     const response = await fetch(fetchUrl, {
-//       method: "GET",
-//       headers: header(),
-//       // body: body,
-//       redirect: "follow",
-//     });
-//     const result = await response.json();
-//     console.log("result::::", result)
-//     if (!response.ok) {
-//       console.log("POST error on ", url);
-//       return "error";
-//     }
-//     return result;
-//   } catch (error) {
-//     return console.log("error", error);
-//   }
-// };

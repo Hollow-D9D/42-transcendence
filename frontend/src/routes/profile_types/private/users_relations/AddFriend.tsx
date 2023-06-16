@@ -61,8 +61,7 @@ export const AddFriend: React.FC = () => {
 export const isInArray = async (fetchedFriends: Array<any>, h: any) => {
   let bool = false;
   fetchedFriends.forEach((e: any) => {    
-    if (e.login === h.login)
-    {
+    if (e.login === h.login){
       bool = true;
     }
   })
@@ -76,7 +75,6 @@ const SearchResultDisplay = (props: any) => {
         props.array.filter((e: any) => {
           return localStorage.getItem("userEmail") !== e.login;
         }).map((h: any, index: any) => {
-          
           return (
             <DisplayRow
               listType={"addFriend"}
@@ -87,7 +85,7 @@ const SearchResultDisplay = (props: any) => {
           );
         })
       ) : (
-        <span>No friend requests.</span>
+        <span></span>
       )}
     </div>
   );

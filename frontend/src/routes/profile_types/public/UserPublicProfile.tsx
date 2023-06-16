@@ -3,7 +3,6 @@ import { Container, Row, Col, OverlayTrigger } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import DisplayGamesStats from "./DisplayGamesStats";
 import { IUserStatus, userModel } from "../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getOtherUser } from "../../../queries/otherUserQueries";
 import DisplayUserFriends from "./DisplayUserFriends";
 import { COnUser } from "../../../ContextMenus/COnUser";
@@ -12,7 +11,9 @@ import { NotifCxt, UsersStatusCxt } from "../../../App";
 import { addFriendQuery } from "../../../queries/userFriendsQueries";
 import "./UserPublicProfile.css";
 import { getUserFriends } from "../../../queries/userFriendsQueries";
-import { userInfo } from "os";
+import { blockUserQuery } from "../../../queries/userFriendsQueries";
+import { getUserBlocked } from "../../../queries/userQueries";
+
 const userInfoInit: userModel = {
   id: 0,
   username: "",
@@ -23,44 +24,65 @@ const userInfoInit: userModel = {
   gamesWon: 0,
   playTime: 0,
   rank: 0,
-  score: 0,
+  status: 0,
   winRate: 0,
   nickname: "",
   isFriend: false,
-  paramName: ""
+  isBlocked: false,
+  paramName: "",
+  full_name: "",
 };
 
 const initializeUser = async (result: any, setUserInfo: any) => {
 
   userInfoInit.id = result.id;
   userInfoInit.username = result.login;
+  userInfoInit.full_name = result.full_name;
   userInfoInit.avatar = result.profpic_url;
   userInfoInit.friends = result.friends;
-  userInfoInit.gamesLost = result.gamesLost;
-  userInfoInit.gamesPlayed = result.gamesPlayed;
-  userInfoInit.gamesWon = result.gamesWon;
-  userInfoInit.playTime = result.playTime;
-  userInfoInit.rank = result.rank;
+  userInfoInit.gamesLost = result.lose_count;
+  userInfoInit.gamesPlayed = result.lose_count + result.win_count;
+  userInfoInit.gamesWon = result.win_count;
+  userInfoInit.playTime = result.matchtime;
+  userInfoInit.rank = result.ladder_level;
   userInfoInit.nickname = result.nickname;
-  userInfoInit.score = result.score;
-  userInfoInit.winRate = result.winRate === null ? 0 : result.winRate;
+  userInfoInit.status = result.status;
+  userInfoInit.winRate = userInfoInit.gamesWon / userInfoInit.gamesPlayed || 0;
   setUserInfo(userInfoInit);
-  fetchDataFriends(userInfoInit, setUserInfo);
+  await fetchDataFriends(userInfoInit, setUserInfo);
+  await fetchDataBlockes(userInfoInit, setUserInfo);
 };
 
 const fetchDataFriends = async (userInfo: any, setUserInfo: any) => {
-
   const result = await getUserFriends();
-  if (result !== "error") {
+
+  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+    userInfo.isFriend = true;
+    setUserInfo(userInfo);
+  }
+  else if (result !== "error") {
     result.forEach((e: any) => {
-      if (e.login === userInfo.paramName || userInfo.paramName === userInfo.username) {
-        userInfo.isFriend = true;
+      if (e.login === userInfo.paramName) {
+        setUserInfo({ ...userInfo, isFriend: true });
       }
     })
-    setUserInfo(userInfo);
-
   };
 }
+
+const fetchDataBlockes = async (userInfo: any, setUserInfo: any) => {
+  const result = await getUserBlocked();
+  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+    setUserInfo({ ...userInfo, isBlocked: true });
+  }
+  else if (result !== "error") {
+    result.forEach((e: any) => {
+      if (e.login === userInfo.paramName) {
+        setUserInfo({ ...userInfo, isBlocked: true });
+      }
+    })
+  };
+}
+
 export default function UserProfile() {
   const usersStatus = useContext(UsersStatusCxt);
   const notif = useContext(NotifCxt);
@@ -70,8 +92,6 @@ export default function UserProfile() {
   const [isFetched, setIsFetched] = useState(false);
   const [avatarURL, setAvatarURL] = useState("");
   const [isUser, setIsUser] = useState(true);
-  const [status, setStatus] = useState(0);
-
 
   useEffect(() => {
     const getAvatar = async () => {
@@ -95,17 +115,7 @@ export default function UserProfile() {
       }
     };
     fetchIsUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetched, usersStatus]);
-
-  useEffect(() => {
-    let found = undefined;
-    if (isFetched && usersStatus && userInfo) {
-      found = usersStatus.find((x: IUserStatus) => x.key === userInfo.id);
-      if (found) setStatus(found.userModel.status);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersStatus, isFetched, userInfo]);
 
   const handleClickFriend = (otherId: number, otherUsername: string) => {
     const addFriend = async () => {
@@ -116,6 +126,17 @@ export default function UserProfile() {
       notif?.setNotifShow(true);
     };
     addFriend();
+  };
+
+  const handleBlockUser = (otherId: number, otherUsername: string) => {
+    const blockUser = async () => {
+      const result = await blockUserQuery(otherId);
+      if (result !== "error") {
+        notif?.setNotifText(otherUsername + " blocked!");
+      } else notif?.setNotifText("Could not block user :(.");
+      notif?.setNotifShow(true);
+    };
+    blockUser();
   };
 
   let myId: number = 0;
@@ -153,40 +174,23 @@ export default function UserProfile() {
                     {userInfo.rank ? `Rank #${userInfo.rank}` : "unranked"}
                   </div>
                   <div className="public-nickname-text">
-                    {userInfo.nickname}
+                    {userInfo.full_name}
                   </div>
                   <div
                     className="IBM-text"
                     style={{ fontSize: "0.8em", fontWeight: "400" }}
                   >
-                    {status === 1
+                    {userInfo.status === 1
                       ? "online"
-                      : status === 2
+                      : userInfo.status === 2
                         ? "playing"
-                        : status === 0
+                        : userInfo.status === 0
                           ? "offline"
                           : ""}
                   </div>
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
                   <Col className="">
-                    {/* {status === 2 ? (
-                      <OverlayTrigger overlay={renderTooltip("Watch game")}>
-                        <div
-                          id="clickableIcon"
-                          className="buttons-round-big float-end"
-                          onClick={(e: any) => {
-                            handleClickWatch(userInfo.id);
-                          }}
-                        >
-                          <i className="bi bi-caret-right-square-fill big-icons" />
-                        </div>
-                      </OverlayTrigger>
-                    ) : (
-                      <div className="buttons-round-big-disabled float-end">
-                        <i className="bi bi-caret-right-square-fill big-icons" />
-                      </div>
-                    )} */}
                     {!userInfo.isFriend ?
                       <OverlayTrigger overlay={renderTooltip("Add friend")}>
                         <div
@@ -199,7 +203,18 @@ export default function UserProfile() {
                           <i className="bi bi-person-plus-fill big-icons" />
                         </div>
                       </OverlayTrigger> : null}
-
+                    {!userInfo.isBlocked ?
+                      <OverlayTrigger overlay={renderTooltip("Block user")}>
+                        <div
+                          id="clickableIcon"
+                          className="buttons-round-big float-end"
+                          onClick={(e: any) => {
+                            handleBlockUser(userInfo.id, userInfo.username);
+                          }}
+                        >
+                          <i className="bi bi-person-x-fill big-icons" />
+                        </div>
+                      </OverlayTrigger> : null}
                   </Col>
                 )}
               </Row>

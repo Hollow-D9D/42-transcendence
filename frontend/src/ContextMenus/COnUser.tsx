@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Menu, Item } from "react-contexify";
 import { useNavigate } from "react-router-dom";
 import { NotifCxt } from "../App";
-import { addFriendQuery } from "../queries/userFriendsQueries";
+import { addFriendQuery, getFriendFriends } from "../queries/userFriendsQueries";
 import { getOtherUser } from "../queries/otherUserQueries";
 import { setUserInfo } from "../queries/userInfoSlice";
 import { getUserFriends } from "../queries/userFriendsQueries";
@@ -15,11 +15,15 @@ export const COnUser = (props: any) => {
   useEffect(() => {
     const fetchDataFriends = async () => {
       const result = await getUserFriends();
-      if (result !== "error") {
+      const friends = await getFriendFriends(props.userModel.username);
+      if (result !== "error" && friends != "error") {
         result.forEach((e: any) => {
-          if (e.login === props.userModel.username) {
-            setIsFriend(true);
-          }
+          friends.forEach((f: any) => {
+            if (e.login === f.login) {
+              setIsFriend(true);
+              console.log("aaa", e.login, f.login, isFriend);
+            }
+          })
         })
       };
     }
@@ -50,7 +54,7 @@ export const COnUser = (props: any) => {
       >
         see profile
       </Item>
-      {!isFriend && (
+      {isFriend ? null : (
         <Item
           onClick={({ props }) => {
             handleClick(props.userModel.id, props.userModel.username);

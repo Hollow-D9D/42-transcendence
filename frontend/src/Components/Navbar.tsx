@@ -23,8 +23,8 @@ const GetIcons = (props: any) => {
       ? "chat-left-dots"
       : url === "game"
       ? "dpad"
-      : url === "watch"
-      ? "play-btn"
+      // : url === "watch"
+      // ? "play-btn"
       : "box-arrow-right"; // Determine the icon to display based on the URL
 
   return (
@@ -83,7 +83,7 @@ export const CNavBar = () => {
             <GetIcons url="leaderboard" />
             <GetIcons url="chat" />
             <GetIcons url="game" />
-            <GetIcons url="watch" />
+            {/* <GetIcons url="watch" /> */}
             <GetIcons url="logout" />
           </div>
         </div>

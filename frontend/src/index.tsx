@@ -9,7 +9,6 @@ import Chat from "./routes/Chat";
 import UserInterface from "./routes/UserInterface";
 import { AuthProvider, RedirectWhenAuth, RequireAuth } from "./hooks/AuthHooks";
 import TwoFAValidation from "./routes/TwoFAValidation";
-import Watch from "./routes/Watch";
 import LeaderBoard from "./routes/LeaderBoard";
 import UserPrivateProfile from "./routes/profile_types/private/UserPrivateProfile";
 import { BlockedList } from "./routes/profile_types/private/users_relations/BlockedList";
@@ -26,7 +25,7 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          <Route index element={<Navigate to="/auth/signin" />} />
+          {/* <Route index element={<Navigate to="/auth/signin" />} /> */}
           <Route path="2FA" element={<TwoFAValidation />} />
           <Route path="/auth" element={<Auth />}>
             <Route index element={<Navigate to="/auth/signin" />} />
@@ -72,7 +71,6 @@ root.render(
             <Route path="leaderboard" element={<LeaderBoard />} />
             <Route path="game" element={<Game />} />
             <Route path="privateGame" element={<Game pvtGame={true} />} />
-            <Route path="watch" element={<Watch />} />
             <Route path="*" element={<Navigate to="/app/private-profile" />} />
           </Route>
           <Route path="*" element={<Navigate to="/auth/signin" />} />
