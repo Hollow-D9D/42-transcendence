@@ -1,34 +1,32 @@
+import { Api } from "../Config/Api";
 import { authHeader } from "./headers";
-import axios from "axios";
-process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
+// process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
-export const getUserBlocked = async() => {
+export const getUserBlocked = async () => {
   try {
-    const friends = await axios.get("http://localhost:3001/profile/friends", {
+    const friends = await Api.get("/profile/friends", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    })
+    });
     return friends.data.blocked_users;
   } catch (err) {
     console.log(err);
     return "error";
-    
   }
 };
 
 export const getUserPending = async () => {
   try {
-    const friends = await axios.get("http://localhost:3001/profile/friends", {
+    const friends = await Api.get("/profile/friends", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    })
+    });
     return friends.data.friend_requests;
   } catch (err) {
     console.log(err);
     return "error";
-    
   }
 };
 
@@ -38,16 +36,15 @@ export const getUserData = () => {
 
 export const getAchievements = async () => {
   try {
-    const achieves = await axios.get("http://localhost:3001/profile/getAchievements", {
+    const achieves = await Api.get("/profile/getAchievements", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('userToken')}`,
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    })
+    });
     return achieves.data.body.achievements;
   } catch (err) {
     console.log(err);
     return "error";
-    
   }
 };
 
@@ -71,14 +68,12 @@ const fetchGet = async (url: string, callback: any) => {
 };
 
 export const storeUserInfo = (result: any) => {
-
   localStorage.setItem("userPicture", result.profpic_url);
   localStorage.setItem("userName", result.full_name || "");
   localStorage.setItem("userEmail", result.login);
   if (result.nickname !== "") {
     localStorage.setItem("userNickname", result.nickname);
-  }
-  else {
+  } else {
     localStorage.setItem("userNickname", result.login);
   }
   localStorage.setItem("userGamesWon", result.gamesWon);

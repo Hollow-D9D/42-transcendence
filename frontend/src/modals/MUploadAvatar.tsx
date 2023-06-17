@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { NotifCxt } from "../App";
 import { uploadAvatarQuery } from "../queries/avatarQueries";
-import axios from 'axios'
+import { Api } from "../Config/Api";
 export function MUploadAvatar(props: any) {
   const notif = useContext(NotifCxt);
   const [newAvatar, setNewAvatar] = useState<any>();
@@ -13,32 +13,34 @@ export function MUploadAvatar(props: any) {
 
   const handleSubmit = (event: any) => {
     console.log("newavatar::", newAvatar);
-    
+
     if (newAvatar) {
       const uploadAvatar = async () => {
         try {
-          
           const fileName = await uploadAvatarQuery(newAvatar);
-          
-          const response = await axios.get("http://localhost:3001/profile/editNickname", {
+
+          const response = await Api.get("/profile/editNickname", {
             headers: {
-              "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             params: {
-              newdata: { avatar_url: fileName }
-            }
+              newdata: { avatar_url: fileName },
+            },
           });
           console.log(response);
           const setAvatarToLocalStorage = async () => {
-            await localStorage.setItem("userPicture", `http://localhost:3001/upload/${fileName}`)
+            localStorage.setItem(
+              "userPicture",
+              `${process.env.REACT_APP_BACKEND_SOCKET}/upload/${fileName}`
+            );
           };
           setAvatarToLocalStorage();
           props.isAvatarUpdated();
           props.onHide();
-          
         } catch (error) {
-          notif?.setNotifText("Error uploading avatar. Please try again later.");
+          notif?.setNotifText(
+            "Error uploading avatar. Please try again later."
+          );
           notif?.setNotifShow(true);
         }
       };

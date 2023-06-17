@@ -31,8 +31,11 @@ const socketOptions = {
   },
 };
 
-export const socket = io(`${process.env.REACT_APP_BACKEND_SOCKET}`, socketOptions);
-
+export const socket = io(
+  `${process.env.REACT_APP_BACKEND_SOCKET}`,
+  socketOptions
+);
+console.log(process.env.REACT_APP_BACKEND_SOCKET);
 export default function App() {
   const [usersStatus, setUsersStatus] = useState<IUserStatus[] | undefined>(
     undefined

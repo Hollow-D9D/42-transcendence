@@ -6,13 +6,15 @@ import { useAuth } from "../../globals/contexts";
 import { getUserData } from "../../queries/userQueries";
 import "./Auth.css";
 import { NotifCxt } from "../../App";
+import { addAuthHeader } from "../../Config/Api";
 
 export default function Auth() {
   const notif = useContext(NotifCxt);
   let navigate = useNavigate();
   let auth = useAuth();
   let location = useLocation();
-  const hrefURL = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-9bf87a7dc6727592572c086dcb74d50c619a0e3065ade141ccb0b92282caaf07&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fredirect&response_type=code&state=absjhasagsgsajg";
+  const hrefURL =
+    "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-9bf87a7dc6727592572c086dcb74d50c619a0e3065ade141ccb0b92282caaf07&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fredirect&response_type=code&state=absjhasagsgsajg";
 
   // Use a callback to avoid re-rendering
   const userSignIn = useCallback(() => {
@@ -31,6 +33,7 @@ export default function Auth() {
     const access_token = location.search.split("=")[1];
     if (access_token) {
       console.log(access_token);
+      addAuthHeader(access_token);
       localStorage.setItem("userToken", access_token);
       // getUserData is a fetch that might take time. In order for sign in
       // to operate after the function, it needs to use await, asyn and .then

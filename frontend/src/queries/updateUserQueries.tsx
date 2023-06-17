@@ -1,7 +1,7 @@
-import { authContentHeader, authHeader } from "./headers";
-import axios from "axios";
+import { Api } from "../Config/Api";
+import { authHeader } from "./headers";
 
-process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
+// process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
 export const updateAvatarQuery = (file: any) => {
   var formdata = new FormData();
@@ -25,17 +25,17 @@ export const updateAvatarQuery = (file: any) => {
 
 export const updateNicknameQuery = async (nickname: string) => {
   try {
-    const response = await axios.get(`http://localhost:3001/profile/editNickname`, {
+    const response = await Api.get(`/profile/editNickname`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-        "Content-Type": "application/json"
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+        "Content-Type": "application/json",
       },
       params: {
-        newdata: { nickname: nickname }
-      }
+        newdata: { nickname: nickname },
+      },
     });
     if (!response.data.error) {
-      localStorage.setItem("userNickname", nickname)
+      localStorage.setItem("userNickname", nickname);
       return "success";
     }
     return "error";
