@@ -21,6 +21,7 @@ export function MUploadAvatar(props: any) {
 
           const response = await Api.get("/profile/editNickname", {
             headers: {
+              Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               "Content-Type": "application/json",
             },
             params: {

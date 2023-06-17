@@ -25,7 +25,8 @@ export type newChannel = {
   name: string;
   private: boolean;
   password: string;
-  email: string | null;
+  login: string | null;
+  mode: string;
 };
 
 export type newDM = {

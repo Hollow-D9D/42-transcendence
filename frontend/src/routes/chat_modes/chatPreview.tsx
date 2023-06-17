@@ -42,18 +42,18 @@ export default function Preview({
   const [menuEvent, setMenuEvent] = useState<any>(null);
 
   useEffect(() => {
-    socket.emit("read preview", email, (data: chatPreview[] | null) => {
+    socket.emit("get search suggest", { login: email });
+    socket.on("search suggest", (data: chatPreview[] | null) => {
+      // console.log(data);
+
       if (data) setPreviews(data);
     });
-
-    return () => {
-      socket.off("read review");
-    };
   }, [updateStatus, email]);
 
   useEffect(() => {
-    socket.on("add preview", (data: chatPreview) => {
-      if (data) setPreviews((oldPreviews) => [...oldPreviews, data]);
+    socket.on("add preview", (data) => {
+      if (data) setPreviews(data);
+      console.log(roomPreview);
     });
 
     socket.on("update preview", (data: chatPreview[] | null) => {
@@ -131,7 +131,6 @@ export default function Preview({
     global.selectedChat.isBlocked = blockedList.find(
       (map: any) => map.id === global.selectedChat.ownerId
     )!;
-
   return (
     <div className="preview-zone">
       <div className="preview-chat-search">
@@ -148,6 +147,7 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
+          // console.log("helomoto");
           return (
             <div key={index}>
               <PreviewChat
@@ -196,17 +196,18 @@ function ChatSearch({
   updateStatus: number;
 }) {
   const [suggestion, setSug] = useState<oneSuggestion[]>([]);
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
 
   useEffect(() => {
     if (updateStatus === 0) return;
-    socket.emit("get search suggest", email);
+    socket.emit("get search suggest", { login: email });
   }, [updateStatus, email]);
 
   useEffect(() => {
-    socket.emit("get search suggest", email);
+    socket.emit("get search suggest", { login: email });
     socket.on("search suggest", (data: oneSuggestion[]) => {
       setSug(data);
+      // console.log("Suggestions: " + data);
     });
 
     return () => {

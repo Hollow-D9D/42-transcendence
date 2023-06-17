@@ -80,36 +80,45 @@ export function NewRoomCard({
   };
 
   const onCreate = async () => {
+    let mode = "PUBLIC";
+    if (isPrivate) mode = "PRIVATE";
+    else if (isPassword) mode = "PROTECTED";
+
     const data: newChannel = {
       name: roomName,
       private: isPrivate,
       password: roomPass,
-      email: email,
+      login: email,
+      mode: mode,
     };
-
-    console.log(data);
-    console.log("aaaaaaaaaaaa");
+    // console.log(data);
+    // console.log(data);
+    // console.log("aaaaaaaaaaaa");
 
     // socket.emit("new channel", data, (data: newChannel) => {
     //   console.log("bbbbbbbbbbbbbb");
     //   socket.emit("fetch new channel", data);
     // });
-    try {
-      await Api.post("/chat/create", {
-        params: data,
-      });
-    } catch (error) {
-      console.log("-------".repeat(10));
-      console.log(error);
-    }
+    socket.emit("create", data);
+    socket.on("error", () => {
+      //TODO HANDLE CREATE ERROR RESPONSES
+    });
+    // try {
+    //   const response = await Api.post("/chat/create", {
+    //     body: JSON.stringify(data),
+    //   });
+    //   console.log(response.data.error);
+    // } catch (error) {
+    //   // console.log("-------".repeat(10));
+    //   // console.log(error);
+    // }
 
-    console.log("aaaaaaaaaaaa");
+    // console.log("aaaaaaaaaaaa");
 
     initVars();
     onNewRoomRequest();
-    socket.emit("get search suggest", email);
+    socket.emit("get search suggest", { login: email });
   };
-
   const initVars = () => {
     setRoomName("");
     setAddMember([]);
@@ -149,28 +158,31 @@ export function NewRoomCard({
           uncheckedIcon={false}
         />
       </div>
-      <div className="div-switch">
-        <label style={{ color: isPassword ? "rgb(0,136,0)" : "grey" }}>
-          password
-        </label>
-        <Switch
-          className="switch"
-          onChange={handleIsPassword}
-          checked={isPassword}
-          checkedIcon={false}
-          uncheckedIcon={false}
-        />
-      </div>
-      {isPassword && (
-        <div>
-          <input
-            type="password"
-            value={roomPass}
-            onChange={(e) => handleString(e.target.value, setRoomPass)}
-            className="password"
+      {isPrivate || (
+        <div className="div-switch">
+          <label style={{ color: isPassword ? "rgb(0,136,0)" : "grey" }}>
+            password
+          </label>
+          <Switch
+            className="switch"
+            onChange={handleIsPassword}
+            checked={isPassword}
+            checkedIcon={false}
+            uncheckedIcon={false}
           />
         </div>
       )}
+      {isPrivate ||
+        (isPassword && (
+          <div>
+            <input
+              type="password"
+              value={roomPass}
+              onChange={(e) => handleString(e.target.value, setRoomPass)}
+              className="password"
+            />
+          </div>
+        ))}
       <div className="flex-block"></div>
       <div onMouseUp={onCreate} className="card-confirm-button">
         CONFIRM

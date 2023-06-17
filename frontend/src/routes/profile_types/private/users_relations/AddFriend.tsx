@@ -18,6 +18,7 @@ export const AddFriend: React.FC = () => {
     if (e.target.value !== "") {
       const response = await Api.get("/profile/friends/searchUsers", {
         headers: {
+          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           "Content-Type": "application/json",
         },
         params: {
