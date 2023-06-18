@@ -56,22 +56,21 @@ export type updateChannel = {
 };
 
 export type useMsg = {
-  email: string | null;
-  channelId: number;
-  msg: string;
-  msgId: number;
+  token: string | null;
+  chatId: number;
+  message: string;
 };
 
 export type oneMsg = {
   msgId: number;
   id: number;
-  channelId: number;
+  //   channelId: number;
   email: string;
   username: string;
   msg: string;
   createAt: string;
-  updateAt: string;
-  isInvite: boolean;
+  //   updateAt: string;
+  //   isInvite: boolean;
 };
 
 export type oneUser = {

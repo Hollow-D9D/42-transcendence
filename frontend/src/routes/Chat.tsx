@@ -60,12 +60,15 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) setShow(!selectedChat.isPassword || !outsider);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outsider]);
 
   useEffect(() => {
     if (show && selectedChat) {
       const cId = selectedChat.id;
+      console.log(cId);
+      socket.emit("into channel", { chat_id: cId, login: email, password: "" });
       socket.emit("read msgs", cId);
       socket.emit("get setting", cId);
     }
@@ -109,6 +112,7 @@ export default function Chat() {
         }}
         blockedList={blockedList}
       />
+
       <div
         style={{
           display: selectedChat?.dm ? "none" : "",
