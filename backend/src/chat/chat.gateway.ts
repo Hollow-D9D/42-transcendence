@@ -188,7 +188,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const messages = await this.chatService.getMessages(chat_id);
       client.emit('fetch_msgs', messages);
       const settings = await this.chatService.getSettings(chat_id);
-      console.log('role');
       client.emit('setting info', settings);
       const role: string = await this.chatService.getRole(login, chat_id);
       client.emit('fetch role', role);
