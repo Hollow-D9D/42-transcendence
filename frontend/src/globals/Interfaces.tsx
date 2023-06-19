@@ -39,10 +39,13 @@ export interface userModel {
   gamesWon: number;
   playTime: number;
   rank: number;
-  score: number;
+  status: number;
   winRate: number;
   nickname: string;
-  // isFriend: boolean;
+  isFriend: boolean;
+  isBlocked: boolean;
+  paramName: string;
+  full_name: string;
 }
 
 export interface gameModel {

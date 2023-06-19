@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../globals/contexts";
 import { MLogoutValid } from "../modals/MLogoutValid";
 import "./Navbar.css";
-import axios from "axios";
-
+import { Api } from "../Config/Api";
 
 const GetIcons = (props: any) => {
   const navigate = useNavigate();
   const location = useLocation();
-  let auth = useAuth();
   const [modalShow, setModalShow] = useState(false);
 
   // Determine the icon to display based on the URL
@@ -23,27 +20,26 @@ const GetIcons = (props: any) => {
       ? "chat-left-dots"
       : url === "game"
       ? "dpad"
-      : url === "watch"
-      ? "play-btn"
-      : "box-arrow-right"; // Determine the icon to display based on the URL
+      : // : url === "watch"
+        // ? "play-btn"
+        "box-arrow-right"; // Determine the icon to display based on the URL
 
   return (
     <main>
       <MLogoutValid
         show={modalShow}
         onHide={() => setModalShow(false)}
-        onSubmit={async() => {
+        onSubmit={async () => {
           console.log("logging otu");
-          try{
-            const res = await axios.get(`http://localhost:3001/logout`, {
-            headers: {
-              // Add your headers here
-              'authorization': `Bearer ${localStorage.getItem('userToken')}`,
-              "Content-Type": "application/json",
-            },
-          });
+          try {
+            await Api.get(`/logout`, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          } catch (err) {
+            console.log(err);
           }
-          catch(err){ console.log(err)}
           setModalShow(false);
           localStorage.clear();
           navigate("/auth/signin");
@@ -83,7 +79,7 @@ export const CNavBar = () => {
             <GetIcons url="leaderboard" />
             <GetIcons url="chat" />
             <GetIcons url="game" />
-            <GetIcons url="watch" />
+            {/* <GetIcons url="watch" /> */}
             <GetIcons url="logout" />
           </div>
         </div>

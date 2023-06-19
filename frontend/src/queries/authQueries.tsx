@@ -1,3 +1,4 @@
+import { addAuthHeader } from "../Config/Api";
 import { authHeader } from "./headers";
 import { getUserData } from "./userQueries";
 
@@ -68,6 +69,7 @@ export const signUp = (userInfo: any, userSignIn: any) => {
 };
 
 export const storeToken = (token: any) => {
+  addAuthHeader(token.access_token);
   localStorage.setItem("userToken", token.access_token);
   localStorage.setItem("userRefreshToken", token.refresh_token);
 };

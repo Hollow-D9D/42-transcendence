@@ -69,7 +69,7 @@ export default function TwoFAValidation() {
                 name="twoFAcode"
               />
             </Form.Group>
-            <Button
+            {/* <Button
               variant="primary"
               type="submit"
               className="submit-button float-end"
@@ -79,7 +79,7 @@ export default function TwoFAValidation() {
               }}
             >
               Submit
-            </Button>
+            </Button> */}
           </div>
         </form>
       </div>

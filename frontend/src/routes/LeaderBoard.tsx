@@ -37,16 +37,17 @@ export default function LeaderBoard() {
             </div>
             <div className="block"/>
             {
-                data == null || data.length === 0 ?
-                <div className="leardboard-logo" style={{marginTop: "160px", height: "60px"}}>
-                    {/* <b style={{font: "500 65px \"Clip\""}}><span>N</span>o  </b>
-                    <b style={{font: "500 65px \"Clip\""}}>G<span>am</span><span>e</span>  </b>
-                    <b style={{font: "500 65px \"Clip\""}}>Re<span>co</span>r<span>d</span>     </b>
-                    <b style={{font: "500 65px \"Clip\""}}><span>Y</span>e<span>t</span></b> */}
-                </div>
-                :
+                // data == null || data.length === 0 ?
+                // <div className="leardboard-logo" style={{marginTop: "160px", height: "60px"}}>
+                //     {/* <b style={{font: "500 65px \"Clip\""}}><span>N</span>o  </b>
+                //     <b style={{font: "500 65px \"Clip\""}}>G<span>am</span><span>e</span>  </b>
+                //     <b style={{font: "500 65px \"Clip\""}}>Re<span>co</span>r<span>d</span>     </b>
+                //     <b style={{font: "500 65px \"Clip\""}}><span>Y</span>e<span>t</span></b> */}
+                // </div>
+                // :
                 <div className="leaderboard">
                     <div className="list">
+                        aaaaaaaaaa
                         {
                             // data?.map((one:gameRecord, rank) => {
                             data?.map((one: any, rank) => {

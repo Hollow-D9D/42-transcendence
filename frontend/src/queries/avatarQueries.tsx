@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { Api } from "../Config/Api";
 
 const authFileHeader = () => {
   let token = "bearer " + localStorage.getItem("userToken");
@@ -11,8 +11,8 @@ export const uploadAvatarQuery = async (file: any) => {
   try {
     const formData = new FormData();
     formData.append("image", file, file.name);
-    const fileProps = await axios.post("http://localhost:3001/profile/upload", formData);
-    console.log("fileProps:::::", fileProps)
+    const fileProps = await Api.post("/profile/upload", formData);
+    console.log("fileProps:::::", fileProps);
     return fileProps.data.fileName;
   } catch (error) {
     console.error("Error saving image:", error);
@@ -24,7 +24,7 @@ export const getAvatarQuery = () => {
   return fetchAvatar("GET", null, authFileHeader(), "avatar");
 };
 
-export const getUserAvatarQuery = async(otherId: number) => {
+export const getUserAvatarQuery = async (otherId: number) => {
   let body = JSON.stringify({
     userId: otherId,
   });
@@ -33,14 +33,13 @@ export const getUserAvatarQuery = async(otherId: number) => {
   return fetchAvatar("GET", body, header, "getProfPic");
 
   // try {
-  //   const fileProps = await axios.post("http://localhost:3001/profile/getProfPic");
+  //   const fileProps = await Api.post("/profile/getProfPic");
   //   console.log("fileProps:::::", fileProps)
   //   return fileProps.data.fileName;
   // } catch (error) {
   //   console.error("Error saving image:", error);
   //   throw error;
   // }
-
 };
 
 // export const fetchAvatarFromServer = async () => {

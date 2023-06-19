@@ -14,9 +14,6 @@ import { AddFriend } from "./users_relations/AddFriend";
 export default function UserPrivateProfile() {
   const navigate = useNavigate();
 
-  const [showUsername, setShowUsername] = useState(false);
-  const onClickEditUsername = () => setShowUsername((curent) => !curent);
-
   const [showEmail, setShowEmail] = useState(false);
   const onClickEditEmail = () => setShowEmail((curent) => !curent);
 
@@ -49,7 +46,6 @@ export default function UserPrivateProfile() {
     const getAvatar = () => {
       if (localStorage.getItem("userPicture") !== '') {
         setAvatarURL(localStorage.getItem("userPicture") || "hambal");
-        // console.log(avatarURL, "??");
       } else {
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
@@ -95,17 +91,17 @@ export default function UserPrivateProfile() {
           <Col className=" content">
             <div className="profile-username-text">
               @
-              {userInfo && userInfo.email
-                ? userInfo.email.length > 20
-                  ? userInfo!.email.substring(0, 15) + "..."
-                  : userInfo!.email
+              {userInfo && userInfo.nickname
+                ? userInfo.nickname.length > 20
+                  ? userInfo!.nickname.substring(0, 15) + "..."
+                  : userInfo!.nickname
                 : null}
             </div>
             <span
               id="clickableIcon"
               className="caption"
               onClick={() =>
-                navigate("/app/public/" + localStorage.getItem("userID"))
+                navigate("/app/public/" + localStorage.getItem("userEmail"))
               }
             >
               See Public Profile
@@ -151,7 +147,6 @@ export default function UserPrivateProfile() {
                         onClick={() => {
                           setShowEmail(true);
                           setShowFriends(false);
-                          setShowUsername(false);
                         }}
                       >
                         Edit

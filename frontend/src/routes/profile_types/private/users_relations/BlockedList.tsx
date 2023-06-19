@@ -24,14 +24,6 @@ export const BlockedList = () => {
       if (result !== "error") return result;
     };
 
-    const fetchDataBlockedAvatar = async (otherId: number) => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(otherId);
-      if (result !== "error") return result;
-      else
-        return "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg";
-    };
-
     const fetchData = async () => {
       let fetchedBlocked = await fetchDataBlocked();
 
@@ -51,12 +43,7 @@ export const BlockedList = () => {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-
-          // let avatar = await fetchDataBlockedAvatar(fetchedBlocked[i].id);
-
-          // if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.profpic_url = fetchedBlocked[i].profpic_url;
-          // else if (avatar) newRow.userModel.profpic_url = avatar;
+          newRow.userModel.profpic_url = fetchedBlocked[i].profpic_url;
           blocked.push(newRow);
         }
       }
@@ -65,7 +52,6 @@ export const BlockedList = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdated, usersStatus]);
 
   return (
@@ -93,4 +79,3 @@ export const BlockedList = () => {
   );
 };
 
-//isFetched === "error" to add

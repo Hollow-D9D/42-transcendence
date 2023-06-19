@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../../App";
 import { ItableRow, IUserStatus } from "../../../globals/Interfaces";
 import { getFriendFriends } from "../../../queries/userFriendsQueries";
+import { COnUser } from "../../../ContextMenus/COnUser";
 
 export default function DisplayUserFriends(props: any) {
   const usersStatus = useContext(UsersStatusCxt);
@@ -103,6 +104,7 @@ export default function DisplayUserFriends(props: any) {
                         userModel={h.userModel}
                         myId={props.myId}
                       />
+                      
                     );
                   })
                 ) : (
@@ -188,9 +190,9 @@ const DisplayFriendsRow = (props: any) => {
           >
             <div>
               @
-              {props.userModel.login.length > 10
-                ? props.userModel.login.substring(0, 7) + "..."
-                : props.userModel.login}
+              {props.userModel.nickname.length > 10
+                ? props.userModel.nickname.substring(0, 7) + "..."
+                : props.userModel.nickname}
             </div>
           </Col>
         </Row>
