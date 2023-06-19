@@ -21,7 +21,7 @@ export default function Chat() {
   const [updateStatus, setUpdateStatus] = useState(0);
   const [blockedList, setBlockedList] = useState<[]>([]);
   const notif = useContext(NotifCxt);
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
 
   useEffect(() => {
     socket.on("exception", (data) => {
@@ -31,6 +31,7 @@ export default function Chat() {
     });
 
     socket.on("fetch role", (data) => {
+      console.log(data);
       setRole(data);
     });
 
@@ -67,7 +68,7 @@ export default function Chat() {
   useEffect(() => {
     if (show && selectedChat) {
       const cId = selectedChat.id;
-      console.log(cId);
+
       socket.emit("into channel", { chat_id: cId, login: email, password: "" });
       socket.emit("read msgs", cId);
       socket.emit("get setting", cId);
@@ -112,7 +113,6 @@ export default function Chat() {
         }}
         blockedList={blockedList}
       />
-
       <div
         style={{
           display: selectedChat?.dm ? "none" : "",

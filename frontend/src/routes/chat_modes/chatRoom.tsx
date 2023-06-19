@@ -29,7 +29,7 @@ export default function ChatRoom({
   setSettingRequest: () => void;
   blockedList: [];
 }) {
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
 
   return (
     <>
@@ -105,7 +105,6 @@ function MsgStream({
 
   useEffect(() => {
     socket.on("fetch_msgs", (data) => {
-      console.log(data);
       const msgStream = data.map((msg: any): oneMsg => {
         return {
           msgId: msg.id,
@@ -133,7 +132,6 @@ function MsgStream({
     });
 
     socket.on("new connection", (msg) => {
-      console.log(msg);
       if (msg.user.login !== localStorage.getItem("userEmail")) {
         notif?.setNotifText(`${msg.user.nickname} is joined!`);
         notif?.setNotifShow(true);
@@ -245,8 +243,6 @@ function InputArea({
       chatId: channelId,
       message: msg,
     };
-    console.log(data);
-
     socket.emit("new_message", data);
     setMsg("");
   };
