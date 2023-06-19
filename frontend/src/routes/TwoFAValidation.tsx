@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NotifCxt } from "../App";
 import { useAuth } from "../globals/contexts";
 import { twoFAAuth } from "../queries/twoFAQueries";
+import { log } from "console";
 
 export default function TwoFAValidation() {
   const notif = useContext(NotifCxt);
@@ -22,6 +23,7 @@ export default function TwoFAValidation() {
   // get username from redirect URL
   useEffect(() => {
     const urlUsername = location.search.split("=")[1];
+    console.log("aaaaa");
     if (urlUsername) {
       localStorage.setItem("userName", urlUsername);
       navigate("/2FA");
@@ -32,7 +34,8 @@ export default function TwoFAValidation() {
     e.preventDefault();
 
     const userSignIn = () => {
-      let username = localStorage.getItem("userName");
+      let username = localStorage.getItem("userEmail");
+      console.log(username);
       if (username)
         auth.signin(username, () => {
           navigate("/app/private-profile", { replace: true });
@@ -40,7 +43,7 @@ export default function TwoFAValidation() {
     };
     if (username !== "undefined" && username) {
       const twoFAValid = async (username: string) => {
-        const result = await twoFAAuth(twoFACode, username, userSignIn);
+        const result = await twoFAAuth(twoFACode, userSignIn);
         if (!result) {
           notif?.setNotifShow(true);
           notif?.setNotifText("Incorrect code. Please try again.");
@@ -69,7 +72,7 @@ export default function TwoFAValidation() {
                 name="twoFAcode"
               />
             </Form.Group>
-            {/* <Button
+            <Button
               variant="primary"
               type="submit"
               className="submit-button float-end"
@@ -79,7 +82,7 @@ export default function TwoFAValidation() {
               }}
             >
               Submit
-            </Button> */}
+            </Button>
           </div>
         </form>
       </div>

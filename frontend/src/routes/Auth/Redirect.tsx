@@ -35,8 +35,13 @@ export default function AuthRedirect() {
             localStorage.setItem("userToken", token);
             storeUserInfo(profile.data.body.user);
             if (res) {
-              localStorage.setItem("userLogged", "true");
-              navigate("/app/private-profile");
+              if (profile.data.body.user.is2fa) {
+                console.log("my dear ", profile.data.body.user);
+                navigate("/2FA");
+              } else {
+                localStorage.setItem("userLogged", "true");
+                navigate("/app/private-profile");
+              }
             }
           }
         } catch (error) {

@@ -32,7 +32,7 @@ const GetIcons = (props: any) => {
         onSubmit={async () => {
           console.log("logging otu");
           try {
-            await Api.get(`/logout`, {
+            await Api.get(`/auth/logout`, {
               headers: {
                 "Content-Type": "application/json",
               },

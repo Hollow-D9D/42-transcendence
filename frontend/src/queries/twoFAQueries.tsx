@@ -16,16 +16,14 @@ export const twoFAGenerate = async () => {
 };
 
 /* Validate 2FA code when signin in  */
-export const twoFAAuth = (
-  twoFAcode: string,
-  email: string,
-  userSignIn: any
-) => {
-  let raw = JSON.stringify({
-    username: email,
-    twoFAcode: twoFAcode,
+export const twoFAAuth = async (twoFAcode: string, userSignIn: any) => {
+  const response = await Api.get(`auth/two-factor/verify?token=${twoFAcode}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+    },
   });
-  return fetchPost(raw, "authenticate", userSignIn);
+  console.log("response", response);
+  return response;
 };
 
 /* Turn on 2FA for signed in user */
