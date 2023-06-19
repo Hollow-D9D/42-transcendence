@@ -13,6 +13,7 @@ import "./UserPublicProfile.css";
 import { getUserFriends } from "../../../queries/userFriendsQueries";
 import { blockUserQuery } from "../../../queries/userFriendsQueries";
 import { getUserBlocked } from "../../../queries/userQueries";
+import { FriendsList } from "../private/users_relations/FriendsList";
 
 const userInfoInit: userModel = {
   id: 0,

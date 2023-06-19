@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../../App";
 import { ItableRow, IUserStatus } from "../../../globals/Interfaces";
 import { getFriendFriends } from "../../../queries/userFriendsQueries";
+import { COnUser } from "../../../ContextMenus/COnUser";
 
 export default function DisplayUserFriends(props: any) {
   const usersStatus = useContext(UsersStatusCxt);
@@ -103,6 +104,7 @@ export default function DisplayUserFriends(props: any) {
                         userModel={h.userModel}
                         myId={props.myId}
                       />
+                      
                     );
                   })
                 ) : (
