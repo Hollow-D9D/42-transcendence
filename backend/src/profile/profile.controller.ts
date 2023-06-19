@@ -87,7 +87,6 @@ export class ProfileController {
   async getProfile(@Headers() headers) {
     try {
       const payload = getPayload(headers);
-      
       const { user } = await this.profileService.getProfile(payload.login);
       if (user)
         return {

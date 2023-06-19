@@ -91,6 +91,8 @@ export class AuthService {
           list.push(userInfo.login);
         }
         await this.cacheM.set('logged_in', list, 0);
+        user.status = 1;
+        await user.save();
         return {
           error: null,
           body: {
@@ -111,17 +113,17 @@ export class AuthService {
         : [];
       list.splice(list.indexOf(login), 1);
       await this.cacheM.set('logged_in', list, 0);
-      
-      console.log('after logout ', await this.cacheM.get('logged_in'));
       const user = await this.userRepo.findOne({
         where: { login: login },
       });
-      // console.log("user:::::::::", user);
+      user.status = 0;
+      await user.save();
       return {
         error: null,
         body: null,
       };
     } catch (err) {
+      console.log('error logout', err);
       throw err;
     }
   }
