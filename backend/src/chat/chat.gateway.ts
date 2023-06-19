@@ -196,10 +196,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('fetch owner', [roles.owner]);
       client.emit('fetch admins', roles.admins);
       client.emit('fetch members', roles.members);
-
     } catch (err) {
       console.log(err);
-      
       throwError(client, err.message);
     }
   }
@@ -214,7 +212,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (err) {
       throwError(client, 'Something went wriong!');
     }
-
   }
 
   @SubscribeMessage('join_chat')
@@ -240,8 +237,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // this.leaveRoom(client, roomName, login);
   }
-
-
 
   // TODO: check if user is blocked or not
   @SubscribeMessage('new_message')

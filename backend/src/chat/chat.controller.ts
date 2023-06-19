@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Body,
   Post,
   Headers,
@@ -11,7 +10,6 @@ import { ChatService } from './chat.service';
 import { getPayload } from 'src/utils/auth.utils';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
-
 
 @Controller('chat')
 export class ChatController {
