@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Body,
   Post,
   Headers,
   Query,
@@ -10,6 +11,7 @@ import { ChatService } from './chat.service';
 import { getPayload } from 'src/utils/auth.utils';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
+
 
 @Controller('chat')
 export class ChatController {
@@ -41,16 +43,15 @@ export class ChatController {
    */
   @Post('create')
   @UseGuards(AuthGuard)
-  async create(@Headers() headers, @Query() query) {
+  async create(@Headers() headers, @Body() body) {
     try {
+      const query = JSON.parse(body.body);
       const payload = getPayload(headers);
+      console.log(payload, 'query', query);
       if (payload) {
         if (!payload.login) {
           // shouldn't get here
-          return {
-            error: new Error('Invalid user info!'),
-            body: null,
-          };
+          throw new Error('Invalid user info!');
         }
         const logins: string[] = [payload.login];
         // add another login if necessary
@@ -59,17 +60,13 @@ export class ChatController {
         if (isValidChannelMode(query.mode)) {
           mode = query.mode as ChannelMode;
         }
+        console.log(mode);
         if (!mode) {
           // chat, not a channel
           if (query.target) logins.push(query.target);
           // `target` user is expected to be provided
           else
-            return {
-              error: new Error(
-                'No valid target user specified for the new chat!',
-              ),
-              body: null,
-            };
+            throw new Error('No valid target user specified for the new chat!');
         }
         // retreive user(s)
         const users = await this.chatService.users(logins);
@@ -79,66 +76,48 @@ export class ChatController {
           if (users.length !== 2) {
             // both `login` and `target` are expected to yield valid users
             // if not, the request in invalid
-            return {
-              error: new Error(
-                'No valid target user specified for the new chat!',
-              ),
-              body: null,
-            };
+            throw new Error('No valid target user specified for the new chat!');
           }
           if (this.chatService.isBlocked(payload.login, query.target)) {
             // `login` cannot create a chat with `target` that has blocked them
-            return {
-              error: new Error('You are blocked by the target user!'),
-              body: null,
-            };
+            console.log('banned');
+            throw new Error('You are blocked by the target user!');
           }
         } else {
           // channel, not a chat
           // not checking whether `users.length === 1` in case when
           // `validMode === true` since we expect that `login` provided
           // by ... is always valid
-          if (!query.name || !query.password) {
+          console.log('bool', !query.password);
+          if (!query.name /* || !query.password*/) {
+            console.log('no login/password');
             // doesn't have a valid `name` and `password` specified
-            return {
-              error: new Error(
-                'No valid channel name and/or password specified!',
-              ),
-              body: null,
-            };
+            throw new Error('No valid channel name and/or password specified!');
           }
           // check that a chat with this name hasn't already been created
           const channelWithName = await this.chatService.channel(query.name);
           if (channelWithName) {
             // channelWithName !== undefined
-            return {
-              error: new Error(
-                'A channel with this name has already been created!',
-              ),
-              body: null,
-            };
+            throw new Error(
+              'A channel with this name has already been created!',
+            );
           }
           // check the validity of the password provided for PROTECTED channels
           if (
             mode == ChannelMode.PROTECTED &&
             !this.chatService.isValidPassword(query.password)
           ) {
-            return {
-              error: new Error('The password provided is invalid!'),
-              body: null,
-            };
+            throw new Error('The password provided is invalid!');
           }
         }
         // all main checks passed
         this.chatService.create(users, mode, query.name, query.password);
       } else {
-        return {
-          error: new Error('Invalid input'),
-          body: null,
-        };
+        throw new Error('Invalid input');
       }
     } catch (error) {
-      return { error, body: null };
+      console.log(error.message);
+      return { error: error.message, body: null };
     }
   }
 

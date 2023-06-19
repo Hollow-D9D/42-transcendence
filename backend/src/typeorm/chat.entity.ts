@@ -7,12 +7,13 @@ import {
   ManyToOne,
   ManyToMany,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { ChannelMode } from './channelmode.enum';
 import { User, MutedUser, Message } from '.';
 
 @Entity()
-export class Chat extends BaseEntity {
+export default class Chat extends BaseEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',
   })
@@ -55,6 +56,11 @@ export class Chat extends BaseEntity {
   admins: User[] | null;
 
   @ManyToMany(() => User, (user) => user.chatsBlockedFrom)
+  @JoinTable({
+    name: 'chat_blocked',
+    joinColumn: { name: 'chat_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
   blocked: User[] | null;
 
   @ManyToOne(() => User, (user) => user.chatsOwned, { nullable: true })

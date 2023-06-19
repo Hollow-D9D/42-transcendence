@@ -177,8 +177,8 @@ function OneRow({rank, name, id, description, icon}
                                     style={{backgroundImage: `url("${icon}")`,
                                     backgroundSize: "cover",
                                     backgroundPosition: "center"}}/> 
-                                    {/* : <></> */}
-                                    {/* } */}
+                                {/* : <></> */}
+                                {/* } */}
                             <div className="username">{name}</div>
                             <div className="record"></div>
                             <div className="description">{description}</div>
