@@ -48,11 +48,13 @@ export default function RoomStatus({
   const [add, setAdd] = useState<boolean>(false);
   const [invitationTag, setTag] = useState<Tag[]>([]);
 
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
 
+  console.log("111current:::::", outsider);
   useEffect(() => {
     if (current) {
-      socket.emit("read room status", { channelId: current?.id, email: email });
+
+      socket.emit("read room status", { channelId: current?.id, login: email });
       socket.emit("get invitation tags", current?.id);
     }
   }, [updateStatus, current, email]);
@@ -60,19 +62,19 @@ export default function RoomStatus({
   useEffect(() => {
     socket.on("invitation tags", (data: Tag[]) => {
       setTag(data);
-      
-      
+
+
     });
     // socket.emit("invitation tags"); //REMOVE
     setTag(
       [{
         id: 1,
         name: "valod"
-      },{
-        id :2,
-        name: "bulki" 
+      }, {
+        id: 2,
+        name: "bulki"
       }
-    ]);
+      ]);
     return () => {
       socket.off("invitation tags");
     };
@@ -80,11 +82,10 @@ export default function RoomStatus({
 
   const handleInvite = (member: Tag) => {
     setAdd(false);
-    console.log(member);
-    
+
     let update: updateChannel = {
       channelId: current!.id,
-      email: email,
+      login: email,
       password: "",
       targetId: member.name,
       private: false,
@@ -97,7 +98,7 @@ export default function RoomStatus({
     });
   };
 
-  const onDelete = (i: number) => {};
+  const onDelete = (i: number) => { };
 
   return (
     <div className="chat-status-zone">
@@ -140,7 +141,7 @@ export default function RoomStatus({
       <JoinChannel
         channelId={current?.id}
         outsider={outsider}
-        isPassword={current?.isPassword}
+        isPassword={(current?.password !== null &&  current?.password !== "") ? true : false}
       />
     </div>
   );
@@ -159,6 +160,8 @@ function MemberStatus({
   const [admins, setAdmins] = useState<oneUser[] | null>([]);
   const [members, setMembers] = useState<oneUser[] | null>([]);
   const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
+
+  // console.log("222current:::::", current);
 
   useEffect(() => {
     socket.on("fetch owner", (data: oneUser[] | null) => {
@@ -223,7 +226,7 @@ function MemberStatus({
         role={role}
         blockedList={blockedList}
       />
-      <p
+      {/* <p
         className="status-type"
         style={{ display: inviteds?.length ? "" : "none" }}
       >
@@ -234,7 +237,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
-      />
+      /> */}
     </div>
   );
 }
@@ -250,7 +253,7 @@ function Status({
   role: string;
   blockedList: [];
 }) {
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
   const [selData, setSelData] = useState<any>(null);
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
@@ -291,7 +294,7 @@ function Status({
   function handleMute(mins: number) {
     let update: mute = {
       duration: mins,
-      email: global.selectedUser.email,
+      login: global.selectedUser.email,
       channelId: current!.id,
     };
     socket.emit("mute user", update);
@@ -316,7 +319,7 @@ function Status({
   function handleBeAdmin() {
     let update: updateChannel = {
       channelId: current!.id,
-      email: email,
+      login: email,
       password: "",
       targetId: global.selectedUser.id,
       private: false,
@@ -330,7 +333,7 @@ function Status({
   function handleNotAdmin() {
     let update: updateChannel = {
       channelId: current!.id,
-      email: email,
+      login: email,
       password: "",
       targetId: global.selectedUser.id,
       private: false,
@@ -344,7 +347,7 @@ function Status({
   function handleKickOut() {
     let update: updateChannel = {
       channelId: current!.id,
-      email: email,
+      login: email,
       password: "",
       targetId: global.selectedUser.id,
       private: false,
@@ -383,45 +386,45 @@ function Status({
         )}
         <Separator />
         {role === "owner"
-        //  && global.selectedUser?.isInvited === false 
-         ? (
-          <>
-            <Item
-              // style={{
-              //   display: global.selectedUser?.isAdmin === false ? "" : "none",
-              // }}
-              onClick={handleBeAdmin}
-            >
-              assign as admin
-            </Item>
-            <Item
-              style={{
-                display: global.selectedUser?.isAdmin === true ? "" : "none",
-              }}
-              onClick={handleNotAdmin}
-            >
-              unset admin right
-            </Item>
-          </>
-        ) : (
-          <></>
-        )}
-        {(role === "admin" || role === "owner") 
-        // &&
-        // global.selectedUser?.isInvited === false 
-        ? (
-          <>
-            <Submenu label="mute">
-              <Item onClick={() => handleMute(5)}>5 mins</Item>
-              <Item onClick={() => handleMute(10)}>10 mins</Item>
-              <Item onClick={() => handleMute(15)}>15 mins</Item>
-              <Item onClick={() => handleMute(20)}>20 mins</Item>
-            </Submenu>
-            <Item onClick={handleKickOut}>kick out</Item>
-          </>
-        ) : (
-          <></>
-        )}
+          //  && global.selectedUser?.isInvited === false 
+          ? (
+            <>
+              <Item
+                // style={{
+                //   display: global.selectedUser?.isAdmin === false ? "" : "none",
+                // }}
+                onClick={handleBeAdmin}
+              >
+                assign as admin
+              </Item>
+              <Item
+                style={{
+                  display: global.selectedUser?.isAdmin === true ? "" : "none",
+                }}
+                onClick={handleNotAdmin}
+              >
+                unset admin right
+              </Item>
+            </>
+          ) : (
+            <></>
+          )}
+        {(role === "admin" || role === "owner")
+          // &&
+          // global.selectedUser?.isInvited === false 
+          ? (
+            <>
+              <Submenu label="mute">
+                <Item onClick={() => handleMute(5)}>5 mins</Item>
+                <Item onClick={() => handleMute(10)}>10 mins</Item>
+                <Item onClick={() => handleMute(15)}>15 mins</Item>
+                <Item onClick={() => handleMute(20)}>20 mins</Item>
+              </Submenu>
+              <Item onClick={handleKickOut}>kick out</Item>
+            </>
+          ) : (
+            <></>
+          )}
       </Menu>
     </>
   );
@@ -521,7 +524,7 @@ function JoinChannel({
   const handleJoin = () => {
     let update: updateChannel = {
       channelId: channelId,
-      email: email,
+      login: email,
       password: password,
       targetId: -1,
       private: false,
@@ -530,6 +533,7 @@ function JoinChannel({
       dm: false,
     };
     socket.emit("join channel", update);
+
     setPass("");
   };
 

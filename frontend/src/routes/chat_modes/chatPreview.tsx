@@ -94,7 +94,7 @@ export default function Preview({
     let update: updateChannel = {
       channelId: global.selectedChat.id,
       dm: global.selectedChat.dm,
-      email: email,
+      login: email,
       password: "",
       targetId: -1,
       private: false,
@@ -109,7 +109,7 @@ export default function Preview({
     let update: updateChannel = {
       channelId: global.selectedChat.id,
       dm: global.selectedChat.dm,
-      email: email,
+      login: email,
       password: "",
       targetId: -1,
       private: false,

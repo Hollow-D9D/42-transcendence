@@ -52,7 +52,7 @@ export function SettingCard({
   const onUpdate = () => {
     let data: updateChannel = {
       channelId: channelId,
-      email: null,
+      login: null,
       password: "",
       targetId: 0,
       private: isPrivate,

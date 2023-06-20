@@ -13,6 +13,7 @@ export type chatPreview = {
   dm: boolean;
   name: string;
   isPassword: boolean;
+  password: string;
   updateAt: string;
   lastMsg: string;
   unreadCount?: number;
@@ -47,7 +48,7 @@ export type Tag = {
 export type updateChannel = {
   channelId: number | undefined;
   dm: boolean;
-  email: string | null;
+  login: string | null;
   password: string;
   targetId: number | string;
   private: boolean;
@@ -98,7 +99,7 @@ export type setting = {
 
 export type mute = {
   duration: number;
-  email: string;
+  login: string;
   channelId: number;
 };
 

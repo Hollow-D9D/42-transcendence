@@ -54,7 +54,9 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) {
-      setOutsider(role === "invited" || role === "noRole" ? true : false);
+      console.log("role::::::;", role);
+      
+      setOutsider(role === "" ? true : false);
       socket.emit("read blocked", email);
     }
   }, [selectedChat, role, email, updateStatus]);

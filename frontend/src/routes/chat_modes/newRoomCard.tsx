@@ -101,6 +101,7 @@ export function NewRoomCard({
     // });
     socket.emit("create", data);
     socket.on("error", () => {
+      
       //TODO HANDLE CREATE ERROR RESPONSES
     });
     // try {
