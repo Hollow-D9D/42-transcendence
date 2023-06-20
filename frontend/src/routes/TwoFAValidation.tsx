@@ -25,10 +25,21 @@ export default function TwoFAValidation() {
     const urlUsername = location.search.split("=")[1];
     console.log("aaaaa");
     if (urlUsername) {
-      localStorage.setItem("userName", urlUsername);
+      localStorage.setItem("userEmail", urlUsername);
+      console.log(urlUsername);
+
       navigate("/2FA");
     }
   }, [location.search, navigate]);
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  useEffect(() => {
+    console.log("chgitem xia ste mtnum");
+
+    if (isTokenValid) {
+      localStorage.setItem("userLogged", "true");
+      navigate("/app/private-profile");
+    }
+  }, [isTokenValid]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
@@ -44,9 +55,12 @@ export default function TwoFAValidation() {
     if (username !== "undefined" && username) {
       const twoFAValid = async (username: string) => {
         const result = await twoFAAuth(twoFACode, userSignIn);
-        if (!result) {
+        if (!result || !result.data.body.isTokenValid) {
           notif?.setNotifShow(true);
           notif?.setNotifText("Incorrect code. Please try again.");
+        } else {
+          console.log(localStorage);
+          setIsTokenValid(true);
         }
       };
       twoFAValid(username);

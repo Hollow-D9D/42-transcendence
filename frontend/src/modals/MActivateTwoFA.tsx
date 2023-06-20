@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { Modal, Button, Form, Spinner } from "react-bootstrap";
 import { NotifCxt } from "../App";
 import { twoFAGenerate, twoFAOn } from "../queries/twoFAQueries";
+import { useNavigate } from "react-router-dom";
 
 export function Activate2FA(props: any) {
   const notif = useContext(NotifCxt);
@@ -11,7 +12,6 @@ export function Activate2FA(props: any) {
   const handleInputChange = (e: any) => {
     const { value } = e.target;
     setCodeModal(value);
-    
   };
 
   const getQRCode = async () => {
@@ -32,6 +32,8 @@ export function Activate2FA(props: any) {
     e.preventDefault();
     const twoFAActivate = async () => {
       const result = await twoFAOn(FACodeModal);
+      console.log("result", result);
+
       if (result?.data.error) {
         notif?.setNotifText("Wrong code. Please try again.");
         notif?.setNotifShow(true);

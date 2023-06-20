@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { storeUserInfo } from "../../queries/userQueries";
 import { Api, addAuthHeader } from "../../Config/Api";
 
-export default function AuthRedirect() {
+export default function AuthRedirect(props: any) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -36,6 +36,12 @@ export default function AuthRedirect() {
             storeUserInfo(profile.data.body.user);
             if (res) {
               if (profile.data.body.user.is2fa) {
+                // if (
+                //   localStorage.getItem("userLogged") &&
+                //   localStorage.getItem("userLogged") === "true"
+                // )
+                //   navigate("/app/private-profile");
+
                 console.log("my dear ", profile.data.body.user);
                 navigate("/2FA");
               } else {
