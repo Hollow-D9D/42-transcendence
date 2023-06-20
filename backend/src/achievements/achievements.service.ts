@@ -63,11 +63,17 @@ export class AchievementsService {
   async seedAchiements() {
     try {
       await this.achieveRepo
+        .createQueryBuilder('user_achievement')
+        .delete()
+        // .where("id = :id", { id: 1 })
+        .execute();
+      await this.achieveRepo
         .createQueryBuilder('users')
         .delete()
         .from(Achievement)
         // .where("id = :id", { id: 1 })
         .execute();
+
       await Promise.all(
         this.achieves.map(async (achieve) => {
           const newOne = this.achieveRepo.create(achieve);

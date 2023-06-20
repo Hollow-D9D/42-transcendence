@@ -24,13 +24,13 @@ export class ChatService {
   /**
    * @param users one (channel) or two (chat) initial members
    * @param mode used to perform the chat/channel and channel mode resolution
-   * @param chat_id of the channel being created
+   * @param name of the channel being created
    * @param password of the PROTECTED channel being created
    */
   async create(
     users: User[],
     mode: ChannelMode,
-    chat_id: number,
+    name: string,
     password: string,
   ) {
     try {
@@ -39,17 +39,18 @@ export class ChatService {
         group: false,
         members: users,
         mode: null,
-        chat_id: null,
+        name: null,
         password: null,
         owner: null,
       };
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
+      console.log(entityLike);
       if (mode !== null) {
         // create a channel
         entityLike.group = true;
         entityLike.mode = mode;
-        entityLike.chat_id = chat_id;
+        entityLike.name = name;
         if (mode === ChannelMode.PROTECTED)
           entityLike.password = hashedPassword;
         entityLike.owner = users[0]; // the first one is `login` from request
@@ -113,15 +114,18 @@ export class ChatService {
   async getRole(login: string, chat_id: number) {
     const chat = await this.chatRepo.findOne({
       where: { id: chat_id },
-      relations: ['admins', 'owner'],
+      relations: ['admins', 'owner', 'members'],
     });
     let role: string = null;
 
     if (chat) {
-      if (chat.owner.login == login) role = 'owner';
+      chat.members.forEach((member) => {
+        if (member.login == login) role = 'member';
+      });
       chat.admins.forEach((admin) => {
         if (admin.login == login) role = 'admin';
       });
+      if (chat.owner.login == login) role = 'owner';
     }
     return role;
   }
@@ -512,6 +516,17 @@ export class ChatService {
   async channel(id: number): Promise<Chat> {
     return await this.chatRepo.findOne({
       where: { id: id },
+      relations: ['members', 'blocked'],
+    });
+  }
+
+  /**
+   * @param name of the channel to return
+   * @returns Chat entity if found, null otherwise
+   */
+  async channelByName(name: string): Promise<Chat> {
+    return await this.chatRepo.findOne({
+      where: { name },
       relations: ['members', 'blocked'],
     });
   }
