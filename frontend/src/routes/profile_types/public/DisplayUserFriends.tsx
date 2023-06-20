@@ -10,13 +10,11 @@ import {
 import { useContextMenu } from "react-contexify";
 import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../../App";
-import { renderTooltip } from "../../../Components/SimpleToolTip";
 import { ItableRow, IUserStatus } from "../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../queries/avatarQueries";
-import { getUserFriends } from "../../../queries/userFriendsQueries";
+import { getFriendFriends } from "../../../queries/userFriendsQueries";
+import { COnUser } from "../../../ContextMenus/COnUser";
 
 export default function DisplayUserFriends(props: any) {
-  console.log("props:::::", props.userInfo)
   const usersStatus = useContext(UsersStatusCxt);
   const [friendsList, setFriendsList] = useState<ItableRow[] | undefined>(
     undefined
@@ -29,34 +27,23 @@ export default function DisplayUserFriends(props: any) {
 
   useEffect(() => {
     const fetchDataFriends = async () => {
-      console.log("fetchDataFriends:::::::")
-      // const result = await getUserFriends(props.userInfo.id);
-      const result = await getUserFriends();
-      if (result !== "error") return result;
-    };
 
-    const fetchDataFriendsAvatar = async (otherId: number) => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(otherId);
+      const result = await getFriendFriends(props.userInfo.username);
       if (result !== "error") return result;
-      else
-        return "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg";
     };
 
     const fetchData = async () => {
       let fetchedFriends = await fetchDataFriends();
-      console.log("display fetchData:::::::")
       if (fetchedFriends !== undefined && fetchedFriends.length !== 0) {
         for (let i = 0; i < fetchedFriends.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { nickname: "", login: "", profpic_url: "", id: 0, status: -1 },
           };
 
-          let avatar = await fetchDataFriendsAvatar(fetchedFriends[i].id);
-
           newRow.userModel.id = fetchedFriends[i].id;
-          newRow.userModel.username = fetchedFriends[i].username;
+          newRow.userModel.login = fetchedFriends[i].login;
+          newRow.userModel.nickname = fetchedFriends[i].nickname;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -64,9 +51,7 @@ export default function DisplayUserFriends(props: any) {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+          newRow.userModel.profpic_url = fetchedFriends[i].profpic_url;
           friends.push(newRow);
         }
       }
@@ -75,7 +60,6 @@ export default function DisplayUserFriends(props: any) {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdated, usersStatus]);
 
   return (
@@ -120,6 +104,7 @@ export default function DisplayUserFriends(props: any) {
                         userModel={h.userModel}
                         myId={props.myId}
                       />
+                      
                     );
                   })
                 ) : (
@@ -139,7 +124,7 @@ export default function DisplayUserFriends(props: any) {
 const DisplayFriendsRow = (props: any) => {
   const { show } = useContextMenu();
   const navigate = useNavigate();
-  console.log("DisplayFriendsRow:::::::")
+
   function displayMenu(
     e: React.MouseEvent<HTMLElement>,
     targetUserId: number,
@@ -149,15 +134,13 @@ const DisplayFriendsRow = (props: any) => {
     show(e, {
       id: "onUser",
       props: {
-        who: targetUserId,
-        username: targetUserUsername,
+        userModel: {
+          id: targetUserId,
+          username: targetUserUsername,
+        }
       },
     });
   }
-
-  const handleClickWatch = (otherId: number) => {
-    navigate("/app/watch", { replace: false });
-  };
 
   return (
     <main>
@@ -174,64 +157,44 @@ const DisplayFriendsRow = (props: any) => {
               <div
                 className="profile-pic-inside-sm"
                 style={{
-                  backgroundImage: `url("${props.userModel.avatar}")`,
+                  backgroundImage: `url("${props.userModel.profpic_url}")`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
                 id="clickableIcon"
-                onClick={(e: React.MouseEvent<HTMLElement>) =>
-                  displayMenu(e, props.userModel.id, props.userModel.username)
+                onClick={(e: React.MouseEvent<HTMLElement>) => {
+                  displayMenu(e, props.userModel.id, props.userModel.login)
+                }
                 }
               ></div>
             </div>
             <div
-              className={`status-private-sm ${
-                props.userModel.status === 1
-                  ? "online"
-                  : props.userModel.status === 2
+              className={`status-private-sm ${props.userModel.status === 1
+                ? "online"
+                : props.userModel.status === 2
                   ? "ingame"
                   : props.userModel.status === 0
-                  ? "offline"
-                  : ""
-              }`}
+                    ? "offline"
+                    : ""
+                }`}
             ></div>
           </Col>
           <Col
             md={"auto"}
             id="clickableIcon"
             className="text-left public-hover"
-            onClick={(e: React.MouseEvent<HTMLElement>) =>
-              displayMenu(e, props.userModel.id, props.userModel.username)
+            onClick={(e: React.MouseEvent<HTMLElement>) => {
+              displayMenu(e, props.userModel.id, props.userModel.login)
+            }
             }
           >
             <div>
               @
-              {props.userModel.username.length > 10
-                ? props.userModel.username.substring(0, 7) + "..."
-                : props.userModel.username}
+              {props.userModel.nickname.length > 10
+                ? props.userModel.nickname.substring(0, 7) + "..."
+                : props.userModel.nickname}
             </div>
           </Col>
-          {props.myId !== 0 && props.userModel.id === props.myId ? null : (
-            <Col className="">
-              {props.userModel.status === 2 ? (
-                <OverlayTrigger overlay={renderTooltip("Watch game")}>
-                  <div
-                    id="clickableIcon"
-                    className="buttons-round-sm float-end"
-                    onClick={(e: any) => {
-                      handleClickWatch(props.userModel.id);
-                    }}
-                  >
-                    <i className="bi bi-caret-right-square-fill sm-icons" />
-                  </div>
-                </OverlayTrigger>
-              ) : (
-                <div className="buttons-round-sm-disabled float-end">
-                  <i className="bi bi-caret-right-square-fill sm-icons" />
-                </div>
-              )}
-            </Col>
-          )}
         </Row>
       </Container>
     </main>

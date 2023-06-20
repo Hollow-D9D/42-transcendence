@@ -24,14 +24,6 @@ export const BlockedList = () => {
       if (result !== "error") return result;
     };
 
-    const fetchDataBlockedAvatar = async (otherId: number) => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(otherId);
-      if (result !== "error") return result;
-      else
-        return "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg";
-    };
-
     const fetchData = async () => {
       let fetchedBlocked = await fetchDataBlocked();
 
@@ -39,10 +31,11 @@ export const BlockedList = () => {
         for (let i = 0; i < fetchedBlocked.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { login: "", nickname: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedBlocked[i].id;
-          newRow.userModel.username = fetchedBlocked[i].username;
+          newRow.userModel.login = fetchedBlocked[i].login;
+          newRow.userModel.nickname = fetchedBlocked[i].nickname;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -50,12 +43,7 @@ export const BlockedList = () => {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-
-          let avatar = await fetchDataBlockedAvatar(fetchedBlocked[i].id);
-
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+          newRow.userModel.profpic_url = fetchedBlocked[i].profpic_url;
           blocked.push(newRow);
         }
       }
@@ -64,7 +52,6 @@ export const BlockedList = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdated, usersStatus]);
 
   return (
@@ -92,4 +79,3 @@ export const BlockedList = () => {
   );
 };
 
-//isFetched === "error" to add

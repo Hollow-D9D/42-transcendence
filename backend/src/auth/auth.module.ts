@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
 import { TwoFactorAuthController } from 'src/two-factor-auth/two-factor-auth.controller';
 import { User, Achievement } from 'src/typeorm';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { User, Achievement } from 'src/typeorm';
     // twofa,
   ],
   controllers: [AuthController, TwoFactorAuthController],
-  providers: [AuthService, TwoFactorAuthService],
+  providers: [AuthService, TwoFactorAuthService, AchievementsService],
 })
 export class AuthModule {}

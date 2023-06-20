@@ -1,4 +1,4 @@
-.Row {
+/* .Row {
     cursor: pointer;
 }
 
@@ -20,7 +20,7 @@
     border-radius: 50%;
     padding: 15px;
     /* background: #D8D8D8; */
-}
+/* }
 
 th, td {
     padding-top: 10px;
@@ -62,7 +62,7 @@ p {
     /*border: 2px solid rgb(255, 255, 255);
     border-radius: 15px;*/
     /*box-shadow: 0px 0px 5px 5px rgb(80, 200, 255), inset 0px 0px 5px 4px rgb(0, 190, 255);*/
-}
+/* }
 
 .Page-top-watch {
     margin: auto;
@@ -72,5 +72,5 @@ p {
     display: flex;
     flex-direction: column;
     /*justify-content: center;*/
-    align-items: center;
-}
+    /* align-items: center;
+} */

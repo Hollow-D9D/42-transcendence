@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { storeUserInfo } from "../../queries/userQueries"
+import { storeUserInfo } from "../../queries/userQueries";
+import { Api, addAuthHeader } from "../../Config/Api";
 
 export default function AuthRedirect() {
   const navigate = useNavigate();
@@ -16,25 +16,32 @@ export default function AuthRedirect() {
       // Send the code and state to the backend
       if (code && state) {
         try {
-          const res = await axios.get(`http://localhost:3001/auth?code=${code}&state=${state}`, {
+          const res = await Api.get(`/auth?code=${code}&state=${state}`, {
             headers: {
               "Content-Type": "application/json",
             },
           });
+          console.log(res);
 
-          const token = (res.data.body.token) ? res.data.body.token : null;
+          const token = res.data.body.token ? res.data.body.token : null;
           if (token) {
-            const profile = await axios.get(`http://localhost:3001/profile`, {
+            const profile = await Api.get(`/profile`, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
-              }
+              },
             });
+            addAuthHeader(token);
             localStorage.setItem("userToken", token);
             storeUserInfo(profile.data.body.user);
             if (res) {
-              localStorage.setItem("userLogged", "true");
-              navigate("/app/private-profile");
+              if (profile.data.body.user.is2fa) {
+                console.log("my dear ", profile.data.body.user);
+                navigate("/2FA");
+              } else {
+                localStorage.setItem("userLogged", "true");
+                navigate("/app/private-profile");
+              }
             }
           }
         } catch (error) {
@@ -52,4 +59,3 @@ export default function AuthRedirect() {
     </div>
   );
 }
-

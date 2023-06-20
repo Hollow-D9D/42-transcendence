@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import { ItableRow, IUserStatus } from "../../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../../queries/avatarQueries";
 import { getUserPending } from "../../../../queries/userQueries";
 import { DisplayRow } from "./DisplayRowUsers";
 import { UsersStatusCxt } from "../../../../App";
@@ -23,15 +22,6 @@ export const PendingList = () => {
       const result = await getUserPending();
       if (result !== "error") return result;
     };
-
-    const fetchDataPendingAvatar = async (otherId: number) => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(otherId);
-      if (result !== "error") return result;
-      else
-        return "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg";
-    };
-
     const fetchData = async () => {
       let fetchedPending = await fetchDataPending();
 
@@ -39,10 +29,11 @@ export const PendingList = () => {
         for (let i = 0; i < fetchedPending.length; i++) {
           let newRow: ItableRow = {
             key: i,
-            userModel: { username: "", avatar: "", id: 0, status: -1 },
+            userModel: { nickname: "", login: "", profpic_url: "", id: 0, status: -1 },
           };
           newRow.userModel.id = fetchedPending[i].id;
-          newRow.userModel.username = fetchedPending[i].username;
+          newRow.userModel.login = fetchedPending[i].login;
+          newRow.userModel.nickname = fetchedPending[i].nickname;
           let found = undefined;
           if (usersStatus) {
             found = usersStatus.find(
@@ -50,12 +41,7 @@ export const PendingList = () => {
             );
             if (found) newRow.userModel.status = found.userModel.status;
           }
-
-          let avatar = await fetchDataPendingAvatar(fetchedPending[i].id);
-
-          if (avatar !== undefined && avatar instanceof Blob)
-            newRow.userModel.avatar = URL.createObjectURL(avatar);
-          else if (avatar) newRow.userModel.avatar = avatar;
+          newRow.userModel.profpic_url = fetchedPending[i].profpic_url;
           pending.push(newRow);
         }
       }
@@ -64,7 +50,6 @@ export const PendingList = () => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isUpdated, usersStatus]);
 
   return (
@@ -91,5 +76,3 @@ export const PendingList = () => {
     </div>
   );
 };
-
-//isFetched === "error" to add

@@ -23,6 +23,17 @@ export class FriendsController {
     }
   }
 
+  @Get('friends')
+  @UseGuards(AuthGuard)
+  async getFriendFriends(@Headers() headers, @Query() query) {
+    try {
+      const payload = getPayload(headers);
+      return await this.friendsService.getFriendFriends(query.login);
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
   /**
    * @param headers user_id from token payload
    * @param query friend_id from query
@@ -85,14 +96,34 @@ export class FriendsController {
 
   @Get('searchUsers')
   @UseGuards(AuthGuard)
-  async searchUsers(@Headers() headers, @Query() query) {
+  async searchUsers(@Query() query) {
+    try {
+      const users = await this.friendsService.searchUsers(query.login);
+      return { error: null, body: users };
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  @Get('block')
+  @UseGuards(AuthGuard)
+  async block_user(@Headers() headers, @Query() query) {
     try {
       const payload = getPayload(headers);
-      console.log("users::",query.login);
-      const users = await this.friendsService.searchUsers(query.login);
-      console.log("users::::::", users);
-      
-      return { error: null, body: users };
+      await this.friendsService.blockUser(payload.id, query.friend_id);
+      return { error: null, body: null };
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  @Get('unblock')
+  @UseGuards(AuthGuard)
+  async unblock_user(@Headers() headers, @Query() query) {
+    try {
+      const payload = getPayload(headers);
+      await this.friendsService.unblockUser(payload.id, query.friend_id);
+      return { error: null, body: null };
     } catch (error) {
       return { error, body: null };
     }

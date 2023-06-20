@@ -14,20 +14,20 @@ export default function SignUp() {
     <div>
       <h3 className="Auth-form-title">Sign up.</h3>
       <div className="text-secondary">
-        Already registered? &nbsp;
+        {/* Already registered? &nbsp; */}
         {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
         <a href="#" onClick={handleClick}>
           Sign in.
         </a>
       </div>
-      <Form.Group className="mb-3">
+      {/* <Form.Group className="mb-3">
         <Form.Label className="form-test">USERNAME</Form.Label>
         <Form.Control
           ref={GUserInputsRefs.username}
           type="text"
           placeholder="JaneDoe"
         />
-      </Form.Group>
+      </Form.Group> */}
     </div>
   );
 }

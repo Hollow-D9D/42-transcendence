@@ -5,6 +5,11 @@ import { ChannelMode } from 'src/typeorm/channelmode.enum';
 import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
+interface chatSettings {
+  private: boolean;
+  isPassword: boolean;
+}
+
 @Injectable()
 export class ChatService {
   constructor(
@@ -19,13 +24,13 @@ export class ChatService {
   /**
    * @param users one (channel) or two (chat) initial members
    * @param mode used to perform the chat/channel and channel mode resolution
-   * @param name of the channel being created
+   * @param chat_id of the channel being created
    * @param password of the PROTECTED channel being created
    */
   async create(
     users: User[],
     mode: ChannelMode,
-    name: string,
+    chat_id: number,
     password: string,
   ) {
     try {
@@ -34,7 +39,7 @@ export class ChatService {
         group: false,
         members: users,
         mode: null,
-        name: null,
+        chat_id: null,
         password: null,
         owner: null,
       };
@@ -44,7 +49,7 @@ export class ChatService {
         // create a channel
         entityLike.group = true;
         entityLike.mode = mode;
-        entityLike.name = name;
+        entityLike.chat_id = chat_id;
         if (mode === ChannelMode.PROTECTED)
           entityLike.password = hashedPassword;
         entityLike.owner = users[0]; // the first one is `login` from request
@@ -58,16 +63,79 @@ export class ChatService {
     }
   }
 
+  async getMessages(chat_id: number) {
+    try {
+      const chat = await this.chatRepo.findOne({
+        where: { id: chat_id },
+        relations: ['messages', 'messages.sender'],
+      });
+      return chat.messages;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async checkPermission(login: string, chat_id: number) {
+    let bool = false;
+    try {
+      const user = await this.userRepo.findOne({
+        where: { login },
+        relations: ['chatsMemberOf'],
+      });
+      if (user)
+        user.chatsMemberOf.map((item) => {
+          if (item.id == chat_id) bool = true;
+        });
+      return bool;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getSearchChats(login: string) {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { login },
+        relations: ['chatsMemberOf'],
+      });
+      const publics = await this.chatRepo.find({
+        where: [{ mode: ChannelMode.PUBLIC }, { mode: ChannelMode.PROTECTED }],
+      });
+      const merged = user.chatsMemberOf
+        .filter((obj1) => !publics.find((obj2) => obj1.id === obj2.id))
+        .concat(publics);
+      return [...merged];
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getRole(login: string, chat_id: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['admins', 'owner'],
+    });
+    let role: string = null;
+
+    if (chat) {
+      if (chat.owner.login == login) role = 'owner';
+      chat.admins.forEach((admin) => {
+        if (admin.login == login) role = 'admin';
+      });
+    }
+    return role;
+  }
+
   /**
    * - remove login
    * - check that there are no users left in the channel OR login is the channel owner ? delete channel
    *
    * @param login of the to-leave channel member
-   * @param name of the channel
+   * @param chat_id of the channel
    * @returns nothing
    */
-  async leaveChannel(login: string, name: string) {
-    const channel = await this.channel(name);
+  async leaveChannel(login: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     if (!channel) return;
     const userToRemove = await channel.members.find(
       (user) => user.login === login,
@@ -89,32 +157,36 @@ export class ChatService {
    *    - else (the channel is open) ? add login to the channel
    *
    * @param login who's trying to join the channel
-   * @param name of the channel
+   * @param chat_id of the channel
    * @param password of the channel
    */
-  async joinChannel(login: string, name: string, password: string) {
-    const channel = await this.channel(name);
-    if (channel.mode != ChannelMode.PRIVATE) {
-      const isChannelMember = channel.members.some(
-        (user) => user.login === login,
-      );
-      const isBannedFromChannel = channel.blocked.some(
-        (user) => user.login === login,
-      );
-      if (!isChannelMember && !isBannedFromChannel) {
-        // TODO: replace with the hashed one
-        if (
-          (channel.mode === ChannelMode.PROTECTED &&
-            (await bcrypt.compare(password, channel.password))) ||
-          channel.mode === ChannelMode.PUBLIC
-        ) {
-          const user = await this.userRepo.findOne({
-            where: { login: login },
-          });
-          channel.members.push(user);
-          await this.chatRepo.save(channel);
+  async joinChannel(login: string, chat_id: number, password: string) {
+    try {
+      const channel = await this.channel(chat_id);
+      if (channel.mode != ChannelMode.PRIVATE) {
+        const isChannelMember = channel.members.some(
+          (user) => user.login === login,
+        );
+        const isBannedFromChannel = channel.blocked.some(
+          (user) => user.login === login,
+        );
+        if (!isChannelMember && !isBannedFromChannel) {
+          // TODO: replace with the hashed one
+          if (
+            (channel.mode === ChannelMode.PROTECTED &&
+              (await bcrypt.compare(password, channel.password))) ||
+            channel.mode === ChannelMode.PUBLIC
+          ) {
+            const user = await this.userRepo.findOne({
+              where: { login: login },
+            });
+            channel.members.push(user);
+            await this.chatRepo.save(channel);
+          }
         }
       }
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -125,10 +197,10 @@ export class ChatService {
    *
    * @param login who's trying to grant admin privileges
    * @param target the to-be admin
-   * @param name of the channel
+   * @param chat_id of the channel
    */
-  async grantAdmin(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async grantAdmin(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     if (channel.owner.login === login) {
       const isChannelMember = channel.members.some(
         (user) => user.login === target,
@@ -156,10 +228,10 @@ export class ChatService {
    *
    * @param login who's trying to remove admin privileges
    * @param target whose admin privileges are about to get revoked
-   * @param name of the channel
+   * @param chat_id of the channel
    */
-  async revokeAdmin(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async revokeAdmin(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     if (channel.owner.login === login) {
       const isChannelAdmin = channel.admins.some(
         (user) => user.login === target,
@@ -177,10 +249,10 @@ export class ChatService {
    *
    * @param login who's trying to add a user
    * @param target the to-be member
-   * @param name of the channel
+   * @param chat_id of the channel
    */
-  async addToChannel(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async addToChannel(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     const isLoginChannelMember = channel.members.some(
       (user) => user.login === login,
     );
@@ -202,13 +274,13 @@ export class ChatService {
   /**
    * @param login who's trying to kick a user
    * @param target the to-be-kicked member
-   * @param name the target channel
+   * @param chat_id the target channel
    *
    * - check that login is an admin of the channel
    * - check that target is a member of the channel and isn't its owner ? remove target from admins (if relevant) and kick it
    */
-  async kickFromChannel(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async kickFromChannel(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     const isChannelAdmin = channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
       const isChannelMember = channel.members.some(
@@ -225,20 +297,34 @@ export class ChatService {
     }
   }
 
+  async getChatRoles(chat_id: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['owner', 'admins', 'members'],
+    });
+    if (chat)
+      return {
+        owner: chat.owner,
+        admins: chat.admins,
+        members: chat.members,
+      };
+    else return null;
+  }
+
   /**
    * @param login who's trying to ban a user
    * @param target the to-be-banned member
-   * @param name the target channel
+   * @param chat_id the target channel
    *
    * - check that login is an admin of the channel
    * - call kick method
    * - check that target isn't its owner ? ban target
    */
-  async banFromChannel(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async banFromChannel(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     const isChannelAdmin = channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
-      this.kickFromChannel(login, target, name);
+      this.kickFromChannel(login, target, chat_id);
       const isChannelOwner = channel.owner.login === target;
       if (!isChannelOwner) {
         const user = await this.userRepo.findOne({ where: { login: target } });
@@ -251,13 +337,13 @@ export class ChatService {
   /**
    * @param login who's trying to unban a user
    * @param target the to-be-unbanned member
-   * @param name the target channel
+   * @param chat_id the target channel
    *
    * - check that login is an admin of the channel
    * - check that target is banned ? unban target
    */
-  async unbanForChannel(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async unbanForChannel(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     const isChannelAdmin = channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
       const isBannedFromChannel = channel.blocked.some(
@@ -276,7 +362,7 @@ export class ChatService {
    * @param login who's trying to mute a user
    * @param target the to-be-muted member
    * @param duration of the mute, in minutes
-   * @param name the target channel
+   * @param chat_id the target channel
    *
    * - check that login is an admin of the channel
    * - check that duration isn't more than 24h and isn't less than 1m
@@ -286,9 +372,9 @@ export class ChatService {
     login: string,
     target: string,
     duration: number,
-    name: string,
+    chat_id: number,
   ) {
-    const channel = await this.channel(name);
+    const channel = await this.channel(chat_id);
     const isLoginChannelAdmin = channel.admins.some(
       (user) => user.login === login,
     );
@@ -325,13 +411,13 @@ export class ChatService {
   /**
    * @param login who's trying to unmute a user
    * @param target the to-be-unmuted member
-   * @param name the target channel
+   * @param chat_id the target channel
    *
    * - check that login is an admin of the channel
    * - check that target is a member of the channel and is muted ? unmute
    */
-  async unmuteForChannel(login: string, target: string, name: string) {
-    const channel = await this.channel(name);
+  async unmuteForChannel(login: string, target: string, chat_id: number) {
+    const channel = await this.channel(chat_id);
     const isLoginChannelAdmin = channel.admins.some(
       (user) => user.login === login,
     );
@@ -359,21 +445,50 @@ export class ChatService {
    * @param message
    */
   async addMessage(chat_id: number, sender_login: string, message: string) {
-    // try {
-    //   const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
-    //   if (!chat) throw new Error('No chat with this id!');
-    //   const sender = await this.userRepo.findOne({
-    //     where: { login: sender_login },
-    //   });
-    //   if (!sender) throw new Error('No user found!');
-    //   const msg = this.messageRepo.create({
-    //     chat_id: chat.id,
-    //     sender_id: sender.id,
-    //     content: message,
-    //   });
-    // } catch (err) {
-    //   throw err;
-    // }
+    try {
+      const chat = await this.chatRepo.findOne({
+        where: { id: chat_id },
+        relations: ['messages'],
+      });
+      if (!chat) throw new Error('No chat with this id!');
+      const sender = await this.userRepo.findOne({
+        where: { login: sender_login },
+      });
+      if (!sender) throw new Error('No user found!');
+      const msg = new Message();
+      msg.content = message;
+      msg.sender = sender;
+      msg.chat = chat;
+      const newmsg = await msg.save();
+      return newmsg.id;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getSettings(chat_id: number): Promise<chatSettings> {
+    const chat = await this.chatRepo.findOne({ where: { id: chat_id } });
+    const settings: chatSettings = {
+      private: false,
+      isPassword: false,
+    };
+
+    if (chat.mode == ChannelMode.PRIVATE) settings.private = true;
+    if (chat.password) settings.isPassword = true;
+
+    return settings;
+  }
+
+  async getMessage(message_id: number) {
+    try {
+      const message = this.messageRepo.findOne({
+        where: { id: message_id },
+        relations: ['sender'],
+      });
+      return message;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async users(logins: string[]): Promise<User[]> {
@@ -391,21 +506,24 @@ export class ChatService {
   }
 
   /**
-   * @param name of the channel to return
+   * @param chat_id of the channel to return
    * @returns Chat entity if found, null otherwise
    */
-  async channel(name: string): Promise<Chat> {
-    return await this.chatRepo.findOne({ where: { name: name } });
+  async channel(id: number): Promise<Chat> {
+    return await this.chatRepo.findOne({
+      where: { id: id },
+      relations: ['members', 'blocked'],
+    });
   }
 
   /**
    * check if a channel exists and return its type if it does
    *
-   * @param name of the channel to be checked
-   * @returns a valid ChannelMode if a channel with this name exists, null otherwise
+   * @param chat_id of the channel to be checked
+   * @returns a valid ChannelMode if a channel with this chat_id exists, null otherwise
    */
-  async channelType(name: string): Promise<ChannelMode> {
-    const channel = await this.channel(name);
+  async channelType(chat_id: number): Promise<ChannelMode> {
+    const channel = await this.channel(chat_id);
     if (channel) {
       return channel.mode;
     }
@@ -413,11 +531,11 @@ export class ChatService {
   }
 
   /**
-   * @param name of the channel
+   * @param chat_id of the channel
    * @param login of the user to be checked
    */
-  async isChannelMember(name: string, login: string): Promise<boolean> {
-    const channel = await this.channel(name);
+  async isChannelMember(chat_id: number, login: string): Promise<boolean> {
+    const channel = await this.channel(chat_id);
     return channel.members.some((user) => user.login === login);
   }
 

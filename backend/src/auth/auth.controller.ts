@@ -17,9 +17,7 @@ export class AuthController {
   /**
    * need to uncomment Redirect decorator first
   */
- // @Redirect('to some react app page!!!', 302)
- async getAuth(@Query() query) {
-   
+  async getAuth(@Query() query) {
    try {
       const userInfo: any = await this.authService.auth42(
         query.code,

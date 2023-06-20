@@ -3,7 +3,6 @@ import { Container, Row, Col, OverlayTrigger } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import DisplayGamesStats from "./DisplayGamesStats";
 import { IUserStatus, userModel } from "../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getOtherUser } from "../../../queries/otherUserQueries";
 import DisplayUserFriends from "./DisplayUserFriends";
 import { COnUser } from "../../../ContextMenus/COnUser";
@@ -11,6 +10,10 @@ import { renderTooltip } from "../../../Components/SimpleToolTip";
 import { NotifCxt, UsersStatusCxt } from "../../../App";
 import { addFriendQuery } from "../../../queries/userFriendsQueries";
 import "./UserPublicProfile.css";
+import { getUserFriends } from "../../../queries/userFriendsQueries";
+import { blockUserQuery } from "../../../queries/userFriendsQueries";
+import { getUserBlocked } from "../../../queries/userQueries";
+import { FriendsList } from "../private/users_relations/FriendsList";
 
 const userInfoInit: userModel = {
   id: 0,
@@ -22,24 +25,64 @@ const userInfoInit: userModel = {
   gamesWon: 0,
   playTime: 0,
   rank: 0,
-  score: 0,
+  status: 0,
   winRate: 0,
+  nickname: "",
+  isFriend: false,
+  isBlocked: false,
+  paramName: "",
+  full_name: "",
 };
 
-const initializeUser = (result: any, setUserInfo: any) => {
+const initializeUser = async (result: any, setUserInfo: any) => {
+
   userInfoInit.id = result.id;
-  userInfoInit.username = result.username;
-  userInfoInit.avatar = result.avatar;
-  userInfoInit.friends = result.frirends;
-  userInfoInit.gamesLost = result.gamesLost;
-  userInfoInit.gamesPlayed = result.gamesPlayed;
-  userInfoInit.gamesWon = result.gamesWon;
-  userInfoInit.playTime = result.playTime;
-  userInfoInit.rank = result.rank;
-  userInfoInit.score = result.score;
-  userInfoInit.winRate = result.winRate === null ? 0 : result.winRate;
+  userInfoInit.username = result.login;
+  userInfoInit.full_name = result.full_name;
+  userInfoInit.avatar = result.profpic_url;
+  userInfoInit.friends = result.friends;
+  userInfoInit.gamesLost = result.lose_count;
+  userInfoInit.gamesPlayed = result.lose_count + result.win_count;
+  userInfoInit.gamesWon = result.win_count;
+  userInfoInit.playTime = result.matchtime;
+  userInfoInit.rank = result.ladder_level;
+  userInfoInit.nickname = result.nickname;
+  userInfoInit.status = result.status;
+  userInfoInit.winRate = userInfoInit.gamesWon / userInfoInit.gamesPlayed || 0;
   setUserInfo(userInfoInit);
+  await fetchDataFriends(userInfoInit, setUserInfo);
+  await fetchDataBlockes(userInfoInit, setUserInfo);
 };
+
+const fetchDataFriends = async (userInfo: any, setUserInfo: any) => {
+  const result = await getUserFriends();
+
+  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+    userInfo.isFriend = true;
+    setUserInfo(userInfo);
+  }
+  else if (result !== "error") {
+    result.forEach((e: any) => {
+      if (e.login === userInfo.paramName) {
+        setUserInfo({ ...userInfo, isFriend: true });
+      }
+    })
+  };
+}
+
+const fetchDataBlockes = async (userInfo: any, setUserInfo: any) => {
+  const result = await getUserBlocked();
+  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+    setUserInfo({ ...userInfo, isBlocked: true });
+  }
+  else if (result !== "error") {
+    result.forEach((e: any) => {
+      if (e.login === userInfo.paramName) {
+        setUserInfo({ ...userInfo, isBlocked: true });
+      }
+    })
+  };
+}
 
 export default function UserProfile() {
   const usersStatus = useContext(UsersStatusCxt);
@@ -50,19 +93,10 @@ export default function UserProfile() {
   const [isFetched, setIsFetched] = useState(false);
   const [avatarURL, setAvatarURL] = useState("");
   const [isUser, setIsUser] = useState(true);
-  const [status, setStatus] = useState(0);
 
   useEffect(() => {
     const getAvatar = async () => {
-      console.log("fetch avatar of :", userInfoInit.id);
-      const result_1: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(userInfoInit.id);
-      if (result_1 !== undefined && result_1 instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result_1));
-      } else if (result_1 === "error")
-        setAvatarURL(
-          "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
-        );
+      setAvatarURL(userInfo.avatar);
     };
     if (isFetched && userInfoInit.id) getAvatar();
   }, [isFetched]);
@@ -70,26 +104,19 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchIsUser = async () => {
       let result;
+
       if (!isFetched && params.userName !== undefined) {
-        result = await getOtherUser(+params.userName);
+        result = await getOtherUser(params.userName);
         if (result !== "error") {
-          initializeUser(result, setUserInfo);
+          userInfo.paramName = params.userName;
+          initializeUser(result.body.user, setUserInfo);
+
           setIsFetched(true);
         } else setIsUser(false);
       }
     };
     fetchIsUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetched, usersStatus]);
-
-  useEffect(() => {
-    let found = undefined;
-    if (isFetched && usersStatus && userInfo) {
-      found = usersStatus.find((x: IUserStatus) => x.key === userInfo.id);
-      if (found) setStatus(found.userModel.status);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersStatus, isFetched, userInfo]);
 
   const handleClickFriend = (otherId: number, otherUsername: string) => {
     const addFriend = async () => {
@@ -102,14 +129,20 @@ export default function UserProfile() {
     addFriend();
   };
 
-  const handleClickWatch = (otherId: number) => {
-    navigate("/app/watch", { replace: false });
+  const handleBlockUser = (otherId: number, otherUsername: string) => {
+    const blockUser = async () => {
+      const result = await blockUserQuery(otherId);
+      if (result !== "error") {
+        notif?.setNotifText(otherUsername + " blocked!");
+      } else notif?.setNotifText("Could not block user :(.");
+      notif?.setNotifShow(true);
+    };
+    blockUser();
   };
 
   let myId: number = 0;
   if (localStorage.getItem("userID"))
     myId = Number(localStorage.getItem("userID"));
-
   return (
     <main>
       {isUser && isFetched ? (
@@ -117,7 +150,7 @@ export default function UserProfile() {
           className="p-5"
           style={{ display: "flex", justifyContent: "center" }}
         >
-          <COnUser />
+          <COnUser userModel={userInfo} />
           <div className="public-left">
             <Container className="p-5">
               <Row className="wrapper public-profile-header">
@@ -134,56 +167,55 @@ export default function UserProfile() {
                 <Col md="auto" className="">
                   <div className="public-username-text">
                     @
-                    {userInfo.username.length > 10
-                      ? userInfo.username.substring(0, 7) + "..."
-                      : userInfo.username}
+                    {userInfo.nickname.length > 10
+                      ? userInfo.nickname.substring(0, 7) + "..."
+                      : userInfo.nickname}
                   </div>
                   <div className="public-rank-text">
                     {userInfo.rank ? `Rank #${userInfo.rank}` : "unranked"}
+                  </div>
+                  <div className="public-nickname-text">
+                    {userInfo.full_name}
                   </div>
                   <div
                     className="IBM-text"
                     style={{ fontSize: "0.8em", fontWeight: "400" }}
                   >
-                    {status === 1
+                    {userInfo.status === 1
                       ? "online"
-                      : status === 2
-                      ? "playing"
-                      : status === 0
-                      ? "offline"
-                      : ""}
+                      : userInfo.status === 2
+                        ? "playing"
+                        : userInfo.status === 0
+                          ? "offline"
+                          : ""}
                   </div>
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
                   <Col className="">
-                    {status === 2 ? (
-                      <OverlayTrigger overlay={renderTooltip("Watch game")}>
+                    {!userInfo.isFriend ?
+                      <OverlayTrigger overlay={renderTooltip("Add friend")}>
                         <div
                           id="clickableIcon"
                           className="buttons-round-big float-end"
                           onClick={(e: any) => {
-                            handleClickWatch(userInfo.id);
+                            handleClickFriend(userInfo.id, userInfo.username);
                           }}
                         >
-                          <i className="bi bi-caret-right-square-fill big-icons" />
+                          <i className="bi bi-person-plus-fill big-icons" />
                         </div>
-                      </OverlayTrigger>
-                    ) : (
-                      <div className="buttons-round-big-disabled float-end">
-                        <i className="bi bi-caret-right-square-fill big-icons" />
-                      </div>
-                    )}
-                    <OverlayTrigger overlay={renderTooltip("Add friend")}>
-                      <div
-                        id="clickableIcon"
-                        className="buttons-round-big float-end"
-                        onClick={(e: any) => {
-                          handleClickFriend(userInfo.id, userInfo.username);
-                        }}
-                      >
-                        <i className="bi bi-person-plus-fill big-icons" />
-                      </div>
-                    </OverlayTrigger>
+                      </OverlayTrigger> : null}
+                    {!userInfo.isBlocked ?
+                      <OverlayTrigger overlay={renderTooltip("Block user")}>
+                        <div
+                          id="clickableIcon"
+                          className="buttons-round-big float-end"
+                          onClick={(e: any) => {
+                            handleBlockUser(userInfo.id, userInfo.username);
+                          }}
+                        >
+                          <i className="bi bi-person-x-fill big-icons" />
+                        </div>
+                      </OverlayTrigger> : null}
                   </Col>
                 )}
               </Row>

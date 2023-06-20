@@ -1,37 +1,29 @@
+import { Api } from "../Config/Api";
 import { storeToken } from "./authQueries";
 import { getUserData } from "./userQueries";
-import axios from 'axios';
 
 /* Generate 2FA QR code */
 export const twoFAGenerate = async () => {
   try {
-    const response = await axios.get("http://localhost:3001/auth/two-factor", {
-      headers: {
-        "authorization" : `Bearer ${ localStorage.getItem('userToken') }`
-      }
-    });
+    const response = await Api.get("/auth/two-factor");
     console.log("we've got there", response.data);
     return response.data.body.qrCode;
   } catch (err) {
     console.log(err);
-    
   }
-  
 
   return fetchPost(null, "generate", null);
 };
 
 /* Validate 2FA code when signin in  */
-export const twoFAAuth = (
-  twoFAcode: string,
-  email: string,
-  userSignIn: any
-) => {
-  let raw = JSON.stringify({
-    username: email,
-    twoFAcode: twoFAcode,
+export const twoFAAuth = async (twoFAcode: string, userSignIn: any) => {
+  const response = await Api.get(`auth/two-factor/verify?token=${twoFAcode}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+    },
   });
-  return fetchPost(raw, "authenticate", userSignIn);
+  console.log("response", response);
+  return response;
 };
 
 /* Turn on 2FA for signed in user */
@@ -40,17 +32,15 @@ export const twoFAOn = async (code: string) => {
   //   twoFAcode: code,
   // });
   try {
-    
-    const response = await axios.get(`http://localhost:3001/auth/two-factor/enable?token=${code}`, {
+    const response = await Api.get(`/auth/two-factor/enable?token=${code}`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-    })
+    });
     console.log(response);
-    
+
     return response;
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
   // console.log("TURN ON");
@@ -59,16 +49,15 @@ export const twoFAOn = async (code: string) => {
 
 export const twoFAOff = async () => {
   try {
-    const response = await axios.get(`http://localhost:3001/auth/two-factor/remove`, {
+    const response = await Api.get(`/auth/two-factor/remove`, {
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-    })
+    });
     console.log(response);
-    
+
     return response;
-  } catch(err) {
+  } catch (err) {
     console.log(err);
   }
 };

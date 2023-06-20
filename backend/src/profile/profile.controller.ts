@@ -101,6 +101,27 @@ export class ProfileController {
     }
   }
 
+  @Get('PublicProfile')
+  @UseGuards(AuthGuard)
+  async getPublicProfile(@Headers() headers, @Query() params) {
+    try {
+      const payload = getPayload(headers);
+      // console.log("payload:::", params.login);
+      
+      const { user } = await this.profileService.getProfile(params.login);
+      if (user)
+        return {
+          error: null,
+          body: {
+            user,
+          },
+        };
+      return { error: new Error('No user found!'), body: null };
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
   @Get('editNickname')
   @UseGuards(AuthGuard)
   async editNickname(@Headers() headers, @Query() params) {

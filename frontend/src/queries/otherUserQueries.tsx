@@ -1,10 +1,24 @@
 import { authContentHeader } from "./headers";
 
-export const getOtherUser = (otherUsername: number) => {
-  let body = JSON.stringify({
-    otherId: otherUsername,
-  });
-  return fetchGetOtherUser("get_user", body);
+export const getOtherUser = async (otherUsername: string) => {
+  try {
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_SOCKET}/profile/PublicProfile?login=${otherUsername}`,
+      {
+        method: "GET",
+        headers: authContentHeader(),
+        redirect: "follow",
+      }
+    );
+    const result = await response.json();
+    if (!response.ok) {
+      console.log("POST error on ");
+      return "error";
+    }
+    return result;
+  } catch (error) {
+    return console.log("error", error);
+  }
 };
 
 const fetchGetOtherUser = async (url: string, body: any) => {

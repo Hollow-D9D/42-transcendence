@@ -1,3 +1,4 @@
+import { addAuthHeader } from "../Config/Api";
 import { authHeader } from "./headers";
 import { getUserData } from "./userQueries";
 
@@ -68,30 +69,30 @@ export const signUp = (userInfo: any, userSignIn: any) => {
 };
 
 export const storeToken = (token: any) => {
+  addAuthHeader(token.access_token);
   localStorage.setItem("userToken", token.access_token);
   localStorage.setItem("userRefreshToken", token.refresh_token);
 };
 
-export const logOut = () => {
-  return fetchPostLogout();
-};
-
-const fetchPostLogout = async () => {
+export const logOut = async () => {
   let fetchUrl = process.env.REACT_APP_BACKEND_URL + "/auth/logout";
-
+  console.log("Logout");
   try {
     const response = await fetch(fetchUrl, {
-      method: "POST",
+      method: "GET",
       headers: authHeader(),
       redirect: "follow",
     });
     const result_1 = await response.text();
     if (!response.ok) {
-      console.log("POST error on logout");
+      // console.log("POST error on logout");
       return "error";
     }
     return result_1;
   } catch (error) {
     return console.log("error", error);
   }
+  // return fetchPostLogout();
 };
+
+const fetchPostLogout = async () => {};

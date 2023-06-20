@@ -235,9 +235,9 @@
 }
 
 .record {
-  flex: 3;
+  flex: 1;
 }
 
 .rate {
-  flex: 2;
+  flex: 4;
 }

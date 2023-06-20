@@ -60,16 +60,12 @@ export class TwoFactorAuthService {
   async verifyToken(token: string, login: string): Promise<boolean> {
     try {
       const user = await this.userRepo.findOne({ where: { login: login } });
-      console.log(token, user);
-      
       const res = speakeasy.totp.verify({
         secret: user.two_factor_token,
         encoding: 'ascii',
         token: token,
       });
-      console.log(res);
       return res;
-      
     } catch (err) {
       throw err;
     }

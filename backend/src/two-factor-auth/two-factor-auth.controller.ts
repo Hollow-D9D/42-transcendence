@@ -39,7 +39,7 @@ export class TwoFactorAuthController {
   async verifyToken(@Req() req): Promise<any> {
     const { token } = req.query;
     const payload = getPayload(req.headers);
-    const isTokenValid = this.twoFactorAuthService.verifyToken(
+    const isTokenValid = await this.twoFactorAuthService.verifyToken(
       token,
       payload.login,
     );

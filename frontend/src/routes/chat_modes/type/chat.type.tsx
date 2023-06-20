@@ -1,112 +1,110 @@
 import { Player } from "../../game.interfaces";
 
 export type oneSuggestion = {
-    catagory: string;
-    picture: string;
-    name: string;
-    id: number;
-    data_id: number;
-}
+  catagory: string;
+  picture: string;
+  name: string;
+  id: number;
+  data_id: number;
+};
 
 export type chatPreview = {
-    id: number;
-    dm: boolean;
-    name: string;
-    isPassword: boolean;
-    updateAt: string;
-    lastMsg: string;
-    unreadCount?: number;
-    ownerEmail: string;
-    ownerId: number;
-    isBlocked: boolean;
-}
+  id: number;
+  dm: boolean;
+  name: string;
+  isPassword: boolean;
+  updateAt: string;
+  lastMsg: string;
+  unreadCount?: number;
+  ownerEmail: string;
+  ownerId: number;
+  isBlocked: boolean;
+};
 
 export type newChannel = {
-    name: string;
-    private: boolean;
-    isPassword: boolean;
-    password: string;
-    email: string | null;
-    members: Tag[];
-}
+  name: string;
+  private: boolean;
+  password: string;
+  login: string | null;
+  mode: string;
+};
 
 export type newDM = {
-    email: string | null;
-    targetId: number;
-}
+  email: string | null;
+  targetId: number;
+};
 
 export type fetchDM = {
-    channelId: number;
-    targetId: number;
-}
+  channelId: number;
+  targetId: number;
+};
 
 export type Tag = {
-    id: number | string;
-    name: string;
-}
+  id: number | string;
+  name: string;
+};
 
 export type updateChannel = {
-    channelId: number | undefined;
-    dm: boolean;
-    email: string | null;
-    password: string;
-    targetId: number | string;
-    private: boolean;
-    isPassword: boolean;
-    newPassword: string;
-}
+  channelId: number | undefined;
+  dm: boolean;
+  email: string | null;
+  password: string;
+  targetId: number | string;
+  private: boolean;
+  isPassword: boolean;
+  newPassword: string;
+};
 
 export type useMsg = {
-    email: string | null;
-    channelId: number;
-    msg: string;
-    msgId: number;
-}
+  token: string | null;
+  chatId: number;
+  message: string;
+};
 
 export type oneMsg = {
-    msgId: number;
-    id: number;
-    channelId: number;
-    email: string;
-    username: string;
-    msg: string;
-    createAt: string;
-    updateAt: string;
-    isInvite: boolean;
-}
+  msgId: number;
+  id: number;
+  //   channelId: number;
+  email: string;
+  username: string;
+  msg: string;
+  createAt: string;
+  //   updateAt: string;
+  //   isInvite: boolean;
+};
 
 export type oneUser = {
-    username: string;
-    id: number;
-    email: string;
-    isOwner: boolean;
-    isAdmin: boolean;
-    isInvited: boolean;
-    isMuted: boolean;
-    isFriend: boolean;
-    isOnline: boolean;
-    isBlocked: boolean;
-}
+  username: string;
+  id: number;
+  email: string;
+  isOwner: boolean;
+  isAdmin: boolean;
+  isInvited: boolean;
+  isMuted: boolean;
+  isFriend: boolean;
+  isOnline: boolean;
+  isBlocked: boolean;
+};
 
 export type updateUser = {
-    selfEmail: string | null;
-    otherId: number;
-}
+  selfEmail: string | null;
+  otherId: number;
+};
 
 export type setting = {
-    private: boolean;
-    isPassword: boolean;
-}
+  private: boolean;
+  isPassword: boolean;
+};
 
 export type mute = {
-    duration: number;
-    email: string;
-    channelId: number;
-}
+  duration: number;
+  email: string;
+  channelId: number;
+};
 
 export type gameInvitation = {
-    gameInfo: Player;
-    inviterId: number;
-    inviterName: string;
-    targetId: number;
-}
+  gameInfo: Player;
+  inviterId: number;
+  inviterName: string;
+  targetId: number;
+};

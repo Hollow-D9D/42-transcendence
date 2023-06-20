@@ -1,20 +1,51 @@
+import { Api } from "../Config/Api";
 import { authHeader } from "./headers";
-process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
+// process.env.REACT_APP_BACKEND_URL = "http://localhost:3001";
 
-export const getUserBlocked = () => {
-  return fetchGet("get_blocked", storeFriendsInfo);
+export const getUserBlocked = async () => {
+  try {
+    const friends = await Api.get("/profile/friends", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    });
+    return friends.data.blocked_users;
+  } catch (err) {
+    console.log(err);
+    return "error";
+  }
 };
 
-export const getUserPending = () => {
-  return fetchGet("get_pending", storeFriendsInfo);
+export const getUserPending = async () => {
+  try {
+    const friends = await Api.get("/profile/friends", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    });
+    return friends.data.friend_requests;
+  } catch (err) {
+    console.log(err);
+    return "error";
+  }
 };
 
 export const getUserData = () => {
   return fetchGet("me", storeUserInfo);
 };
 
-export const getAchievements = () => {
-  return fetchGet("get_leaderboard", storeLeaderBoardInfo);
+export const getAchievements = async () => {
+  try {
+    const achieves = await Api.get("/profile/getAchievements", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    });
+    return achieves.data.body.achievements;
+  } catch (err) {
+    console.log(err);
+    return "error";
+  }
 };
 
 const fetchGet = async (url: string, callback: any) => {
@@ -37,14 +68,12 @@ const fetchGet = async (url: string, callback: any) => {
 };
 
 export const storeUserInfo = (result: any) => {
-
   localStorage.setItem("userPicture", result.profpic_url);
   localStorage.setItem("userName", result.full_name || "");
   localStorage.setItem("userEmail", result.login);
   if (result.nickname !== "") {
     localStorage.setItem("userNickname", result.nickname);
-  }
-  else {
+  } else {
     localStorage.setItem("userNickname", result.login);
   }
   localStorage.setItem("userGamesWon", result.gamesWon);

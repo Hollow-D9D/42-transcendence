@@ -13,14 +13,12 @@ import {
 
 export const DisplayRow = (props: any) => {
   const { show } = useContextMenu();
-
-  function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: number) {
-    console.log("display menu")
+  function displayMenu(e: React.MouseEvent<HTMLElement>, targetUser: string) {
     e.preventDefault();
     show(e, {
       id: "onUserSimple",
       props: {
-        who: targetUser,
+        userName: targetUser,
       },
     });
   }
@@ -33,7 +31,7 @@ export const DisplayRow = (props: any) => {
             className="col-auto profile-pic-round-sm"
             id="clickableIcon"
             onClick={(e: React.MouseEvent<HTMLElement>) =>
-              displayMenu(e, props.userModel.id)
+              displayMenu(e, props.userModel.login)
             }
           >
             <div
@@ -51,12 +49,12 @@ export const DisplayRow = (props: any) => {
             </div>
             <div
               className={`status-private ${props.userModel.status === 1
-                  ? "online"
-                  : props.userModel.status === 2
-                    ? "ingame"
-                    : props.userModel.status === 0
-                      ? "offline"
-                      : ""
+                ? "online"
+                : props.userModel.status === 2
+                  ? "ingame"
+                  : props.userModel.status === 0
+                    ? "offline"
+                    : ""
                 }`}
             ></div>
           </Col>
@@ -64,15 +62,15 @@ export const DisplayRow = (props: any) => {
             className="content"
             id="clickableIcon"
             onClick={(e: React.MouseEvent<HTMLElement>) =>
-              displayMenu(e, props.userModel.id)
+              displayMenu(e, props.userModel.login)
             }
           >
             <div className="profile-username-text" style={{ fontSize: "15px" }}>
               @
               {props.userModel && props.userModel.login
-                ? props.userModel.login.length > 10
-                  ? props.userModel.login.substring(0, 7) + "..."
-                  : props.userModel.login
+                ? props.userModel.nickname.length > 10
+                  ? props.userModel.nickname.substring(0, 7) + "..."
+                  : props.userModel.nickname
                 : null}
             </div>
           </Col>
@@ -80,28 +78,29 @@ export const DisplayRow = (props: any) => {
             {props.listType === "friends" ? (
               <ButtonsFriends
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "blocked" ? (
               <ButtonsBlocked
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "pending" ? (
               <ButtonsPending
                 id={props.userModel.id}
-                username={props.userModel.username}
+                username={props.userModel.login}
                 hook={props.hook}
                 state={props.state}
               />
             ) : props.listType === "addFriend" ? (
-              <ButtonsAdding 
-              id={props.userModel.id}
-              username={props.userModel.username}
+              <ButtonsAdding
+                id={props.userModel.id}
+                username={props.userModel.login}
+                isFriend={props.userModel.isFriend}
               />
             )
               : null}
@@ -262,7 +261,6 @@ const ButtonsPending = (props: any) => {
 
 
 const ButtonsAdding = (props: any) => {
-  console.log("ButtonsAdding::::::")
   const notif = useContext(NotifCxt);
 
   const handleClickAccept = (e: any) => {
@@ -270,53 +268,32 @@ const ButtonsAdding = (props: any) => {
     const addFriend = async () => {
       const result = await addFriendQuery(props.id);
       if (result !== "error") {
-        notif?.setNotifText(props.username + " added as friend!");
+        notif?.setNotifText(props.userModel.login + " added as friend!");
         props.hook(!props.state);
       } else
         notif?.setNotifText(
-          "Could not accept friend request from " + props.username + " :(."
+          "Could not accept friend request from " + props.userModel.login + " :(."
         );
       notif?.setNotifShow(true);
     };
     addFriend();
   };
 
-  // const handleClickIgnore = (e: any) => {
-  //   e.preventDefault();
-  //   const ignoreFriend = async () => {
-  //     const result = await denyInviteQuery(props.id);
-  //     if (result !== "error") {
-  //       notif?.setNotifText("Request from " + props.username + " ignored.");
-  //       props.hook(!props.state);
-  //     } else
-  //       notif?.setNotifText(
-  //         "Could not ignore request from " + props.username + " :(."
-  //       );
-  //     notif?.setNotifShow(true);
-  //   };
-  //   ignoreFriend();
-  // };
-
   return (
     <main>
-      <Col className="float-end">
-        <button
-          type="button"
-          className="IBM-text btn btn-sm text-button"
-          onClick={(e) => handleClickAccept(e)}
-        >
-          Send Request
-        </button>
-      </Col>
-      {/* <Col className="float-end">
-        <button
-          type="button"
-          className="IBM-text btn btn-sm text-button"
-          onClick={(e) => handleClickIgnore(e)}
-        >
-          Ignore
-        </button>
-      </Col> */}
+
+      {!props.isFriend ?
+        <Col className="float-end">
+          <button
+            type="button"
+            className="IBM-text btn btn-sm text-button"
+            onClick={(e) => handleClickAccept(e)}
+          >
+            Send Request
+          </button>
+        </Col>
+        : ""
+      }
     </main>
   );
 };

@@ -15,16 +15,20 @@ export class AchievementsService {
 
   achieves = [
     {
-      name: '#1',
-      icon: 'path/to/icon.png',
-      description: 'The 1st one',
+      id: 1,
+      name: 'Welcome',
+      alias: 'first_login',
+      icon: process.env.BACKEND_URL + '/upload/handshake.png',
+      description: 'Congratulations with your registration!',
       level: 1,
       progress: 1,
     },
     {
-      name: '#2',
+      id: 2,
+      name: 'First blood',
+      alias: 'first_win',
       icon: 'path/to/icon.png',
-      description: 'The 2st one',
+      description: 'First enemy is slayed!',
       level: 1,
       progress: 1,
     },
@@ -39,9 +43,31 @@ export class AchievementsService {
     }
   }
 
+  async addAchievement(user_id: number, achieve_alias: string) {
+    try {
+      const user = await this.userRepo.findOne({
+        where: { id: user_id },
+        relations: ['achievements'],
+      });
+      const achieve = await this.achieveRepo.findOne({
+        where: { alias: achieve_alias },
+      });
+      user.achievements.push(achieve);
+      await this.userRepo.save(user);
+      return { user };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async seedAchiements() {
     try {
-    //   await this.achieveRepo.clear();
+      await this.achieveRepo
+        .createQueryBuilder('users')
+        .delete()
+        .from(Achievement)
+        // .where("id = :id", { id: 1 })
+        .execute();
       await Promise.all(
         this.achieves.map(async (achieve) => {
           const newOne = this.achieveRepo.create(achieve);
