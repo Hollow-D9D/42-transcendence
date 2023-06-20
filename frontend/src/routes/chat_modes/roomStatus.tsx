@@ -60,8 +60,19 @@ export default function RoomStatus({
   useEffect(() => {
     socket.on("invitation tags", (data: Tag[]) => {
       setTag(data);
+      
+      
     });
-
+    // socket.emit("invitation tags"); //REMOVE
+    setTag(
+      [{
+        id: 1,
+        name: "valod"
+      },{
+        id :2,
+        name: "bulki" 
+      }
+    ]);
     return () => {
       socket.off("invitation tags");
     };
@@ -69,11 +80,13 @@ export default function RoomStatus({
 
   const handleInvite = (member: Tag) => {
     setAdd(false);
+    console.log(member);
+    
     let update: updateChannel = {
       channelId: current!.id,
       email: email,
       password: "",
-      targetId: member.id,
+      targetId: member.name,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -369,12 +382,14 @@ function Status({
           <Item onClick={handleBlockUser}>block user</Item>
         )}
         <Separator />
-        {role === "owner" && global.selectedUser?.isInvited === false ? (
+        {role === "owner"
+        //  && global.selectedUser?.isInvited === false 
+         ? (
           <>
             <Item
-              style={{
-                display: global.selectedUser?.isAdmin === false ? "" : "none",
-              }}
+              // style={{
+              //   display: global.selectedUser?.isAdmin === false ? "" : "none",
+              // }}
               onClick={handleBeAdmin}
             >
               assign as admin
@@ -391,8 +406,10 @@ function Status({
         ) : (
           <></>
         )}
-        {(role === "admin" || role === "owner") &&
-        global.selectedUser?.isInvited === false ? (
+        {(role === "admin" || role === "owner") 
+        // &&
+        // global.selectedUser?.isInvited === false 
+        ? (
           <>
             <Submenu label="mute">
               <Item onClick={() => handleMute(5)}>5 mins</Item>

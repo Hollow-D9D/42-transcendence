@@ -20,7 +20,7 @@ export function NewRoomCard({
   onNewRoomRequest,
   updateStatus,
 }: NewRoomCardProps) {
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
   const [, setUserTag] = useState<Tag[]>([]);
   const [roomName, setRoomName] = useState("");
   const [roomPass, setRoomPass] = useState("");

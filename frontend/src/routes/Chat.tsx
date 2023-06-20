@@ -32,7 +32,7 @@ export default function Chat() {
 
     socket.on("fetch role", (data) => {
       console.log(data);
-      setRole(data);
+      setRole(data || "noRole");
     });
 
     socket.on("fetch blocked", (data: []) => {

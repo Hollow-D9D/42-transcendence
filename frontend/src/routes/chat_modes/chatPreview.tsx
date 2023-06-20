@@ -169,16 +169,19 @@ export default function Preview({
               <Item onClick={handleLeave}>delete message</Item>
               {global.selectedChat?.isBlocked ? (
                 <Item onClick={handleUnblockUser}>unblock user</Item>
-              ) : (
+              ) : 
+              (
                 <Item onClick={handleBlockChannel}>block user</Item>
-              )}
+              )
+              }
             </>
           ) : (
             <>
               <Item onClick={handleLeave}>Leave chat</Item>
-              <Item onClick={handleBlockChannel}>Block channel</Item>
+              {/* <Item onClick={handleBlockChannel}>Block channel</Item> */}
             </>
-          )}
+          )
+          }
         </Menu>
         {/* <Menu id={MENU_DM} theme={theme.dark}></Menu> */}
       </div>
