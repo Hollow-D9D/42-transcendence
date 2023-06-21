@@ -140,14 +140,15 @@ export class ChatService {
    */
   async leaveChannel(login: string, chat_id: number) {
     const channel = await this.channel(chat_id);
+    console.log(channel);
     if (!channel) return;
+
     const userToRemove = await channel.members.find(
       (user) => user.login === login,
     );
     if (!userToRemove) return;
     channel.members = channel.members.filter((user) => user.login !== login);
     await this.chatRepo.save(channel);
-
     if (channel.members.length === 0 || channel.owner.login === login) {
       await this.chatRepo.remove(channel);
     }
@@ -167,6 +168,7 @@ export class ChatService {
   async joinChannel(login: string, chat_id: number, password: string) {
     try {
       const channel = await this.channel(chat_id);
+
       if (channel.mode != ChannelMode.PRIVATE) {
         const isChannelMember = channel.members.some(
           (user) => user.login === login,
@@ -186,6 +188,7 @@ export class ChatService {
             });
             channel.members.push(user);
             await this.chatRepo.save(channel);
+            return 'Saved';
           }
         }
       }
@@ -498,7 +501,27 @@ export class ChatService {
   async users(logins: string[]): Promise<User[]> {
     return await this.userRepo.find({ where: { login: In(logins) } });
   }
-
+  async notInChannelUsers(chat_id: number) {
+    const users = await this.userRepo.find({ where: {} });
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['members'],
+    });
+    const rtn = users.filter((elem) => {
+      console.log();
+      return (
+        chat.members.find((element) => {
+          return element.login === elem.login;
+        }) === undefined
+      );
+    });
+    return rtn.map((elem) => {
+      return {
+        id: elem.id,
+        name: elem.nickname,
+      };
+    });
+  }
   async isBlocked(blocked: string, blocker: string): Promise<boolean> {
     const blockerFound = await this.userRepo.findOne({
       where: { login: blocker },

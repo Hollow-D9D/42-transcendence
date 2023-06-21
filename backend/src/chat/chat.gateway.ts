@@ -94,6 +94,55 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('leave channel')
+  async leaveChannel(client: Socket, query: any) {
+    try {
+      console.log(query);
+      // const payload = getPayload(headers);
+      if (query.login) {
+        if (!query.login) {
+          // shouldn't get here
+          return {
+            error: new Error('Invalid user info!'),
+            body: null,
+          };
+        }
+        // console.log('vrode oka');
+
+        if (!query.chat_id) {
+          // doesn't have a valid channel `name` specified
+          return {
+            error: new Error('No valid channel name specified!'),
+            body: null,
+          };
+        }
+        const channelWithName = await this.chatService.channel(query.chat_id);
+        console.log(channelWithName);
+        if (!channelWithName) {
+          // no channel with this name
+          return {
+            error: new Error('No channel with this name!'),
+            body: null,
+          };
+        }
+        if (
+          !(await this.chatService.isChannelMember(query.name, query.login))
+        ) {
+          // isn't a member of the channel
+          console.log('vrode oka');
+
+          return {
+            error: new Error('You are not a member of this channel!'),
+            body: null,
+          };
+        }
+        this.chatService.leaveChannel(query.login, query.name);
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
   @SubscribeMessage('create')
   async handleCreate(client: Socket, query: any) {
     try {
@@ -170,7 +219,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async sendChatStuff(client, chat_id, login) {
-    console.log('chat_id', chat_id, 'login', login);
+    // console.log('chat_id', chat_id, 'login', login);
     try {
       this.joinRoom(client, chat_id, login);
       const profile = await this.profileService.getProfile(login);
@@ -188,6 +237,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('get invitation tags')
+  async sendTags(client: Socket, payload: any) {
+    try {
+      // console.log(await this.chatService.allUsers(1))
+      const data = await this.chatService.notInChannelUsers(payload.chat_id);
+      client.emit('invitation tags', data);
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
   @SubscribeMessage('into channel')
   async intoMessage(client: Socket, payload: any) {
     try {
@@ -201,9 +261,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // join to a room
       const role: string = await this.chatService.getRole(login, chat_id);
+      // console.log(role);
       client.emit('fetch role', role);
       if (isMember) {
         await this.sendChatStuff(client, chat_id, login);
+      } else {
+        client.emit('fetch_msgs', []);
+        client.emit('fetch owner', []);
+        client.emit('fetch admins', []);
+        client.emit('fetch members', []);
       }
     } catch (err) {
       throwError(client, err.message);
@@ -214,7 +280,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
-      console.log('login', payload);
+      // console.log('login', payload);
       const suggest = await this.chatService.getSearchChats(login);
       client.emit('search suggest', suggest);
     } catch (err) {
@@ -230,13 +296,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!login) throwError(client, 'No login');
       if (!chat_id) throwError(client, 'No chat_id');
       const password = payload.password || '';
-      await this.chatService.joinChannel(login, chat_id, password);
+      // await this.chatService.joinChannel(login, chat_id, password);
+
       // if (this.joinRoom(client, chat_id, login)) {
       //   client.emit('join_chat', { chat_id: chat_id });
       // } else {
       //   throwError(client, 'No permission');
       // }
-      await this.sendChatStuff(client, chat_id, login);
+      if (
+        (await this.chatService.joinChannel(login, chat_id, password)) ===
+        'Saved'
+      )
+        await this.sendChatStuff(client, chat_id, login);
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }
