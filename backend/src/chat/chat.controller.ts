@@ -45,7 +45,6 @@ export class ChatController {
     try {
       const query = JSON.parse(body.body);
       const payload = getPayload(headers);
-      console.log(payload, 'query', query);
       if (payload) {
         if (!payload.login) {
           // shouldn't get here
@@ -58,7 +57,6 @@ export class ChatController {
         if (isValidChannelMode(query.mode)) {
           mode = query.mode as ChannelMode;
         }
-        console.log(mode);
         if (!mode) {
           // chat, not a channel
           if (query.target) logins.push(query.target);
@@ -78,7 +76,6 @@ export class ChatController {
           }
           if (this.chatService.isBlocked(payload.login, query.target)) {
             // `login` cannot create a chat with `target` that has blocked them
-            console.log('banned');
             throw new Error('You are blocked by the target user!');
           }
         } else {
@@ -86,9 +83,7 @@ export class ChatController {
           // not checking whether `users.length === 1` in case when
           // `validMode === true` since we expect that `login` provided
           // by ... is always valid
-          console.log('bool', !query.password);
           if (!query.name /* || !query.password*/) {
-            console.log('no login/password');
             // doesn't have a valid `name` and `password` specified
             throw new Error('No valid channel name and/or password specified!');
           }
@@ -114,7 +109,6 @@ export class ChatController {
         throw new Error('Invalid input');
       }
     } catch (error) {
-      console.log(error.message);
       return { error: error.message, body: null };
     }
   }

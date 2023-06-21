@@ -31,7 +31,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private rooms: { [roomName: string]: Set<string> } = {};
 
   afterInit() {
-    console.log('should be uncommented');
     this.server.use((socket, next) => {
       let had = false;
       socket.onAny((event, args) => {
@@ -97,49 +96,40 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leave channel')
   async leaveChannel(client: Socket, query: any) {
     try {
-      console.log(query);
       // const payload = getPayload(headers);
       if (query.login) {
         if (!query.login) {
           // shouldn't get here
-          return {
-            error: new Error('Invalid user info!'),
-            body: null,
-          };
+          throwError(client, 'Invalid user info!');
+          return;
         }
-        // console.log('vrode oka');
-
         if (!query.chat_id) {
           // doesn't have a valid channel `name` specified
-          return {
-            error: new Error('No valid channel name specified!'),
-            body: null,
-          };
+          throwError(client, 'No valid channel name specified!');
+          return;
         }
         const channelWithName = await this.chatService.channel(query.chat_id);
-        console.log(channelWithName);
         if (!channelWithName) {
           // no channel with this name
-          return {
-            error: new Error('No channel with this name!'),
-            body: null,
-          };
+          throwError(client, 'No channel with this name!');
+          return;
         }
         if (
-          !(await this.chatService.isChannelMember(query.name, query.login))
+          !(await this.chatService.isChannelMember(query.chat_id, query.login))
         ) {
           // isn't a member of the channel
-          console.log('vrode oka');
-
-          return {
-            error: new Error('You are not a member of this channel!'),
-            body: null,
-          };
+          throwError(client, 'You are not a member of this channel!');
+          return;
         }
-        this.chatService.leaveChannel(query.login, query.name);
+        this.chatService.leaveChannel(query.login, query.chat_id);
+        client.emit('channel left');
+        client.emit('fetch_msgs', []);
+        client.emit('fetch owner', []);
+        client.emit('fetch admins', []);
+        client.emit('fetch members', []);
       }
     } catch (error) {
-      return { error, body: null };
+      throwError(client, error.message);
     }
   }
 
@@ -238,6 +228,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+
   @SubscribeMessage('get invitation tags')
   async sendTags(client: Socket, payload: any) {
     try {
@@ -246,6 +237,51 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('invitation tags', data);
     } catch (err) {
       throwError(client, err.message);
+    }
+  }
+  @SubscribeMessage('get channel')
+  async sendChannel(client: Socket, payload: any) {
+
+  const channel = await this.chatService.channel(payload.chat_id);
+  client.emit('fetch channel', channel);
+  }
+
+  @SubscribeMessage('be admin')
+  async grantAdmin(client: Socket, query: any) {
+    try {
+      // const payload = getPayload(headers);
+      // if (payload) {
+      if (!query.login) {
+        // shouldn't get here
+        throwError(client, 'Invalid user info!');
+      }
+      if (!query.chat_id || !query.target) {
+        // doesn't have a valid channel `name`/`target` user specified
+        throwError(client, 'No valid channel name/target user specified!');
+      }
+      const channelWithName = await this.chatService.channel(query.chat_id);
+      if (!channelWithName) {
+        // no channel with this name
+        throwError(client, 'No channel with this name!');
+      }
+      const userWithLogin = await this.chatService.users([
+        query.login,
+        query.target,
+      ]);
+      if (userWithLogin.length !== 2) {
+        // no user with the username login/target
+        throwError(client, 'No user with username login/target!');
+      }
+      await this.chatService.grantAdmin(
+        query.login,
+        query.target,
+        query.chat_id,
+      );
+      const chat = await this.chatService.channel(query.chat_id);
+      client.emit('fetch admins', chat.admins);
+      client.emit('admin success');
+    } catch (error) {
+      throwError(client, error.message);
     }
   }
 
@@ -264,6 +300,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const role: string = await this.chatService.getRole(login, chat_id);
       // console.log(role);
       client.emit('fetch role', role);
+
       if (isMember) {
         await this.sendChatStuff(client, chat_id, login, role);
       } else {

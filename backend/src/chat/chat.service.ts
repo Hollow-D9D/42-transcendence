@@ -45,7 +45,6 @@ export class ChatService {
       };
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      console.log(entityLike);
       if (mode !== null) {
         // create a channel
         entityLike.group = true;
@@ -139,18 +138,21 @@ export class ChatService {
    * @returns nothing
    */
   async leaveChannel(login: string, chat_id: number) {
-    const channel = await this.channel(chat_id);
-    console.log(channel);
-    if (!channel) return;
+    try {
+      const channel = await this.channel(chat_id);
+      if (!channel) return;
 
-    const userToRemove = await channel.members.find(
-      (user) => user.login === login,
-    );
-    if (!userToRemove) return;
-    channel.members = channel.members.filter((user) => user.login !== login);
-    await this.chatRepo.save(channel);
-    if (channel.members.length === 0 || channel.owner.login === login) {
-      await this.chatRepo.remove(channel);
+      const userToRemove = await channel.members.find(
+        (user) => user.login === login,
+      );
+      if (!userToRemove) return;
+      channel.members = channel.members.filter((user) => user.login !== login);
+      await this.chatRepo.save(channel);
+      if (channel.members.length === 0 || channel.owner.login === login) {
+        await this.chatRepo.remove(channel);
+      }
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -223,6 +225,7 @@ export class ChatService {
           (user) => user.login === target,
         );
         if (!isChannelAdmin) {
+
           const user = await this.userRepo.findOne({
             where: { login: target },
           });
@@ -514,7 +517,6 @@ export class ChatService {
       relations: ['members'],
     });
     const rtn = users.filter((elem) => {
-      console.log();
       return (
         chat.members.find((element) => {
           return element.login === elem.login;
@@ -545,7 +547,7 @@ export class ChatService {
   async channel(id: number): Promise<Chat> {
     return await this.chatRepo.findOne({
       where: { id: id },
-      relations: ['members', 'blocked'],
+      relations: ['members', 'admins', 'blocked', 'owner'],
     });
   }
 
