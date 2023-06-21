@@ -6,7 +6,7 @@ import RoomStatus from "./chat_modes/roomStatus";
 import { chatPreview } from "./chat_modes/type/chat.type";
 import { NewRoomCard } from "./chat_modes/newRoomCard";
 import { SettingCard } from "./chat_modes/settingCard";
-import { NotifCxt } from "../App";
+import { NotifCxt} from "../App";
 import { socket } from "../App";
 
 export default function Chat() {
@@ -31,7 +31,6 @@ export default function Chat() {
     });
 
     socket.on("fetch role", (data) => {
-      console.log(data);
       setRole(data || "noRole");
     });
 
@@ -54,16 +53,17 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) {
-      console.log("role::::::;", role);
-      
-      setOutsider(role === "" ? true : false);
+
+      setOutsider(role === "" || role === "noRole" ? true : false);
       socket.emit("read blocked", email);
     }
   }, [selectedChat, role, email, updateStatus]);
 
   useEffect(() => {
-    if (selectedChat) setShow(!selectedChat.isPassword || !outsider);
-
+    
+    if (selectedChat) {
+      setShow(!selectedChat.isPassword || !outsider);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outsider]);
 

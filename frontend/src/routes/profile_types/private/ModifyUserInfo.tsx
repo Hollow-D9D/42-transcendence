@@ -17,8 +17,6 @@ export const ModifyEntry = (props: any) => {
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    console.log("name::::::::", name, value)
-    console.log("nickname:::::::::", userInput.nickname)
     setUserInput({
       ...userInput,
       [name]: value,
@@ -30,7 +28,6 @@ export const ModifyEntry = (props: any) => {
     if (userInput.nickname || userInput.nickname === "") {
       const updateNickname = async () => {
         const result = await updateNicknameQuery(userInput.nickname);
-        console.log("update:::::::::", result)
         if (result !== "error") {
           const button = document.getElementById("handleChange");
           if (button) {

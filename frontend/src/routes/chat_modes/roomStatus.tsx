@@ -50,12 +50,11 @@ export default function RoomStatus({
 
   const email = localStorage.getItem("userEmail");
 
-  console.log("111current:::::", outsider);
   useEffect(() => {
     if (current) {
 
       socket.emit("read room status", { channelId: current?.id, login: email });
-      socket.emit("get invitation tags", current?.id);
+      socket.emit("get invitation tags", { chat_id: current?.id });
     }
   }, [updateStatus, current, email]);
 
@@ -66,15 +65,15 @@ export default function RoomStatus({
 
     });
     // socket.emit("invitation tags"); //REMOVE
-    setTag(
-      [{
-        id: 1,
-        name: "valod"
-      }, {
-        id: 2,
-        name: "bulki"
-      }
-      ]);
+    // setTag(
+    //   [{
+    //     id: 1,
+    //     name: "valod"
+    //   }, {
+    //     id: 2,
+    //     name: "bulki"
+    //   }
+    //   ]);
     return () => {
       socket.off("invitation tags");
     };
@@ -84,18 +83,16 @@ export default function RoomStatus({
     setAdd(false);
 
     let update: updateChannel = {
-      channelId: current!.id,
-      login: email,
+      chat_id: current!.id,
+      login: member.name,
       password: "",
-      targetId: member.name,
+      target: member.name,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
-    socket.emit("invite to channel", update, () => {
-      socket.emit("fetch new invite");
-    });
+    socket.emit("join channel", update);
   };
 
   const onDelete = (i: number) => { };
@@ -141,7 +138,7 @@ export default function RoomStatus({
       <JoinChannel
         channelId={current?.id}
         outsider={outsider}
-        isPassword={(current?.password !== null &&  current?.password !== "") ? true : false}
+        isPassword={(current?.password !== null && current?.password !== "") ? true : false}
       />
     </div>
   );
@@ -160,8 +157,6 @@ function MemberStatus({
   const [admins, setAdmins] = useState<oneUser[] | null>([]);
   const [members, setMembers] = useState<oneUser[] | null>([]);
   const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
-
-  // console.log("222current:::::", current);
 
   useEffect(() => {
     socket.on("fetch owner", (data: oneUser[] | null) => {
@@ -268,6 +263,12 @@ function Status({
     }
   }, [selData, show, hide, usersStatus, blockedList]);
 
+  useEffect(() => {
+    socket.on("admin success", (() => { global.selectedUser.isAdmin = true }))
+    return (() => {
+      socket.off("admin success");
+    })
+  }, [])
   function handleAddFriend() {
     let update: updateUser = {
       selfEmail: email,
@@ -281,7 +282,7 @@ function Status({
       const invitation: gameInvitation = {
         gameInfo: player,
         inviterId: Number(localStorage.getItem("userID")),
-        inviterName: localStorage.getItem("userName")!,
+        inviterName: localStorage.getItem("userNickname")!,
         targetId: global.selectedUser.id,
       };
       socket.emit("send invitation", invitation);
@@ -294,7 +295,7 @@ function Status({
   function handleMute(mins: number) {
     let update: mute = {
       duration: mins,
-      login: global.selectedUser.email,
+      login: global.selectedUser.login,
       channelId: current!.id,
     };
     socket.emit("mute user", update);
@@ -317,25 +318,29 @@ function Status({
   }
 
   function handleBeAdmin() {
+
+    console.log("global.selectedUser", global.selectedUser);
     let update: updateChannel = {
-      channelId: current!.id,
+      chat_id: current!.id,
       login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
+    console.log("update::", update);
+
     socket.emit("be admin", update);
   }
 
   function handleNotAdmin() {
     let update: updateChannel = {
-      channelId: current!.id,
+      chat_id: current!.id,
       login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -346,10 +351,10 @@ function Status({
 
   function handleKickOut() {
     let update: updateChannel = {
-      channelId: current!.id,
+      chat_id: current!.id,
       login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -389,10 +394,11 @@ function Status({
           //  && global.selectedUser?.isInvited === false 
           ? (
             <>
+
               <Item
-                // style={{
-                //   display: global.selectedUser?.isAdmin === false ? "" : "none",
-                // }}
+                style={{
+                  display: global.selectedUser?.isAdmin === false ? "" : "none",
+                }}
                 onClick={handleBeAdmin}
               >
                 assign as admin
@@ -482,6 +488,8 @@ function OneStatus({
     global.selectedUser.isOnline = global.onlineStatus === 1;
 
     event.preventDefault();
+    console.log(":::::::", data);
+
     setSelData({ data: data, event: event });
   };
 
@@ -523,17 +531,17 @@ function JoinChannel({
 
   const handleJoin = () => {
     let update: updateChannel = {
-      channelId: channelId,
+      chat_id: channelId,
       login: email,
       password: password,
-      targetId: -1,
+      target: -1,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
-    socket.emit("join channel", update);
 
+    socket.emit("join channel", update);
     setPass("");
   };
 

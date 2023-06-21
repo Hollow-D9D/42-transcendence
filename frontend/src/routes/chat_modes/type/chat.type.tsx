@@ -46,11 +46,11 @@ export type Tag = {
 };
 
 export type updateChannel = {
-  channelId: number | undefined;
+  chat_id: number | undefined;
   dm: boolean;
   login: string | null;
   password: string;
-  targetId: number | string;
+  target: number | string;
   private: boolean;
   isPassword: boolean;
   newPassword: string;
@@ -77,7 +77,7 @@ export type oneMsg = {
 export type oneUser = {
   username: string;
   id: number;
-  email: string;
+  login: string;
   isOwner: boolean;
   isAdmin: boolean;
   isInvited: boolean;

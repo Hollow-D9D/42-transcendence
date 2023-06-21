@@ -21,7 +21,6 @@ export function SettingCard({
 
   useEffect(() => {
     socket.on("setting info", (data: setting) => {
-      console.log(data);
       setCurrent(data);
       initVars(data);
     });
@@ -51,10 +50,10 @@ export function SettingCard({
 
   const onUpdate = () => {
     let data: updateChannel = {
-      channelId: channelId,
+      chat_id: channelId,
       login: null,
       password: "",
-      targetId: 0,
+      target: 0,
       private: isPrivate,
       isPassword: isPassword,
       newPassword: newPass,

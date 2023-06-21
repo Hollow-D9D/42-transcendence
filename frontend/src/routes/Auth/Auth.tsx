@@ -24,7 +24,6 @@ export default function Auth() {
         navigate("/app/private-profile", { replace: true });
         window.location.reload();
       });
-    console.log("user is signed in");
   }, [navigate, auth]);
 
   // useEffect to get access token from URL
@@ -32,7 +31,6 @@ export default function Auth() {
     // get access token from URL Query
     const access_token = location.search.split("=")[1];
     if (access_token) {
-      console.log(access_token);
       addAuthHeader(access_token);
       localStorage.setItem("userToken", access_token);
       // getUserData is a fetch that might take time. In order for sign in

@@ -23,17 +23,14 @@ export default function TwoFAValidation() {
   // get username from redirect URL
   useEffect(() => {
     const urlUsername = location.search.split("=")[1];
-    console.log("aaaaa");
     if (urlUsername) {
       localStorage.setItem("userEmail", urlUsername);
-      console.log(urlUsername);
 
       navigate("/2FA");
     }
   }, [location.search, navigate]);
   const [isTokenValid, setIsTokenValid] = useState(false);
   useEffect(() => {
-    console.log("chgitem xia ste mtnum");
 
     if (isTokenValid) {
       localStorage.setItem("userLogged", "true");
@@ -46,7 +43,6 @@ export default function TwoFAValidation() {
 
     const userSignIn = () => {
       let username = localStorage.getItem("userEmail");
-      console.log(username);
       if (username)
         auth.signin(username, () => {
           navigate("/app/private-profile", { replace: true });
@@ -59,7 +55,6 @@ export default function TwoFAValidation() {
           notif?.setNotifShow(true);
           notif?.setNotifText("Incorrect code. Please try again.");
         } else {
-          console.log(localStorage);
           setIsTokenValid(true);
         }
       };

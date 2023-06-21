@@ -21,7 +21,6 @@ export default function AuthRedirect(props: any) {
               "Content-Type": "application/json",
             },
           });
-          console.log(res);
 
           const token = res.data.body.token ? res.data.body.token : null;
           if (token) {
@@ -36,13 +35,6 @@ export default function AuthRedirect(props: any) {
             storeUserInfo(profile.data.body.user);
             if (res) {
               if (profile.data.body.user.is2fa) {
-                // if (
-                //   localStorage.getItem("userLogged") &&
-                //   localStorage.getItem("userLogged") === "true"
-                // )
-                //   navigate("/app/private-profile");
-
-                console.log("my dear ", profile.data.body.user);
                 navigate("/2FA");
               } else {
                 localStorage.setItem("userLogged", "true");

@@ -78,6 +78,8 @@ export default function App() {
         socket.off("game invitation");
       };
     });
+    // setGameRequest(true);
+
   }, []);
 
   return (

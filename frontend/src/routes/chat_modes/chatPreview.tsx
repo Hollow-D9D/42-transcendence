@@ -1,6 +1,5 @@
 import "./chatPreview.css";
 import { useEffect, useState } from "react";
-import { socket } from "../../App";
 import {
   chatPreview,
   newDM,
@@ -13,6 +12,8 @@ import { Menu, Item, useContextMenu, theme } from "react-contexify";
 import "./context.css";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import { getUserAvatarQuery } from "../../queries/avatarQueries";
+import { current } from "@reduxjs/toolkit";
+import { socket } from "../../App";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MENU_CHANNEL = "menu_channel";
@@ -36,16 +37,17 @@ export default function Preview({
   blockedList: [];
 }) {
   const [roomPreview, setPreviews] = useState<chatPreview[]>([]);
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
   const [menuEvent, setMenuEvent] = useState<any>(null);
 
+  // console.log("global:::::", global.selectedChat);
+  
+
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
     socket.on("search suggest", (data: chatPreview[] | null) => {
-      // console.log(data);
-
       if (data) setPreviews(data);
     });
   }, [updateStatus, email]);
@@ -53,14 +55,27 @@ export default function Preview({
   useEffect(() => {
     socket.on("add preview", (data) => {
       if (data) setPreviews(data);
-      console.log(roomPreview);
     });
-
     socket.on("update preview", (data: chatPreview[] | null) => {
       if (data) setPreviews(data);
     });
-
+    socket.on("fetch channel", (value) => {
+      console.log(value);
+      onSelect ( {
+        id : value.id,
+        dm : !value.group,
+        name : value.name,
+        isPassword : value.mode === "PROTECTED",
+        password : value.password,
+        updateAt : "",
+        lastMsg : '',
+        ownerEmail : "",
+        ownerId : -1,
+        isBlocked : false
+      });
+    })
     return () => {
+      socket.off("fetch channel");
       socket.off("add preview");
       socket.off("update preview");
     };
@@ -78,7 +93,11 @@ export default function Preview({
   }, [blockedList, show, hide, current]);
 
   const addPreview = (channelId: number) => {
-    socket.emit("add preview", { channelId: channelId, email: email });
+
+    // current = {
+    //   id : channelId,
+
+    // }
   };
 
   const search = (channelId: number) => {
@@ -92,11 +111,11 @@ export default function Preview({
 
   function handleLeave() {
     let update: updateChannel = {
-      channelId: global.selectedChat.id,
+      chat_id: global.selectedChat.id,
       dm: global.selectedChat.dm,
       login: email,
       password: "",
-      targetId: -1,
+      target: -1,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -107,11 +126,11 @@ export default function Preview({
 
   function handleBlockChannel() {
     let update: updateChannel = {
-      channelId: global.selectedChat.id,
+      chat_id: global.selectedChat.id,
       dm: global.selectedChat.dm,
       login: email,
       password: "",
-      targetId: -1,
+      target: -1,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -138,6 +157,7 @@ export default function Preview({
           onSearchMyChat={(channelId) => search(channelId)}
           onSearchPublicChat={(channelId) => addPreview(channelId)}
           updateStatus={updateStatus}
+          
         />
         <AddRoom
           onRequest={() => {
@@ -147,7 +167,6 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
-          // console.log("helomoto");
           return (
             <div key={index}>
               <PreviewChat
@@ -164,6 +183,7 @@ export default function Preview({
           );
         })}
         <Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
+
           {global.selectedChat?.dm ? (
             <>
               <Item onClick={handleLeave}>delete message</Item>
@@ -210,7 +230,6 @@ function ChatSearch({
     socket.emit("get search suggest", { login: email });
     socket.on("search suggest", (data: oneSuggestion[]) => {
       setSug(data);
-      // console.log("Suggestions: " + data);
     });
 
     return () => {
@@ -219,20 +238,27 @@ function ChatSearch({
   }, [email]);
 
   const handleOnSelect = (data: oneSuggestion) => {
-    if (data.catagory === "user") {
-      let dm: newDM = {
-        email: email,
-        targetId: data.data_id,
-      };
-      socket.emit("new dm", dm, (channelId: number) => {
-        let fetch: fetchDM = {
-          channelId: channelId,
-          targetId: data.data_id,
-        };
-        socket.emit("fetch new DM", fetch);
-      });
-    } else if (data.catagory === "my chat") onSearchMyChat(data.data_id);
-    else if (data.catagory === "public chat") onSearchPublicChat(data.data_id);
+    // console.log(data);
+    // updateStatus = data.id;
+
+    socket.emit("into channel", { chat_id: data.id, login: email, password: "" })
+    socket.emit("read msgs", data.id);
+    socket.emit("get setting", data.id);
+    socket.emit("get channel", data.id);
+    // // if (data.catagory === "user") {
+    //   let dm: newDM = {
+    //     email: email,
+    //     targetId: data.data_id,
+    //   };
+    //   socket.emit("new dm", dm, (channelId: number) => {
+    //     let fetch: fetchDM = {
+    //       channelId: channelId,
+    //       targetId: data.data_id,
+    //     };
+    //     socket.emit("fetch new DM", fetch);
+    //   });
+    // } else if (data.catagory === "my chat") onSearchMyChat(data.data_id);
+    // else if (data.catagory === "public chat") onSearchPublicChat(data.data_id);
   };
 
   const formatResult = (data: oneSuggestion) => {
@@ -341,8 +367,6 @@ function PreviewChat({
           <div className="preview-chat-info">
             <div className="preview-chat-info-1">
               <p className="preview-chat-name">{data.name}</p>
-
-              {/* <p className="preview-chat-msg">{data.lastMsg}</p> */}
             </div>
           </div>
         </div>
