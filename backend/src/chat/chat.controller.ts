@@ -185,59 +185,59 @@ export class ChatController {
    * - check that password is valid or an empty string
    * - proceed to business logic (service.ts)
    */
-  @Post('joinChannel')
-  @UseGuards(AuthGuard)
-  async joinChannel(@Headers() headers, @Query() query) {
-    try {
-      const payload = getPayload(headers);
-      if (payload) {
-        if (!payload.login) {
-          // shouldn't get here
-          return {
-            error: new Error('Invalid user info!'),
-            body: null,
-          };
-        }
-        if (!query.name) {
-          // doesn't have a valid channel `name` specified
-          return {
-            error: new Error('No valid channel name specified!'),
-            body: null,
-          };
-        }
-        const channelWithName = await this.chatService.channel(query.name);
-        if (!channelWithName) {
-          // no channel with this name
-          return {
-            error: new Error('No channel with this name!'),
-            body: null,
-          };
-        }
-        const userWithLogin = await this.chatService.users([payload.login]);
-        if (userWithLogin.length !== 1) {
-          // no user with the username login
-          return {
-            error: new Error('No user with username login!'),
-            body: null,
-          };
-        }
-        if (
-          !query.password ||
-          (!this.chatService.isValidPassword(query.password) &&
-            query.password !== '')
-        ) {
-          // doesn't have a valid/empty-string `password` specified
-          return {
-            error: new Error('No valid password specified!'),
-            body: null,
-          };
-        }
-        this.chatService.joinChannel(payload.login, query.name, query.password);
-      }
-    } catch (error) {
-      return { error, body: null };
-    }
-  }
+  // @Post('joinChannel')
+  // @UseGuards(AuthGuard)
+  // async joinChannel(@Headers() headers, @Query() query) {
+  //   try {
+  //     const payload = getPayload(headers);
+  //     if (payload) {
+  //       if (!payload.login) {
+  //         // shouldn't get here
+  //         return {
+  //           error: new Error('Invalid user info!'),
+  //           body: null,
+  //         };
+  //       }
+  //       if (!query.name) {
+  //         // doesn't have a valid channel `name` specified
+  //         return {
+  //           error: new Error('No valid channel name specified!'),
+  //           body: null,
+  //         };
+  //       }
+  //       const channelWithName = await this.chatService.channel(query.name);
+  //       if (!channelWithName) {
+  //         // no channel with this name
+  //         return {
+  //           error: new Error('No channel with this name!'),
+  //           body: null,
+  //         };
+  //       }
+  //       const userWithLogin = await this.chatService.users([payload.login]);
+  //       if (userWithLogin.length !== 1) {
+  //         // no user with the username login
+  //         return {
+  //           error: new Error('No user with username login!'),
+  //           body: null,
+  //         };
+  //       }
+  //       if (
+  //         !query.password ||
+  //         (!this.chatService.isValidPassword(query.password) &&
+  //           query.password !== '')
+  //       ) {
+  //         // doesn't have a valid/empty-string `password` specified
+  //         return {
+  //           error: new Error('No valid password specified!'),
+  //           body: null,
+  //         };
+  //       }
+  //       this.chatService.joinChannel(payload.login, query.name, query.password);
+  //     }
+  //   } catch (error) {
+  //     return { error, body: null };
+  //   }
+  // }
 
   /**
    * GRANT ADMIN PRIVILEGES TO A CHANNEL MEMBER

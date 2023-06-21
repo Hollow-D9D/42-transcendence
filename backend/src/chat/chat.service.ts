@@ -165,7 +165,12 @@ export class ChatService {
    * @param chat_id of the channel
    * @param password of the channel
    */
-  async joinChannel(login: string, chat_id: number, password: string) {
+  async joinChannel(
+    login: string,
+    chat_id: number,
+    password: string,
+    isInvited: boolean,
+  ) {
     try {
       const channel = await this.channel(chat_id);
 
@@ -179,6 +184,7 @@ export class ChatService {
         if (!isChannelMember && !isBannedFromChannel) {
           // TODO: replace with the hashed one
           if (
+            isInvited ||
             (channel.mode === ChannelMode.PROTECTED &&
               (await bcrypt.compare(password, channel.password))) ||
             channel.mode === ChannelMode.PUBLIC

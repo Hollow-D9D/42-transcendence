@@ -209,7 +209,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // all main checks passed
         await this.chatService.create(users, mode, query.name, query.password);
         const suggest = await this.chatService.getSearchChats(query.login);
-        client.emit('add preview', suggest);
+        this.server.emit('add preview', suggest);
       } else {
         throw new Error('Invalid input');
       }
@@ -218,7 +218,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  async sendChatStuff(client, chat_id, login) {
+  async sendChatStuff(client, chat_id, login, role) {
     // console.log('chat_id', chat_id, 'login', login);
     try {
       this.joinRoom(client, chat_id, login);
@@ -232,6 +232,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('fetch owner', [roles.owner]);
       client.emit('fetch admins', roles.admins);
       client.emit('fetch members', roles.members);
+      client.emit('fetch role', role);
     } catch (err) {
       throw err;
     }
@@ -264,7 +265,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // console.log(role);
       client.emit('fetch role', role);
       if (isMember) {
-        await this.sendChatStuff(client, chat_id, login);
+        await this.sendChatStuff(client, chat_id, login, role);
       } else {
         client.emit('fetch_msgs', []);
         client.emit('fetch owner', []);
@@ -280,7 +281,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
-      // console.log('login', payload);
+      // console.log('bulki', payload);
       const suggest = await this.chatService.getSearchChats(login);
       client.emit('search suggest', suggest);
     } catch (err) {
@@ -303,11 +304,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // } else {
       //   throwError(client, 'No permission');
       // }
+      const isInvited = payload.targetId !== -1 ? true : false;
       if (
-        (await this.chatService.joinChannel(login, chat_id, password)) ===
-        'Saved'
+        (await this.chatService.joinChannel(
+          login,
+          chat_id,
+          password,
+          isInvited,
+        )) === 'Saved'
       )
-        await this.sendChatStuff(client, chat_id, login);
+        await this.sendChatStuff(client, chat_id, login, 'member');
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }
