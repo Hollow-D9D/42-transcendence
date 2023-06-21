@@ -75,16 +75,15 @@ export type oneMsg = {
 };
 
 export type oneUser = {
-  username: string;
+  nickname: string;
   id: number;
   login: string;
-  isOwner: boolean;
-  isAdmin: boolean;
-  isInvited: boolean;
+  role: string;
   isMuted: boolean;
   isFriend: boolean;
-  isOnline: boolean;
+  status: number;
   isBlocked: boolean;
+  profpic_url: string;
 };
 
 export type updateUser = {

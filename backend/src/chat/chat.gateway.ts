@@ -221,13 +221,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const roles = await this.chatService.getChatRoles(chat_id);
       client.emit('fetch owner', [roles.owner]);
       client.emit('fetch admins', roles.admins);
-      client.emit('fetch members', roles.members);
+      this.server.to(chat_id).emit(
+        'fetch members',
+        roles.members.filter((elem) => {
+          return (
+            elem.login !== roles.owner.login &&
+            roles.admins.find((e) => {
+              return e.login === elem.login;
+            }) === undefined
+          );
+        }),
+      );
+
       client.emit('fetch role', role);
     } catch (err) {
       throw err;
     }
   }
-
 
   @SubscribeMessage('get invitation tags')
   async sendTags(client: Socket, payload: any) {
@@ -241,11 +251,59 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   @SubscribeMessage('get channel')
   async sendChannel(client: Socket, payload: any) {
-
-  const channel = await this.chatService.channel(payload.chat_id);
-  client.emit('fetch channel', channel);
+    const channel = await this.chatService.channel(payload.chat_id);
+    client.emit('fetch channel', channel);
   }
 
+  @SubscribeMessage('not admin')
+  async unsetAdmin(client: Socket, query: any) {
+    try {
+      if (query) {
+        if (!query.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+      }
+      if (!query.chat_id || !query.target) {
+        // doesn't have a valid channel `name`/`target` user specified
+        throw 'No valid channel name/target user specified!';
+      }
+      const channelWithName = await this.chatService.channel(query.chat_id);
+      if (!channelWithName) {
+        // no channel with this name
+        throw 'No channel with this name!';
+      }
+      const userWithLogin = await this.chatService.users([
+        query.login,
+        query.target,
+      ]);
+      if (userWithLogin.length !== 2) {
+        // no user with the username login/target
+        throw 'No user with username login/target!';
+      }
+      await this.chatService.revokeAdmin(
+        query.login,
+        query.target,
+        query.chat_id,
+      );
+      const chat = await this.chatService.channel(query.chat_id);
+      client.emit('fetch admins', chat.admins);
+      client.emit(
+        'fetch members',
+        chat.members.filter((elem) => {
+          return (
+            elem.login !== chat.owner.login &&
+            chat.admins.find((e) => {
+              return e.login === elem.login;
+            }) === undefined
+          );
+        }),
+      );
+      client.emit('admin success', { role: 'member' });
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
   @SubscribeMessage('be admin')
   async grantAdmin(client: Socket, query: any) {
     try {
@@ -279,7 +337,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
       const chat = await this.chatService.channel(query.chat_id);
       client.emit('fetch admins', chat.admins);
-      client.emit('admin success');
+      client.emit(
+        'fetch members',
+        chat.members.filter((elem) => {
+          return (
+            elem.login !== chat.owner.login &&
+            chat.admins.find((e) => {
+              return e.login === elem.login;
+            }) === undefined
+          );
+        }),
+      );
+      client.emit('admin success', { role: 'admin' });
     } catch (error) {
       throwError(client, error.message);
     }
@@ -341,16 +410,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // } else {
       //   throwError(client, 'No permission');
       // }
-      const isInvited = payload.targetId !== -1 ? true : false;
-      if (
-        (await this.chatService.joinChannel(
-          login,
-          chat_id,
-          password,
-          isInvited,
-        )) === 'Saved'
-      )
-        await this.sendChatStuff(client, chat_id, login, 'member');
+      const isInvited = payload.target !== -1 ? true : false;
+      const userLogin = await this.chatService.joinChannel(
+        login,
+        chat_id,
+        password,
+        isInvited,
+      );
+      if (userLogin !== undefined)
+        await this.sendChatStuff(client, chat_id, userLogin, 'member');
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }

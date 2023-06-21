@@ -1,17 +1,30 @@
-import React from 'react';
+import React from "react";
 import { io, Socket } from "socket.io-client";
 import "./Game.css";
-import { Game_data, Player, Coordinates, StatePong, Button, ButtonState, Msg, MsgState, PaddleProps, StatePaddle, SettingsProps, SettingsState, PropsPong } from './game.interfaces';
-import FocusTrap from 'focus-trap-react';
-import { getUserAvatarQuery } from '../queries/avatarQueries';
-import SoloGame from './SoloGame';
-import { socket as chatSocket } from '../App';
-import { Navigate } from 'react-router-dom';
-import { NotifCxt } from '../App';
-import { Prev } from 'react-bootstrap/esm/PageItem';
+import {
+  Game_data,
+  Player,
+  Coordinates,
+  StatePong,
+  Button,
+  ButtonState,
+  Msg,
+  MsgState,
+  PaddleProps,
+  StatePaddle,
+  SettingsProps,
+  SettingsState,
+  PropsPong,
+} from "./game.interfaces";
+import FocusTrap from "focus-trap-react";
+import { getUserAvatarQuery } from "../queries/avatarQueries";
+import SoloGame from "./SoloGame";
+import { socket as chatSocket } from "../App";
+import { Navigate } from "react-router-dom";
+import { NotifCxt } from "../App";
+import { Prev } from "react-bootstrap/esm/PageItem";
 
 class Settings extends React.Component<SettingsProps, SettingsState> {
-
   constructor(props: SettingsProps) {
     super(props);
     this.state = { message: this.props.message };
@@ -29,22 +42,28 @@ class Settings extends React.Component<SettingsProps, SettingsState> {
           tabIndex={-1}
           aria-modal="true"
           className="modal-settings"
-          onKeyDown={(event) => { this.props.onKeyDown(event) }}
+          onKeyDown={(event) => {
+            this.props.onKeyDown(event);
+          }}
         >
           <div className="modal-text">
             Press key for moving {this.state.message}
           </div>
-          <button onClick={() => { this.props.onClickClose() }} className="closeButton">X</button>
+          <button
+            onClick={() => {
+              this.props.onClickClose();
+            }}
+            className="closeButton"
+          >
+            X
+          </button>
         </aside>
       </FocusTrap>
     );
-
   }
 }
 
-
 class StartButton extends React.Component<Button, ButtonState> {
-
   constructor(props: Button) {
     super(props);
     this.state = {
@@ -61,40 +80,36 @@ class StartButton extends React.Component<Button, ButtonState> {
   //   };
   // }
   handleClick = () => {
-    console.log("mta");
-    if (!this.state.onQueue)
-    {
+    // console.log("mta");
+    if (!this.state.onQueue) {
       this.setState({ buttonText: "Cancel", onQueue: true });
       // socket.emit("on queue");
       // socket.on("matched" () => {
-      //  
+      //
       // });
-    }
-    else
-    {
+    } else {
       this.setState({ buttonText: "Start", onQueue: false });
     }
-  }
-
-  componentDidUpdate(prevProps: Readonly<Button>, prevState: Readonly<ButtonState>, snapshot?: any): void {
-    console.log(this.state);
-  }
+  };
 
   render() {
     console.log("render");
 
-    const btt = this.state.showButton ? 'unset' : 'none';
+    const btt = this.state.showButton ? "unset" : "none";
     return (
       <div>
-        {this.state.onQueue ?
-          <p>On Queue</p>
-          : null}
-        <button onClick={this.handleClick} style={{ display: `${btt}`, }} className="Start_button">{this.state.buttonText}</button>
+        {this.state.onQueue ? <p>On Queue</p> : null}
+        <button
+          onClick={this.handleClick}
+          style={{ display: `${btt}` }}
+          className="Start_button"
+        >
+          {this.state.buttonText}
+        </button>
       </div>
-    )
+    );
   }
 }
-
 
 // class Ball extends React.Component< Coordinates, {} >
 // {
@@ -144,7 +159,6 @@ class StartButton extends React.Component<Button, ButtonState> {
 //           };
 //         }
 
-
 //         render() {
 //           const disp = this.state.showMsg ? 'unset': 'none';
 //           var message: string;
@@ -163,7 +177,7 @@ class StartButton extends React.Component<Button, ButtonState> {
 //                 break;
 //             case 5:
 //                 message = "Please finish your game before starting a new one";
-//                 break; 
+//                 break;
 //              default:
 //                  message = "error";
 //           }
@@ -171,13 +185,12 @@ class StartButton extends React.Component<Button, ButtonState> {
 //              <div style={{display: `${disp}`,}} className="Message">{message}</div>
 //          )
 //      }
-//      } 
-
+//      }
 
 // class Paddle extends React.Component< PaddleProps, StatePaddle > {
 //     constructor(props: PaddleProps){
 //       super(props);
-//       this.state = {side: props.side, 
+//       this.state = {side: props.side,
 //                     y: props.ystart,
 //                     show: props.show,
 //                 };
@@ -199,7 +212,7 @@ class StartButton extends React.Component<Button, ButtonState> {
 //               style={{
 //                 display: `${show}`,
 //                 top: `${this.state.y}%`,
-//               }} 
+//               }}
 //               className={`${side}`}
 //            />
 //         );
@@ -207,8 +220,8 @@ class StartButton extends React.Component<Button, ButtonState> {
 //     }
 
 export default class Game extends React.Component<PropsPong, StatePong> {
-  static contextType = NotifCxt
-  context!: React.ContextType<typeof NotifCxt>
+  static contextType = NotifCxt;
+  context!: React.ContextType<typeof NotifCxt>;
 
   socketOptions = {
     transportOptions: {
@@ -252,14 +265,15 @@ export default class Game extends React.Component<PropsPong, StatePong> {
       redirectChat: false,
     };
     if (this.props.pvtGame === false)
-      this.socket = io(`${process.env.REACT_APP_BACKEND_SOCKET}`, this.socketOptions);
-    else
-      this.socket = chatSocket;
+      this.socket = io(
+        `${process.env.REACT_APP_BACKEND_SOCKET}`,
+        this.socketOptions
+      );
+    else this.socket = chatSocket;
     // this.onSettingsKeyDown = this.onSettingsKeyDown.bind(this);
     // this.onSettingsClickClose = this.onSettingsClickClose.bind(this);
     // this.quitSoloMode = this.quitSoloMode.bind(this);
   }
-
 
   componentDidMount() {
     // document.onkeydown = this.keyDownInput;
@@ -288,21 +302,21 @@ export default class Game extends React.Component<PropsPong, StatePong> {
     this.socket.on("end_game", (winner: number) =>
       winner === this.state.playerNumber
         ? this.setState({
-          msgType: 2,
-          gameStarted: false,
-          showStartButton: true,
-          buttonState: "New Game",
-          avatarP1URL: "",
-          avatarP2URL: "",
-        })
+            msgType: 2,
+            gameStarted: false,
+            showStartButton: true,
+            buttonState: "New Game",
+            avatarP1URL: "",
+            avatarP2URL: "",
+          })
         : this.setState({
-          msgType: 3,
-          gameStarted: false,
-          showStartButton: true,
-          buttonState: "New Game",
-          avatarP1URL: "",
-          avatarP2URL: "",
-        })
+            msgType: 3,
+            gameStarted: false,
+            showStartButton: true,
+            buttonState: "New Game",
+            avatarP1URL: "",
+            avatarP2URL: "",
+          })
     );
 
     if (this.props.pvtGame && localStorage.getItem("playernb") === "1") {
@@ -310,22 +324,30 @@ export default class Game extends React.Component<PropsPong, StatePong> {
       this.setState({ roomId: RoomId });
       this.setState({ playerNumber: 1, msgType: 4, buttonState: "Cancel" });
       this.socket.on("rejected", (targetName: string) => {
-        this.setState({ roomId: 0, playerNumber: 0, msgType: 0, buttonState: "Start" })
-        this.setState({ redirectChat: true })
-        console.log(targetName + ' rejected')
-        this.context?.setNotifText(targetName + ' rejected the game');
+        this.setState({
+          roomId: 0,
+          playerNumber: 0,
+          msgType: 0,
+          buttonState: "Start",
+        });
+        this.setState({ redirectChat: true });
+        console.log(targetName + " rejected");
+        this.context?.setNotifText(targetName + " rejected the game");
         this.context?.setNotifShow(true);
-      }
-
-      );
+      });
     }
 
     if (this.props.pvtGame && localStorage.getItem("playernb") === "2") {
       let RoomId = Number(localStorage.getItem("roomid")!);
-      this.setState({ roomId: RoomId, playerNumber: 2, msgType: 0, gameStarted: true, showStartButton: false });
+      this.setState({
+        roomId: RoomId,
+        playerNumber: 2,
+        msgType: 0,
+        gameStarted: true,
+        showStartButton: false,
+      });
     }
   }
-
 
   componentWillUnmount() {
     this.socket.disconnect();
@@ -359,7 +381,7 @@ export default class Game extends React.Component<PropsPong, StatePong> {
         roomId: player.roomId,
         playerNumber: player.playerNb,
         msgType: 1,
-      })
+      });
     });
   };
 
@@ -448,8 +470,6 @@ export default class Game extends React.Component<PropsPong, StatePong> {
 
     return (
       <div>
-
-
         {/* {this.state.soloGame ? (
           <SoloGame clickHandler={this.quitSoloMode}></SoloGame>
         ) : (
@@ -532,8 +552,6 @@ export default class Game extends React.Component<PropsPong, StatePong> {
         {/* </div>
             </div>*/}
 
-
-
         <div className="Button-msg-zone">
           {/* <Message
                 showMsg={
@@ -552,7 +570,6 @@ export default class Game extends React.Component<PropsPong, StatePong> {
                 buttonText="Solo mode"
               /> */}
         </div>
-
 
         {/* <div>
               {this.state.isSettingsShown ? ( */}
@@ -580,10 +597,6 @@ export default class Game extends React.Component<PropsPong, StatePong> {
     );
   }
 }
-
-
-
-
 
 // import React, { useRef, useEffect, useState, KeyboardEvent } from "react";
 // import io, { Socket } from "socket.io-client";

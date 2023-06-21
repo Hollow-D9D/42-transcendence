@@ -7,7 +7,7 @@ import { getUserData } from "./userQueries";
 export const twoFAGenerate = async () => {
   try {
     const response = await Api.get("/auth/two-factor");
-    console.log("we've got there", response.data);
+    // console.log("we've got there", response.data);
     return response.data.body.qrCode;
   } catch (err) {
     console.log(err);
@@ -23,7 +23,7 @@ export const twoFAAuth = async (twoFAcode: string, userSignIn: any) => {
       Authorization: `Bearer ${localStorage.getItem("userToken")}`,
     },
   });
-  console.log("response", response);
+  // console.log("response", response);
   return response;
 };
 
@@ -32,7 +32,7 @@ export const twoFAOn = async (code: string) => {
   // let raw = JSON.stringify({
   //   twoFAcode: code,
   // });
-  console.log(code);
+  // console.log(code);
 
   try {
     const response = await Api.get(`/auth/two-factor/enable?token=${code}`, {
@@ -57,7 +57,7 @@ export const twoFAOff = async () => {
         Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
     });
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {

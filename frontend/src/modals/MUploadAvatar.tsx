@@ -28,7 +28,7 @@ export function MUploadAvatar(props: any) {
               newdata: { avatar_url: fileName },
             },
           });
-          console.log(response);
+          // console.log(response);
           const setAvatarToLocalStorage = async () => {
             localStorage.setItem(
               "userPicture",

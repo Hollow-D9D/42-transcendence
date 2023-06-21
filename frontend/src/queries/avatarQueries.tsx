@@ -12,7 +12,7 @@ export const uploadAvatarQuery = async (file: any) => {
     const formData = new FormData();
     formData.append("image", file, file.name);
     const fileProps = await Api.post("/profile/upload", formData);
-    console.log("fileProps:::::", fileProps);
+    // console.log("fileProps:::::", fileProps);
     return fileProps.data.fileName;
   } catch (error) {
     console.error("Error saving image:", error);

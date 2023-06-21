@@ -176,12 +176,12 @@ export class ChatService {
     try {
       const channel = await this.channel(chat_id);
 
-      if (channel.mode != ChannelMode.PRIVATE) {
+      if (channel.mode != ChannelMode.PRIVATE || isInvited) {
         const isChannelMember = channel.members.some(
-          (user) => user.login === login,
+          (user) => (isInvited ? user.nickname : user.login) === login,
         );
         const isBannedFromChannel = channel.blocked.some(
-          (user) => user.login === login,
+          (user) => (isInvited ? user.nickname : user.login) === login,
         );
         if (!isChannelMember && !isBannedFromChannel) {
           // TODO: replace with the hashed one
@@ -191,12 +191,16 @@ export class ChatService {
               (await bcrypt.compare(password, channel.password))) ||
             channel.mode === ChannelMode.PUBLIC
           ) {
-            const user = await this.userRepo.findOne({
-              where: { login: login },
-            });
+            const user = isInvited
+              ? await this.userRepo.findOne({
+                  where: { nickname: login },
+                })
+              : await this.userRepo.findOne({
+                  where: { login: login },
+                });
             channel.members.push(user);
             await this.chatRepo.save(channel);
-            return 'Saved';
+            return user.login;
           }
         }
       }
@@ -225,7 +229,6 @@ export class ChatService {
           (user) => user.login === target,
         );
         if (!isChannelAdmin) {
-
           const user = await this.userRepo.findOne({
             where: { login: target },
           });

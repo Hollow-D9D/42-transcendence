@@ -43,7 +43,6 @@ export default function Preview({
   const [menuEvent, setMenuEvent] = useState<any>(null);
 
   // console.log("global:::::", global.selectedChat);
-  
 
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
@@ -60,20 +59,20 @@ export default function Preview({
       if (data) setPreviews(data);
     });
     socket.on("fetch channel", (value) => {
-      console.log(value);
-      onSelect ( {
-        id : value.id,
-        dm : !value.group,
-        name : value.name,
-        isPassword : value.mode === "PROTECTED",
-        password : value.password,
-        updateAt : "",
-        lastMsg : '',
-        ownerEmail : "",
-        ownerId : -1,
-        isBlocked : false
+      // console.log(value);
+      onSelect({
+        id: value.id,
+        dm: !value.group,
+        name: value.name,
+        isPassword: value.mode === "PROTECTED",
+        password: value.password,
+        updateAt: "",
+        lastMsg: "",
+        ownerEmail: "",
+        ownerId: -1,
+        isBlocked: false,
       });
-    })
+    });
     return () => {
       socket.off("fetch channel");
       socket.off("add preview");
@@ -93,10 +92,8 @@ export default function Preview({
   }, [blockedList, show, hide, current]);
 
   const addPreview = (channelId: number) => {
-
     // current = {
     //   id : channelId,
-
     // }
   };
 
@@ -157,7 +154,6 @@ export default function Preview({
           onSearchMyChat={(channelId) => search(channelId)}
           onSearchPublicChat={(channelId) => addPreview(channelId)}
           updateStatus={updateStatus}
-          
         />
         <AddRoom
           onRequest={() => {
@@ -183,25 +179,21 @@ export default function Preview({
           );
         })}
         <Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
-
           {global.selectedChat?.dm ? (
             <>
               <Item onClick={handleLeave}>delete message</Item>
               {global.selectedChat?.isBlocked ? (
                 <Item onClick={handleUnblockUser}>unblock user</Item>
-              ) : 
-              (
+              ) : (
                 <Item onClick={handleBlockChannel}>block user</Item>
-              )
-              }
+              )}
             </>
           ) : (
             <>
               <Item onClick={handleLeave}>Leave chat</Item>
               {/* <Item onClick={handleBlockChannel}>Block channel</Item> */}
             </>
-          )
-          }
+          )}
         </Menu>
         {/* <Menu id={MENU_DM} theme={theme.dark}></Menu> */}
       </div>
@@ -241,7 +233,11 @@ function ChatSearch({
     // console.log(data);
     // updateStatus = data.id;
 
-    socket.emit("into channel", { chat_id: data.id, login: email, password: "" })
+    socket.emit("into channel", {
+      chat_id: data.id,
+      login: email,
+      password: "",
+    });
     socket.emit("read msgs", data.id);
     socket.emit("get setting", data.id);
     socket.emit("get channel", data.id);
