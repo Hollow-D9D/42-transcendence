@@ -1,4 +1,6 @@
 FROM postgres:15-alpine
+
+EXPOSE 5432
 # https://archive.is/ZmBAq#selection-1497.0-1523.1
 # https://archive.is/tr3yM#selection-1323.0-1326.0
 # COPY init.sql /docker-entrypoint-initdb.d/

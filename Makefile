@@ -10,7 +10,7 @@ endif
 
 
 all: update_ip
-	cd deploy && docker compose -f docker-compose.yml up -d
+	cd deploy && docker compose -f docker-compose.yml up 
 	@echo "\033[1;0mStarting service with host IP: \033[1;33m  http://localhost:3000\033[1;0m"
 
 build: update_ip
