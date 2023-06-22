@@ -121,8 +121,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           throwError(client, 'You are not a member of this channel!');
           return;
         }
-        this.chatService.leaveChannel(query.login, query.chat_id);
-        client.emit('channel left');
+        await this.chatService.leaveChannel(query.login, query.chat_id);
+        const suggest = await this.chatService.getSearchChats(query.login);
+        client.emit('update preview', suggest);
+
+        const roles = await this.chatService.channel(query.chat_id);
+        this.server.to(query.chat_id).emit('fetch owner', [roles.owner]);
+        this.server.to(query.chat_id).emit('fetch admins', roles.admins);
+        this.server.to(query.chat_id).emit(
+          'fetch members',
+          roles.members.filter((elem) => {
+            return (
+              elem.login !== roles.owner.login &&
+              roles.admins.find((e) => {
+                return e.login === elem.login;
+              }) === undefined
+            );
+          }),
+        );
+
         client.emit('fetch_msgs', []);
         client.emit('fetch owner', []);
         client.emit('fetch admins', []);
@@ -199,7 +216,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // all main checks passed
         await this.chatService.create(users, mode, query.name, query.password);
         const suggest = await this.chatService.getSearchChats(query.login);
-        this.server.emit('add preview', suggest);
+        if (mode !== ChannelMode.PRIVATE)
+          this.server.emit('add preview', suggest);
+        else client.emit('add preview', suggest);
       } else {
         throw new Error('Invalid input');
       }

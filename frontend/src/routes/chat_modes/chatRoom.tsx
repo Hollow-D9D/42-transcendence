@@ -175,9 +175,6 @@ function MsgStream({
           </div>
         );
       })}
-      <Menu id={MENU_MSG} style={{ width: "120px", minWidth: "120px" }}>
-        {/* <Item onClick={handleDeleteMsg}>unsend</Item> */}
-      </Menu>
     </div>
   );
 }

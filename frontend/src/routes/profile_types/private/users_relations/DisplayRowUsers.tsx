@@ -35,8 +35,9 @@ export const DisplayRow = (props: any) => {
             }
           >
             <div
-              className={`profile-pic-wrapper ${props.userModel.status === 2 ? "ingame" : ""
-                }`}
+              className={`profile-pic-wrapper ${
+                props.userModel.status === 2 ? "ingame" : ""
+              }`}
             >
               <div
                 className="profile-pic-inside-sm"
@@ -48,14 +49,15 @@ export const DisplayRow = (props: any) => {
               ></div>
             </div>
             <div
-              className={`status-private ${props.userModel.status === 1
-                ? "online"
-                : props.userModel.status === 2
+              className={`status-private ${
+                props.userModel.status === 1
+                  ? "online"
+                  : props.userModel.status === 2
                   ? "ingame"
                   : props.userModel.status === 0
-                    ? "offline"
-                    : ""
-                }`}
+                  ? "offline"
+                  : ""
+              }`}
             ></div>
           </Col>
           <Col
@@ -102,8 +104,7 @@ export const DisplayRow = (props: any) => {
                 username={props.userModel.login}
                 isFriend={props.userModel.isFriend}
               />
-            )
-              : null}
+            ) : null}
           </Col>
         </Row>
       </Container>
@@ -259,7 +260,6 @@ const ButtonsPending = (props: any) => {
   );
 };
 
-
 const ButtonsAdding = (props: any) => {
   const notif = useContext(NotifCxt);
 
@@ -272,7 +272,9 @@ const ButtonsAdding = (props: any) => {
         props.hook(!props.state);
       } else
         notif?.setNotifText(
-          "Could not accept friend request from " + props.userModel.login + " :(."
+          "Could not accept friend request from " +
+            props.userModel.login +
+            " :(."
         );
       notif?.setNotifShow(true);
     };
@@ -281,8 +283,7 @@ const ButtonsAdding = (props: any) => {
 
   return (
     <main>
-
-      {!props.isFriend ?
+      {!props.isFriend ? (
         <Col className="float-end">
           <button
             type="button"
@@ -292,8 +293,9 @@ const ButtonsAdding = (props: any) => {
             Send Request
           </button>
         </Col>
-        : ""
-      }
+      ) : (
+        ""
+      )}
     </main>
   );
 };
