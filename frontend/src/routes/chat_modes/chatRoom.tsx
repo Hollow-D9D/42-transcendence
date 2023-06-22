@@ -132,6 +132,8 @@ function MsgStream({
     });
 
     socket.on("new connection", (msg) => {
+      // console.log(msg);
+
       if (msg.user.login !== localStorage.getItem("userEmail")) {
         notif?.setNotifText(`${msg.user.nickname} is joined!`);
         notif?.setNotifShow(true);
@@ -173,9 +175,6 @@ function MsgStream({
           </div>
         );
       })}
-      <Menu id={MENU_MSG} style={{ width: "120px", minWidth: "120px" }}>
-        {/* <Item onClick={handleDeleteMsg}>unsend</Item> */}
-      </Menu>
     </div>
   );
 }
@@ -238,13 +237,15 @@ function InputArea({
   };
 
   const sendMsg = () => {
-    let data: useMsg = {
-      token: localStorage.getItem("userToken"),
-      chatId: channelId,
-      message: msg,
-    };
-    socket.emit("new_message", data);
-    setMsg("");
+    if (msg !== "") {
+      let data: useMsg = {
+        token: localStorage.getItem("userToken"),
+        chatId: channelId,
+        message: msg,
+      };
+      socket.emit("new_message", data);
+      setMsg("");
+    }
   };
 
   const emojiDisappear = () => {

@@ -20,7 +20,7 @@ export function NewRoomCard({
   onNewRoomRequest,
   updateStatus,
 }: NewRoomCardProps) {
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
   const [, setUserTag] = useState<Tag[]>([]);
   const [roomName, setRoomName] = useState("");
   const [roomPass, setRoomPass] = useState("");
@@ -91,30 +91,11 @@ export function NewRoomCard({
       login: email,
       mode: mode,
     };
-    // console.log(data);
-    // console.log(data);
-    // console.log("aaaaaaaaaaaa");
-
-    // socket.emit("new channel", data, (data: newChannel) => {
-    //   console.log("bbbbbbbbbbbbbb");
-    //   socket.emit("fetch new channel", data);
-    // });
     socket.emit("create", data);
     socket.on("error", () => {
+      
       //TODO HANDLE CREATE ERROR RESPONSES
     });
-    // try {
-    //   const response = await Api.post("/chat/create", {
-    //     body: JSON.stringify(data),
-    //   });
-    //   console.log(response.data.error);
-    // } catch (error) {
-    //   // console.log("-------".repeat(10));
-    //   // console.log(error);
-    // }
-
-    // console.log("aaaaaaaaaaaa");
-
     initVars();
     onNewRoomRequest();
     socket.emit("get search suggest", { login: email });

@@ -22,7 +22,6 @@ export class FriendsService {
       });
       return user;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -35,7 +34,6 @@ export class FriendsService {
       });
       return user;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -59,8 +57,6 @@ export class FriendsService {
 
   async unblockUser(user_id: number, blocked_id: number) {
     try {
-      console.log(user_id, blocked_id);
-      
       const user = await this.userRepo.findOne({ where: { id: user_id }, relations: ['blocked_users'] });
       user.blocked_users = user.blocked_users.filter((user) => user.id !== blocked_id);
       user.save();
@@ -171,14 +167,13 @@ export class FriendsService {
     }
   }
 
-  async searchUsers(login: string){
-    try{
-      console.log(login);
+  async searchUsers(login: string) {
+    try {
       const users = await this.userRepo.find({
-        where : { login : Like(`%${login}%`)},
+        where: { login: Like(`%${login}%`) },
       });
       return users;
-    }catch (err) {
+    } catch (err) {
       throw err;
     }
   }

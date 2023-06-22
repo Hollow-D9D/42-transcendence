@@ -1,3 +1,4 @@
+import { Navigate, useNavigate } from "react-router";
 import { Api } from "../Config/Api";
 import { storeToken } from "./authQueries";
 import { getUserData } from "./userQueries";
@@ -6,7 +7,7 @@ import { getUserData } from "./userQueries";
 export const twoFAGenerate = async () => {
   try {
     const response = await Api.get("/auth/two-factor");
-    console.log("we've got there", response.data);
+    // console.log("we've got there", response.data);
     return response.data.body.qrCode;
   } catch (err) {
     console.log(err);
@@ -22,7 +23,7 @@ export const twoFAAuth = async (twoFAcode: string, userSignIn: any) => {
       Authorization: `Bearer ${localStorage.getItem("userToken")}`,
     },
   });
-  console.log("response", response);
+  // console.log("response", response);
   return response;
 };
 
@@ -31,14 +32,15 @@ export const twoFAOn = async (code: string) => {
   // let raw = JSON.stringify({
   //   twoFAcode: code,
   // });
+  // console.log(code);
+
   try {
     const response = await Api.get(`/auth/two-factor/enable?token=${code}`, {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
     });
-    console.log(response);
-
     return response;
   } catch (err) {
     console.log(err);
@@ -52,9 +54,10 @@ export const twoFAOff = async () => {
     const response = await Api.get(`/auth/two-factor/remove`, {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
     });
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {
@@ -63,7 +66,7 @@ export const twoFAOff = async () => {
 };
 
 const authRawHeader = () => {
-  let token = "bearer " + localStorage.getItem("userToken");
+  let token = "Bearer " + localStorage.getItem("userToken");
   let myHeaders = new Headers();
   myHeaders.append("Authorization", token);
   myHeaders.append("Content-Type", "application/json");
@@ -71,7 +74,7 @@ const authRawHeader = () => {
 };
 
 const fetchPost = async (body: any, url: string, userSignIn: any) => {
-  let fetchUrl = process.env.REACT_APP_BACKEND_URL + "/auth/2fa/" + url;
+  let fetchUrl = process.env.REACT_APP_BACKEND_SOCKET + "/auth/2fa/" + url;
 
   try {
     const response = await fetch(fetchUrl, {

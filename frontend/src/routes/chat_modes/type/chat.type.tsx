@@ -13,6 +13,7 @@ export type chatPreview = {
   dm: boolean;
   name: string;
   isPassword: boolean;
+  password: string;
   updateAt: string;
   lastMsg: string;
   unreadCount?: number;
@@ -45,11 +46,11 @@ export type Tag = {
 };
 
 export type updateChannel = {
-  channelId: number | undefined;
+  chat_id: number | undefined;
   dm: boolean;
-  email: string | null;
+  login: string | null;
   password: string;
-  targetId: number | string;
+  target: number | string;
   private: boolean;
   isPassword: boolean;
   newPassword: string;
@@ -74,16 +75,15 @@ export type oneMsg = {
 };
 
 export type oneUser = {
-  username: string;
+  nickname: string;
   id: number;
-  email: string;
-  isOwner: boolean;
-  isAdmin: boolean;
-  isInvited: boolean;
+  login: string;
+  role: string;
   isMuted: boolean;
   isFriend: boolean;
-  isOnline: boolean;
+  status: number;
   isBlocked: boolean;
+  profpic_url: string;
 };
 
 export type updateUser = {
@@ -98,7 +98,7 @@ export type setting = {
 
 export type mute = {
   duration: number;
-  email: string;
+  login: string;
   channelId: number;
 };
 

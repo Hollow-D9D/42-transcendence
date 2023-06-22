@@ -73,10 +73,13 @@ export default function App() {
     socket.on("game invitation", (game: gameInvitation) => {
       setGameRequest(true);
       setGameInfo(game);
-
       return () => {
         socket.off("game invitation");
       };
+    });
+    // setGameRequest(true);
+    socket.on("error", (data) => {
+      console.log("ERROROOOOROROOR:::: ", data.error);
     });
   }, []);
 

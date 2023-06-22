@@ -23,19 +23,26 @@ export default function TwoFAValidation() {
   // get username from redirect URL
   useEffect(() => {
     const urlUsername = location.search.split("=")[1];
-    console.log("aaaaa");
     if (urlUsername) {
-      localStorage.setItem("userName", urlUsername);
+      localStorage.setItem("userEmail", urlUsername);
+
       navigate("/2FA");
     }
   }, [location.search, navigate]);
+  const [isTokenValid, setIsTokenValid] = useState(false);
+  useEffect(() => {
+
+    if (isTokenValid) {
+      localStorage.setItem("userLogged", "true");
+      navigate("/app/private-profile");
+    }
+  }, [isTokenValid]);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
     const userSignIn = () => {
       let username = localStorage.getItem("userEmail");
-      console.log(username);
       if (username)
         auth.signin(username, () => {
           navigate("/app/private-profile", { replace: true });
@@ -44,9 +51,11 @@ export default function TwoFAValidation() {
     if (username !== "undefined" && username) {
       const twoFAValid = async (username: string) => {
         const result = await twoFAAuth(twoFACode, userSignIn);
-        if (!result) {
+        if (!result || !result.data.body.isTokenValid) {
           notif?.setNotifShow(true);
           notif?.setNotifText("Incorrect code. Please try again.");
+        } else {
+          setIsTokenValid(true);
         }
       };
       twoFAValid(username);

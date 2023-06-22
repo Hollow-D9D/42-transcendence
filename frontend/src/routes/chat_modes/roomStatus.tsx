@@ -48,12 +48,12 @@ export default function RoomStatus({
   const [add, setAdd] = useState<boolean>(false);
   const [invitationTag, setTag] = useState<Tag[]>([]);
 
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
 
   useEffect(() => {
     if (current) {
-      socket.emit("read room status", { channelId: current?.id, email: email });
-      socket.emit("get invitation tags", current?.id);
+      socket.emit("read room status", { channelId: current?.id, login: email });
+      socket.emit("get invitation tags", { chat_id: current?.id });
     }
   }, [updateStatus, current, email]);
 
@@ -69,19 +69,18 @@ export default function RoomStatus({
 
   const handleInvite = (member: Tag) => {
     setAdd(false);
+
     let update: updateChannel = {
-      channelId: current!.id,
-      email: email,
+      chat_id: current!.id,
+      login: member.name,
       password: "",
-      targetId: member.id,
+      target: member.name,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
-    socket.emit("invite to channel", update, () => {
-      socket.emit("fetch new invite");
-    });
+    socket.emit("join channel", update);
   };
 
   const onDelete = (i: number) => {};
@@ -89,7 +88,7 @@ export default function RoomStatus({
   return (
     <div className="chat-status-zone">
       <div className="status-top">
-        {current ? (
+        {role !== "noRole" ? (
           add ? (
             <div className="add-box">
               <ReactTags
@@ -127,7 +126,9 @@ export default function RoomStatus({
       <JoinChannel
         channelId={current?.id}
         outsider={outsider}
-        isPassword={current?.isPassword}
+        isPassword={
+          current?.password !== null && current?.password !== "" ? true : false
+        }
       />
     </div>
   );
@@ -148,16 +149,63 @@ function MemberStatus({
   const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
 
   useEffect(() => {
-    socket.on("fetch owner", (data: oneUser[] | null) => {
-      setOwner(data);
+    socket.on("fetch owner", (data: any) => {
+      // console.log(data);
+      if (data.length === 0) {
+        setOwner([]);
+        return;
+      }
+      setOwner([
+        {
+          nickname: data[0].nickname,
+          login: data[0].login,
+          id: data[0].id,
+          role: "owner",
+          isMuted: false,
+          isFriend: false,
+          status: data[0].status,
+          isBlocked: false,
+          profpic_url: data[0].profpic_url,
+        },
+      ]);
     });
 
-    socket.on("fetch admins", (data: oneUser[] | null) => {
-      setAdmins(data);
+    socket.on("fetch admins", (data: any) => {
+      setAdmins(
+        data.map((elem: any): oneUser => {
+          return {
+            nickname: elem.nickname,
+            login: elem.login,
+            id: elem.id,
+            role: "admin",
+            isMuted: false,
+            isFriend: false,
+            status: elem.status,
+            isBlocked: false,
+            profpic_url: elem.profpic_url,
+          };
+        })
+      );
     });
 
-    socket.on("fetch members", (data: oneUser[] | null) => {
-      setMembers(data);
+    socket.on("fetch members", (data) => {
+      setMembers(
+        data.map((elem: any): oneUser => {
+          // console.log(owner);
+          return {
+            nickname: elem.login,
+            login: elem.login,
+            id: elem.id,
+            role: "member",
+            isMuted: false,
+            isFriend: false,
+            status: elem.status,
+            isBlocked: false,
+            profpic_url: elem.profpic_url,
+          };
+        })
+      );
+      // console.log(members);
     });
 
     socket.on("fetch inviteds", (data: oneUser[] | null) => {
@@ -210,7 +258,7 @@ function MemberStatus({
         role={role}
         blockedList={blockedList}
       />
-      <p
+      {/* <p
         className="status-type"
         style={{ display: inviteds?.length ? "" : "none" }}
       >
@@ -221,7 +269,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
-      />
+      /> */}
     </div>
   );
 }
@@ -237,7 +285,7 @@ function Status({
   role: string;
   blockedList: [];
 }) {
-  const email = localStorage.getItem("userNickname");
+  const email = localStorage.getItem("userEmail");
   const [selData, setSelData] = useState<any>(null);
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
@@ -252,6 +300,15 @@ function Status({
     }
   }, [selData, show, hide, usersStatus, blockedList]);
 
+  useEffect(() => {
+    socket.on("admin success", (payload: any) => {
+      // console.log(payload.role);
+      global.selectedUser.role = payload.role;
+    });
+    return () => {
+      socket.off("admin success");
+    };
+  }, []);
   function handleAddFriend() {
     let update: updateUser = {
       selfEmail: email,
@@ -265,7 +322,7 @@ function Status({
       const invitation: gameInvitation = {
         gameInfo: player,
         inviterId: Number(localStorage.getItem("userID")),
-        inviterName: localStorage.getItem("userName")!,
+        inviterName: localStorage.getItem("userNickname")!,
         targetId: global.selectedUser.id,
       };
       socket.emit("send invitation", invitation);
@@ -278,7 +335,7 @@ function Status({
   function handleMute(mins: number) {
     let update: mute = {
       duration: mins,
-      email: global.selectedUser.email,
+      login: global.selectedUser.login,
       channelId: current!.id,
     };
     socket.emit("mute user", update);
@@ -301,25 +358,28 @@ function Status({
   }
 
   function handleBeAdmin() {
+    // console.log("global.selectedUser", global.selectedUser);
     let update: updateChannel = {
-      channelId: current!.id,
-      email: email,
+      chat_id: current!.id,
+      login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
+    // console.log("update::", update);
+
     socket.emit("be admin", update);
   }
 
   function handleNotAdmin() {
     let update: updateChannel = {
-      channelId: current!.id,
-      email: email,
+      chat_id: current!.id,
+      login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -330,10 +390,10 @@ function Status({
 
   function handleKickOut() {
     let update: updateChannel = {
-      channelId: current!.id,
-      email: email,
+      chat_id: current!.id,
+      login: email,
       password: "",
-      targetId: global.selectedUser.id,
+      target: global.selectedUser.login,
       private: false,
       isPassword: false,
       newPassword: "",
@@ -358,7 +418,7 @@ function Status({
       })}
       <Menu id={JSON.stringify(global.selectedUser)} theme={theme.dark}>
         <Item onClick={handleAddFriend}>add friend</Item>
-        {global.selectedUser?.isOnline ? (
+        {global.selectedUser?.status === 1 ? (
           <Item onClick={handleCreateGame}>invite to a game!</Item>
         ) : (
           <></>
@@ -369,11 +429,12 @@ function Status({
           <Item onClick={handleBlockUser}>block user</Item>
         )}
         <Separator />
-        {role === "owner" && global.selectedUser?.isInvited === false ? (
+        {role === "owner" ? (
+          //  && global.selectedUser?.isInvited === false
           <>
             <Item
               style={{
-                display: global.selectedUser?.isAdmin === false ? "" : "none",
+                display: global.selectedUser?.role === "member" ? "" : "none",
               }}
               onClick={handleBeAdmin}
             >
@@ -381,7 +442,7 @@ function Status({
             </Item>
             <Item
               style={{
-                display: global.selectedUser?.isAdmin === true ? "" : "none",
+                display: global.selectedUser?.role !== "member" ? "" : "none",
               }}
               onClick={handleNotAdmin}
             >
@@ -391,16 +452,29 @@ function Status({
         ) : (
           <></>
         )}
-        {(role === "admin" || role === "owner") &&
-        global.selectedUser?.isInvited === false ? (
+        {role === "admin" || role === "owner" ? (
+          // &&
+          // global.selectedUser?.isInvited === false
           <>
-            <Submenu label="mute">
+            <Submenu
+              style={{
+                display: global.selectedUser?.role !== "owner" ? "" : "none",
+              }}
+              label="mute"
+            >
               <Item onClick={() => handleMute(5)}>5 mins</Item>
               <Item onClick={() => handleMute(10)}>10 mins</Item>
               <Item onClick={() => handleMute(15)}>15 mins</Item>
               <Item onClick={() => handleMute(20)}>20 mins</Item>
             </Submenu>
-            <Item onClick={handleKickOut}>kick out</Item>
+            <Item
+              style={{
+                display: global.selectedUser?.role !== "owner" ? "" : "none",
+              }}
+              onClick={handleKickOut}
+            >
+              kick out
+            </Item>
           </>
         ) : (
           <></>
@@ -416,7 +490,7 @@ function OneStatus({
   setHide,
   blockedList,
 }: {
-  data: any;
+  data: oneUser;
   setSelData: (d: any) => void;
   setHide: (d: any) => void;
   blockedList: [];
@@ -429,7 +503,7 @@ function OneStatus({
 
   useEffect(() => {
     setAvatarURL(data.profpic_url);
-
+    // console.log("data", data);
     // setStatus(data.status);
     let found = data.status;
     switch (found) {
@@ -459,9 +533,11 @@ function OneStatus({
     global.selectedUser.isBlocked = blockedList.find(
       (map: any) => map.id === data.id
     )!;
-    global.selectedUser.isOnline = global.onlineStatus === 1;
+    // global.selectedUser.status = global.onlineStatus;
 
     event.preventDefault();
+    // console.log(":::::::", data);
+
     setSelData({ data: data, event: event });
   };
 
@@ -469,7 +545,7 @@ function OneStatus({
     <div
       style={{ display: data ? "" : "none" }}
       className="one-status"
-      onContextMenu={email !== data?.email ? (e) => handleMenu(e) : undefined}
+      onContextMenu={email !== data?.login ? (e) => handleMenu(e) : undefined}
       onClick={() => navigate("/app/public/" + data?.login)}
     >
       <div
@@ -503,15 +579,16 @@ function JoinChannel({
 
   const handleJoin = () => {
     let update: updateChannel = {
-      channelId: channelId,
-      email: email,
+      chat_id: channelId,
+      login: email,
       password: password,
-      targetId: -1,
+      target: -1,
       private: false,
       isPassword: false,
       newPassword: "",
       dm: false,
     };
+
     socket.emit("join channel", update);
     setPass("");
   };

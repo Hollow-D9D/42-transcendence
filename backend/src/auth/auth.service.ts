@@ -63,7 +63,6 @@ export class AuthService {
   }
 
   createUser(userInfo: any) {
-    console.log('creating user');
     const newUser = this.userRepo.create(userInfo);
     this.userRepo.insert(newUser).then((res) => {
       this.achieveService.addAchievement(res.identifiers[0].id, 'first_login');
@@ -71,7 +70,6 @@ export class AuthService {
   }
 
   async loginUser(userInfo: any) {
-    console.log('login process, jwt');
     try {
       if (await this.checkUser(userInfo.login)) {
         const user = await this.userRepo.findOne({
@@ -123,7 +121,6 @@ export class AuthService {
         body: null,
       };
     } catch (err) {
-      console.log('error logout', err);
       throw err;
     }
   }

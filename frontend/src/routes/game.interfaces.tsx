@@ -64,7 +64,8 @@ export interface Button {
 
 export interface ButtonState {
   showButton: boolean;
-  buttonText?: "Start" | "New Game" | "Cancel";
+  buttonText?: "Start" | "Cancel";
+  onQueue: boolean
 }
 
 export interface SoloButtonProps {

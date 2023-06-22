@@ -16,9 +16,9 @@ export class AuthController {
   @Get()
   /**
    * need to uncomment Redirect decorator first
-  */
+   */
   async getAuth(@Query() query) {
-   try {
+    try {
       const userInfo: any = await this.authService.auth42(
         query.code,
         query.state,
@@ -28,8 +28,6 @@ export class AuthController {
       }
       return await this.authService.loginUser(userInfo);
     } catch (err) {
-      console.log('err', err);
-      
       return {
         error: err,
         body: null,

@@ -24,13 +24,13 @@ export class ChatService {
   /**
    * @param users one (channel) or two (chat) initial members
    * @param mode used to perform the chat/channel and channel mode resolution
-   * @param chat_id of the channel being created
+   * @param name of the channel being created
    * @param password of the PROTECTED channel being created
    */
   async create(
     users: User[],
     mode: ChannelMode,
-    chat_id: number,
+    name: string,
     password: string,
   ) {
     try {
@@ -39,7 +39,7 @@ export class ChatService {
         group: false,
         members: users,
         mode: null,
-        chat_id: null,
+        name: null,
         password: null,
         owner: null,
       };
@@ -49,7 +49,7 @@ export class ChatService {
         // create a channel
         entityLike.group = true;
         entityLike.mode = mode;
-        entityLike.chat_id = chat_id;
+        entityLike.name = name;
         if (mode === ChannelMode.PROTECTED)
           entityLike.password = hashedPassword;
         entityLike.owner = users[0]; // the first one is `login` from request
@@ -113,15 +113,18 @@ export class ChatService {
   async getRole(login: string, chat_id: number) {
     const chat = await this.chatRepo.findOne({
       where: { id: chat_id },
-      relations: ['admins', 'owner'],
+      relations: ['admins', 'owner', 'members'],
     });
     let role: string = null;
 
     if (chat) {
-      if (chat.owner.login == login) role = 'owner';
+      chat.members.forEach((member) => {
+        if (member.login == login) role = 'member';
+      });
       chat.admins.forEach((admin) => {
         if (admin.login == login) role = 'admin';
       });
+      if (chat.owner.login == login) role = 'owner';
     }
     return role;
   }
@@ -135,17 +138,21 @@ export class ChatService {
    * @returns nothing
    */
   async leaveChannel(login: string, chat_id: number) {
-    const channel = await this.channel(chat_id);
-    if (!channel) return;
-    const userToRemove = await channel.members.find(
-      (user) => user.login === login,
-    );
-    if (!userToRemove) return;
-    channel.members = channel.members.filter((user) => user.login !== login);
-    await this.chatRepo.save(channel);
+    try {
+      const channel = await this.channel(chat_id);
+      if (!channel) return;
 
-    if (channel.members.length === 0 || channel.owner.login === login) {
-      await this.chatRepo.remove(channel);
+      const userToRemove = await channel.members.find(
+        (user) => user.login === login,
+      );
+      if (!userToRemove) return;
+      channel.members = channel.members.filter((user) => user.login !== login);
+      await this.chatRepo.save(channel);
+      if (channel.members.length === 0 || channel.owner.login === login) {
+        await this.chatRepo.remove(channel);
+      }
+    } catch (err) {
+      throw err;
     }
   }
 
@@ -160,28 +167,40 @@ export class ChatService {
    * @param chat_id of the channel
    * @param password of the channel
    */
-  async joinChannel(login: string, chat_id: number, password: string) {
+  async joinChannel(
+    login: string,
+    chat_id: number,
+    password: string,
+    isInvited: boolean,
+  ) {
     try {
       const channel = await this.channel(chat_id);
-      if (channel.mode != ChannelMode.PRIVATE) {
+
+      if (channel.mode != ChannelMode.PRIVATE || isInvited) {
         const isChannelMember = channel.members.some(
-          (user) => user.login === login,
+          (user) => (isInvited ? user.nickname : user.login) === login,
         );
         const isBannedFromChannel = channel.blocked.some(
-          (user) => user.login === login,
+          (user) => (isInvited ? user.nickname : user.login) === login,
         );
         if (!isChannelMember && !isBannedFromChannel) {
           // TODO: replace with the hashed one
           if (
+            isInvited ||
             (channel.mode === ChannelMode.PROTECTED &&
               (await bcrypt.compare(password, channel.password))) ||
             channel.mode === ChannelMode.PUBLIC
           ) {
-            const user = await this.userRepo.findOne({
-              where: { login: login },
-            });
+            const user = isInvited
+              ? await this.userRepo.findOne({
+                  where: { nickname: login },
+                })
+              : await this.userRepo.findOne({
+                  where: { login: login },
+                });
             channel.members.push(user);
             await this.chatRepo.save(channel);
+            return user.login;
           }
         }
       }
@@ -494,7 +513,26 @@ export class ChatService {
   async users(logins: string[]): Promise<User[]> {
     return await this.userRepo.find({ where: { login: In(logins) } });
   }
-
+  async notInChannelUsers(chat_id: number) {
+    const users = await this.userRepo.find({ where: {} });
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['members'],
+    });
+    const rtn = users.filter((elem) => {
+      return (
+        chat.members.find((element) => {
+          return element.login === elem.login;
+        }) === undefined
+      );
+    });
+    return rtn.map((elem) => {
+      return {
+        id: elem.id,
+        name: elem.nickname,
+      };
+    });
+  }
   async isBlocked(blocked: string, blocker: string): Promise<boolean> {
     const blockerFound = await this.userRepo.findOne({
       where: { login: blocker },
@@ -512,6 +550,17 @@ export class ChatService {
   async channel(id: number): Promise<Chat> {
     return await this.chatRepo.findOne({
       where: { id: id },
+      relations: ['members', 'admins', 'blocked', 'owner'],
+    });
+  }
+
+  /**
+   * @param name of the channel to return
+   * @returns Chat entity if found, null otherwise
+   */
+  async channelByName(name: string): Promise<Chat> {
+    return await this.chatRepo.findOne({
+      where: { name },
       relations: ['members', 'blocked'],
     });
   }

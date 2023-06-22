@@ -69,7 +69,7 @@ root.render(
             />
             <Route path="leaderboard" element={<LeaderBoard />} />
             <Route path="game" element={<Game />} />
-            <Route path="privateGame" element={<Game pvtGame={true} />} />
+            {/* <Route path="privateGame" element={<Game pvtGame={true} />} /> */}
             <Route path="*" element={<Navigate to="/app/private-profile" />} />
           </Route>
           <Route path="*" element={<Navigate to="/auth/signin" />} />
