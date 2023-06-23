@@ -68,7 +68,7 @@ export default class Chat extends BaseEntity {
   owner: User | null;
 
   // regular many-to-many relation with User with an extra property (expiration)
-  @OneToMany(() => MutedUser, (muteduser) => muteduser)
+  @OneToMany(() => MutedUser, (muteduser) => muteduser.chat)
   mutedUsers: MutedUser[] | null;
 
   // MESSAGE RELATIONS

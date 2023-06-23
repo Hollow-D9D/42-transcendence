@@ -21,11 +21,11 @@ export class MutedUser extends typeorm.BaseEntity {
   })
   expiration: Date;
 
-  @typeorm.ManyToOne(() => Chat, (chat) => chat.id)
+  @typeorm.ManyToOne(() => Chat, (chat) => chat.mutedUsers)
   @typeorm.JoinColumn({ name: 'chat_id' })
   chat: Chat;
 
-  @typeorm.ManyToOne(() => User, (user) => user.id)
+  @typeorm.ManyToOne(() => User, (user) => user.mutedUsers)
   @typeorm.JoinColumn({ name: 'user_id' })
   user: User;
 }

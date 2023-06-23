@@ -98,7 +98,8 @@ export type setting = {
 
 export type mute = {
   duration: number;
-  login: string;
+  login: string | null;
+  target: string;
   channelId: number;
 };
 

@@ -126,6 +126,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('update preview', suggest);
 
         const roles = await this.chatService.channel(query.chat_id);
+        const data = await this.chatService.notInChannelUsers(query.chat_id);
+        this.server.to(query.chat_id).emit('invitation tags', data);
         this.server.to(query.chat_id).emit('fetch owner', [roles.owner]);
         this.server.to(query.chat_id).emit('fetch admins', roles.admins);
         this.server.to(query.chat_id).emit(
@@ -383,7 +385,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const isMember = await this.chatService.isChannelMember(chat_id, login);
       // const password = payload.password || '';
       // await this.chatService.joinChannel(login, chat_id, password);
-
       // join to a room
       const role: string = await this.chatService.getRole(login, chat_id);
       // console.log(role);
@@ -442,16 +443,147 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throwError(client, 'Somexxdhing went wriong!');
     }
   }
-
-  @SubscribeMessage('leave_chat')
-  async handleLeave(client: any, payload: any) {
-    const login = payload.login;
-    const roomName = payload.chat_id;
-    if (!login) throwError(client, 'No login');
-    if (!roomName) throwError(client, 'No chat_id');
-
-    // this.leaveRoom(client, roomName, login);
+  @SubscribeMessage('kick out')
+  async kickFromChannel(client: any, payload: any) {
+    try {
+      if (payload) {
+        if (!payload.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+      }
+      if (!payload.chat_id || !payload.target) {
+        // doesn't have a valid channel `name`/`target` user specified
+        throw 'No valid channel id/target user specified!';
+      }
+      const channelWithName = await this.chatService.channel(payload.chat_id);
+      if (!channelWithName) {
+        // no channel with this id
+        throw 'No channel with this id!';
+      }
+      const userWithLogin = await this.chatService.users([
+        payload.login,
+        payload.target,
+      ]);
+      if (userWithLogin.length !== 2) {
+        // no user with the username login/target
+        throw 'No user with username login/target!';
+      }
+      await this.chatService.kickFromChannel(
+        payload.login,
+        payload.target,
+        payload.chat_id,
+      );
+      const roles = await this.chatService.getChatRoles(payload.chat_id);
+      const data = await this.chatService.notInChannelUsers(payload.chat_id);
+      this.server.to(payload.chat_id).emit('invitation tags', data);
+      this.server.to(payload.chat_id).emit('fetch admins', roles.admins);
+      this.server.to(payload.chat_id).emit(
+        'fetch members',
+        roles.members.filter((elem) => {
+          return (
+            elem.login !== roles.owner.login &&
+            roles.admins.find((e) => {
+              return e.login === elem.login;
+            }) === undefined
+          );
+        }),
+      );
+    } catch (error) {
+      return { error, body: null };
+    }
   }
+
+  @SubscribeMessage('mute user')
+  async muteForChannel(client: any, payload: any) {
+    try {
+      if (payload) {
+        if (!payload.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+        if (!payload.channelId || !payload.target || !payload.duration) {
+          // doesn't have a valid channel `name`/`target` user/mute `duration` specified
+          throw 'No valid channel name/target user/mute duration specified!';
+        }
+        const channelWithName = await this.chatService.channel(
+          payload.channelId,
+        );
+        if (!channelWithName) {
+          // no channel with this name
+          throw 'No channel with this name!';
+        }
+        const userWithLogin = await this.chatService.users([
+          payload.login,
+          payload.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          throw 'No user with username login/target!';
+        }
+        const duration = Number(payload.duration);
+        if (isNaN(duration)) {
+          // duration isn't a number
+          throw 'Invalid mute duration specified!';
+        }
+        this.chatService.muteForChannel(
+          payload.login,
+          payload.target,
+          duration,
+          payload.channelId,
+        );
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  @SubscribeMessage('unmute user')
+  async unmuteForChannel(client: any, payload: any) {
+    try {
+      if (payload) {
+        if (!payload.login) {
+          throw 'Invalid user info!';
+        }
+        if (!payload.channel_id || !payload.target) {
+          // doesn't have a valid channel `name`/`target` user specified
+          throw 'No valid channel name/target user specified!';
+        }
+        const channelWithName = await this.chatService.channel(
+          payload.channel_id,
+        );
+        if (!channelWithName) {
+          // no channel with this name
+          throw 'No channel with this name!';
+        }
+      }
+      const userWithLogin = await this.chatService.users([
+        payload.login,
+        payload.target,
+      ]);
+      if (userWithLogin.length !== 2) {
+        // no user with the username login/target
+        throw 'No user with username login/target!';
+      }
+      this.chatService.unmuteForChannel(
+        payload.login,
+        payload.target,
+        payload.chat_id,
+      );
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  // @SubscribeMessage('leave_chat')
+  // async handleLeave(client: any, payload: any) {
+  //   const login = payload.login;
+  //   const roomName = payload.chat_id;
+  //   if (!login) throwError(client, 'No login');
+  //   if (!roomName) throwError(client, 'No chat_id');
+
+  //   // this.leaveRoom(client, roomName, login);
+  // }
 
   // TODO: check if user is blocked or not
   @SubscribeMessage('new_message')
@@ -467,7 +599,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!sender) throwError(client, 'No sender');
       if (!chat_id) throwError(client, 'No chat_id');
       if (!message) throwError(client, 'No message');
-
+      const isMuted = this.chatService.findMutedInChannel(chat_id, sender.id);
+      if (isMuted) return;
       const msg_id = await this.chatService.addMessage(
         chat_id,
         sender,

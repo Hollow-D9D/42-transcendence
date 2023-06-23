@@ -189,9 +189,10 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
+      // console.log(data);
       setMembers(
         data.map((elem: any): oneUser => {
-          // console.log(owner);
+          console.log(elem);
           return {
             nickname: elem.login,
             login: elem.login,
@@ -331,16 +332,26 @@ function Status({
       navigate("/app/privateGame");
     });
   }
-
+  //TODO
   function handleMute(mins: number) {
     let update: mute = {
+      login: email,
       duration: mins,
-      login: global.selectedUser.login,
+      target: global.selectedUser.login,
       channelId: current!.id,
     };
     socket.emit("mute user", update);
   }
-
+  //TODO
+  function handleUnmute() {
+    let update = {
+      login: email,
+      target: global.selectedUser.login,
+      channelId: current!.id,
+    };
+    socket.emit("unmute user", update);
+  }
+  //TODO
   function handleBlockUser() {
     let update: updateUser = {
       selfEmail: email,
@@ -348,7 +359,7 @@ function Status({
     };
     socket.emit("block user", update);
   }
-
+  //TODO
   function handleUnblockUser() {
     let update: updateUser = {
       selfEmail: email,
@@ -386,6 +397,34 @@ function Status({
       dm: false,
     };
     socket.emit("not admin", update);
+  }
+  //TODO
+  function handleBanUser() {
+    let update: updateChannel = {
+      chat_id: current!.id,
+      login: email,
+      password: "",
+      target: global.selectedUser.login,
+      private: false,
+      isPassword: false,
+      newPassword: "",
+      dm: false,
+    };
+    socket.emit("ban user", update);
+  }
+  //TODO
+  function handleUnbanUser() {
+    let update: updateChannel = {
+      chat_id: current!.id,
+      login: email,
+      password: "",
+      target: global.selectedUser.login,
+      private: false,
+      isPassword: false,
+      newPassword: "",
+      dm: false,
+    };
+    socket.emit("unban user", update);
   }
 
   function handleKickOut() {
@@ -453,29 +492,28 @@ function Status({
           <></>
         )}
         {role === "admin" || role === "owner" ? (
-          // &&
-          // global.selectedUser?.isInvited === false
-          <>
-            <Submenu
-              style={{
-                display: global.selectedUser?.role !== "owner" ? "" : "none",
-              }}
-              label="mute"
-            >
+          <div
+            style={{
+              display: global.selectedUser?.role !== "owner" ? "" : "none",
+            }}
+          >
+            <Submenu label="mute">
               <Item onClick={() => handleMute(5)}>5 mins</Item>
               <Item onClick={() => handleMute(10)}>10 mins</Item>
               <Item onClick={() => handleMute(15)}>15 mins</Item>
               <Item onClick={() => handleMute(20)}>20 mins</Item>
             </Submenu>
-            <Item
-              style={{
-                display: global.selectedUser?.role !== "owner" ? "" : "none",
-              }}
-              onClick={handleKickOut}
-            >
-              kick out
-            </Item>
-          </>
+
+            {global.selectedUser?.isMuted && (
+              <Item onClick={() => handleUnmute()}>unmute</Item>
+            )}
+            {!global.selectedUser?.isBlocked ? (
+              <Item onClick={() => handleBanUser()}>ban</Item>
+            ) : (
+              <Item onClick={() => handleUnbanUser()}>unban</Item>
+            )}
+            <Item onClick={handleKickOut}>kick out</Item>
+          </div>
         ) : (
           <></>
         )}
