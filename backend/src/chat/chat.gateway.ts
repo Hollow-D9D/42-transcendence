@@ -119,12 +119,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // no user with the username login/target
           throw 'No user with username login/target!';
         }
-        this.chatService.banFromChannel(
+        await this.chatService.banFromChannel(
           query.login,
           query.target,
           query.chat_id,
         );
         const chat = await this.chatService.channel(query.chat_id);
+        // console.log(chat.members);
         client.emit('fetch admins', chat.admins);
         client.emit(
           'fetch members',
@@ -135,7 +136,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 return e.login === elem.login;
               }) === undefined
             );
-          }),
+          }) || null,
         );
         client.emit('fetch banned', chat.blocked);
       }
@@ -169,7 +170,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // no user with the username login/target
           throw 'No user with username login/target!';
         }
-        this.chatService.unbanForChannel(
+        await this.chatService.unbanForChannel(
           query.login,
           query.target,
           query.chat_id,
@@ -533,8 +534,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // } else {
       //   throwError(client, 'No permission');
       // }
-      const profile = await this.profileService.getProfile(login);
-      this.server.to(chat_id).emit('new connection', profile);
+      // const profile = await this.profileService.getProfile(login);
+      // this.server.to(chat_id).emit('new connection', profile);
 
       const isInvited = payload.target !== -1 ? true : false;
       const userLogin = await this.chatService.joinChannel(

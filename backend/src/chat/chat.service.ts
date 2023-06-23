@@ -313,6 +313,7 @@ export class ChatService {
         channel.members = channel.members.filter(
           (user) => user.login !== target,
         );
+        console.log(channel.members);
         await this.chatRepo.save(channel);
       }
     }
@@ -361,11 +362,11 @@ export class ChatService {
     if (isChannelAdmin) {
       const isChannelOwner = channel.owner.login === target;
       if (!isChannelOwner) {
-        this.kickFromChannel(login, target, chat_id);
         const user = await this.userRepo.findOne({ where: { login: target } });
         channel.blocked.push(user);
         await this.chatRepo.save(channel);
-        console.log(channel.blocked);
+        await this.kickFromChannel(login, target, chat_id);
+        // console.log(channel.blocked);
       }
     }
   }
@@ -387,12 +388,12 @@ export class ChatService {
       const isBannedFromChannel = channel.blocked.some(
         (user) => user.login === target,
       );
-      console.log(channel.blocked);
+      // console.log(channel.blocked);
       if (isBannedFromChannel) {
         channel.blocked = channel.blocked.filter(
           (user) => user.login != target,
         );
-        this.chatRepo.save(channel);
+        await this.chatRepo.save(channel);
       }
     }
   }
@@ -492,7 +493,7 @@ export class ChatService {
     if (!isTargetChannelMember) return;
     const mutedTarget = await this.findMutedInChannel(chat_id, target);
     if (!mutedTarget) return;
-    this.mutedUserRepo.remove(mutedTarget); // TODO
+    await this.mutedUserRepo.remove(mutedTarget); // TODO
   }
 
   /**

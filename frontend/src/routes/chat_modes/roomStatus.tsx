@@ -220,7 +220,8 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
-      // console.log(data);
+      console.log(data);
+
       setMembers(
         data.map((elem: any): oneUser => {
           console.log(elem);
@@ -317,7 +318,7 @@ function MemberStatus({
         className="status-type"
         style={{ display: banned?.length ? "" : "none" }}
       >
-        Banned
+        BANNED
       </p>
       <Status
         users={banned}
