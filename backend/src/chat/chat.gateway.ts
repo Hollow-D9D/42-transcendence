@@ -15,6 +15,7 @@ import { throwError } from 'src/utils/gateway.utils';
 import { parseToken } from 'src/utils/auth.utils';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
 import { ProfileService } from '../profile/profile.service';
+import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -90,6 +91,106 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (this.rooms[roomName].size === 0) {
         delete this.rooms[roomName];
       }
+    }
+  }
+
+  @SubscribeMessage('ban user')
+  async banFromChannel(client: Socket, query: any) {
+    try {
+      if (query) {
+        if (!query.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+        if (!query.chat_id || !query.target) {
+          // doesn't have a valid channel `name`/`target` user specified
+          throw 'No valid channel name/target user specified!';
+        }
+        const channelWithName = await this.chatService.channel(query.chat_id);
+        if (!channelWithName) {
+          // no channel with this name
+          throw 'No channel with this name!';
+        }
+        const userWithLogin = await this.chatService.users([
+          query.login,
+          query.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          throw 'No user with username login/target!';
+        }
+        this.chatService.banFromChannel(
+          query.login,
+          query.target,
+          query.chat_id,
+        );
+        const chat = await this.chatService.channel(query.chat_id);
+        client.emit('fetch admins', chat.admins);
+        client.emit(
+          'fetch members',
+          chat.members.filter((elem) => {
+            return (
+              elem.login !== chat.owner.login &&
+              chat.admins.find((e) => {
+                return e.login === elem.login;
+              }) === undefined
+            );
+          }),
+        );
+        client.emit('fetch banned', chat.blocked);
+      }
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  @SubscribeMessage('unban user')
+  async unbanForChannel(client: Socket, query: any) {
+    try {
+      if (query) {
+        if (!query.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+        if (!query.chat_id || !query.target) {
+          // doesn't have a valid channel `name`/`target` user specified
+          throw 'No valid channel name/target user specified!';
+        }
+        const channelWithName = await this.chatService.channel(query.chat_id);
+        if (!channelWithName) {
+          // no channel with this name
+          throw 'No channel with this name!';
+        }
+        const userWithLogin = await this.chatService.users([
+          query.login,
+          query.target,
+        ]);
+        if (userWithLogin.length !== 2) {
+          // no user with the username login/target
+          throw 'No user with username login/target!';
+        }
+        this.chatService.unbanForChannel(
+          query.login,
+          query.target,
+          query.chat_id,
+        );
+        const chat = await this.chatService.channel(query.chat_id);
+        client.emit('fetch admins', chat.admins);
+        client.emit(
+          'fetch members',
+          chat.members.filter((elem) => {
+            return (
+              elem.login !== chat.owner.login &&
+              chat.admins.find((e) => {
+                return e.login === elem.login;
+              }) === undefined
+            );
+          }),
+        );
+        client.emit('fetch banned', chat.blocked);
+      }
+    } catch (error) {
+      return { error, body: null };
     }
   }
 
@@ -233,8 +334,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // console.log('chat_id', chat_id, 'login', login);
     try {
       this.joinRoom(client, chat_id, login);
-      const profile = await this.profileService.getProfile(login);
-      this.server.to(chat_id).emit('new connection', profile);
       const messages = await this.chatService.getMessages(chat_id);
       const muteds = await this.chatService.channelMutedUsers(chat_id);
       this.server.to(chat_id).emit('fetch muted', muteds);
@@ -244,7 +343,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const roles = await this.chatService.getChatRoles(chat_id);
       client.emit('fetch owner', [roles.owner]);
       client.emit('fetch admins', roles.admins);
-      this.server.to(chat_id).emit(
+      client.emit(
         'fetch members',
         roles.members.filter((elem) => {
           return (
@@ -255,7 +354,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           );
         }),
       );
-
+      const chatWithBanned = await this.chatService.chatWithBanned(chat_id);
+      client.emit('fetch banned', chatWithBanned.blocked);
       client.emit('fetch role', role);
     } catch (err) {
       throw err;
@@ -399,6 +499,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('fetch owner', []);
         client.emit('fetch admins', []);
         client.emit('fetch members', []);
+        client.emit('fetch banned', []);
       }
     } catch (err) {
       throwError(client, err.message);
@@ -432,6 +533,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // } else {
       //   throwError(client, 'No permission');
       // }
+      const profile = await this.profileService.getProfile(login);
+      this.server.to(chat_id).emit('new connection', profile);
+
       const isInvited = payload.target !== -1 ? true : false;
       const userLogin = await this.chatService.joinChannel(
         login,

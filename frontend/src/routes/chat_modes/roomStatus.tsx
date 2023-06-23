@@ -147,7 +147,7 @@ function MemberStatus({
   const [admins, setAdmins] = useState<oneUser[] | null>([]);
   const [members, setMembers] = useState<oneUser[] | null>([]);
   const [muteds, setMuteds] = useState<string[]>([""]);
-  const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
+  const [banned, setBanned] = useState<oneUser[] | null>([]);
 
   useEffect(() => {
     setMembers(
@@ -207,7 +207,9 @@ function MemberStatus({
             login: elem.login,
             id: elem.id,
             role: "admin",
-            isMuted: false,
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
             isFriend: false,
             status: elem.status,
             isBlocked: false,
@@ -240,8 +242,25 @@ function MemberStatus({
       // console.log(members);
     });
 
-    socket.on("fetch inviteds", (data: oneUser[] | null) => {
-      setInviteds(data);
+    socket.on("fetch banned", (data) => {
+      setBanned(
+        data.map((elem: any): oneUser => {
+          console.log(elem);
+          return {
+            nickname: elem.login,
+            login: elem.login,
+            id: elem.id,
+            role: "banned",
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
+            isFriend: false,
+            status: elem.status,
+            isBlocked: false,
+            profpic_url: elem.profpic_url,
+          };
+        })
+      );
     });
 
     return () => {
@@ -249,7 +268,7 @@ function MemberStatus({
       socket.off("fetch muted");
       socket.off("fetch admins");
       socket.off("fetch members");
-      socket.off("fetch inviteds");
+      socket.off("fetch banned");
     };
   }, [current]);
 
@@ -294,18 +313,19 @@ function MemberStatus({
         blockedList={blockedList}
         mutedList={muteds}
       />
-      {/* <p
+      <p
         className="status-type"
-        style={{ display: inviteds?.length ? "" : "none" }}
+        style={{ display: banned?.length ? "" : "none" }}
       >
-        Invited Users
+        Banned
       </p>
       <Status
-        users={inviteds}
+        users={banned}
         current={current}
         role={role}
         blockedList={blockedList}
-      /> */}
+        mutedList={muteds}
+      />
     </div>
   );
 }
@@ -506,7 +526,7 @@ function Status({
           <Item onClick={handleBlockUser}>block user</Item>
         )}
         <Separator />
-        {role === "owner" ? (
+        {role === "owner" && global.selectedUser?.role !== "banned" ? (
           //  && global.selectedUser?.isInvited === false
           <>
             <Item
@@ -529,7 +549,8 @@ function Status({
         ) : (
           <></>
         )}
-        {role === "admin" || role === "owner" ? (
+        {role === "admin" ||
+        (role === "owner" && global.selectedUser?.role !== "banned") ? (
           <div
             style={{
               display: global.selectedUser?.role !== "owner" ? "" : "none",
@@ -545,15 +566,16 @@ function Status({
             {global.selectedUser?.isMuted && (
               <Item onClick={() => handleUnmute()}>unmute</Item>
             )}
-            {!global.selectedUser?.isBlocked ? (
-              <Item onClick={() => handleBanUser()}>ban</Item>
-            ) : (
-              <Item onClick={() => handleUnbanUser()}>unban</Item>
-            )}
             <Item onClick={handleKickOut}>kick out</Item>
+            <Item onClick={() => handleBanUser()}>ban</Item>
           </div>
         ) : (
-          <></>
+          role === "admin" ||
+          (role === "owner" ? (
+            <Item onClick={() => handleUnbanUser()}>unban</Item>
+          ) : (
+            <></>
+          ))
         )}
       </Menu>
     </>

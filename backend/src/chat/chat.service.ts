@@ -318,6 +318,18 @@ export class ChatService {
     }
   }
 
+  async chatWithBanned(chat_id: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['blocked'],
+    });
+    if (chat)
+      return {
+        blocked: chat.blocked,
+      };
+    else return null;
+  }
+
   async getChatRoles(chat_id: number) {
     const chat = await this.chatRepo.findOne({
       where: { id: chat_id },
@@ -343,14 +355,17 @@ export class ChatService {
    */
   async banFromChannel(login: string, target: string, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    const isChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
-      this.kickFromChannel(login, target, chat_id);
       const isChannelOwner = channel.owner.login === target;
       if (!isChannelOwner) {
+        this.kickFromChannel(login, target, chat_id);
         const user = await this.userRepo.findOne({ where: { login: target } });
         channel.blocked.push(user);
         await this.chatRepo.save(channel);
+        console.log(channel.blocked);
       }
     }
   }
@@ -365,11 +380,14 @@ export class ChatService {
    */
   async unbanForChannel(login: string, target: string, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    const isChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
       const isBannedFromChannel = channel.blocked.some(
-        (user) => user.login === login,
+        (user) => user.login === target,
       );
+      console.log(channel.blocked);
       if (isBannedFromChannel) {
         channel.blocked = channel.blocked.filter(
           (user) => user.login != target,
