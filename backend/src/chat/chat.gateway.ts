@@ -236,6 +236,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const profile = await this.profileService.getProfile(login);
       this.server.to(chat_id).emit('new connection', profile);
       const messages = await this.chatService.getMessages(chat_id);
+      const muteds = await this.chatService.channelMutedUsers(chat_id);
+      this.server.to(chat_id).emit('fetch muted', muteds);
       client.emit('fetch_msgs', messages);
       const settings = await this.chatService.getSettings(chat_id);
       client.emit('setting info', settings);
@@ -532,9 +534,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           duration,
           payload.channelId,
         );
+        const muteds = await this.chatService.channelMutedUsers(
+          payload.channelId,
+        );
+        this.server.to(payload.channelId).emit('fetch muted', muteds);
       }
     } catch (error) {
-      return { error, body: null };
+      throwError(client, error);
     }
   }
 
@@ -545,13 +551,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (!payload.login) {
           throw 'Invalid user info!';
         }
-        if (!payload.channel_id || !payload.target) {
+        if (!payload.chat_id || !payload.target) {
           // doesn't have a valid channel `name`/`target` user specified
           throw 'No valid channel name/target user specified!';
         }
-        const channelWithName = await this.chatService.channel(
-          payload.channel_id,
-        );
+        const channelWithName = await this.chatService.channel(payload.chat_id);
         if (!channelWithName) {
           // no channel with this name
           throw 'No channel with this name!';
@@ -567,9 +571,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       this.chatService.unmuteForChannel(
         payload.login,
-        payload.target,
+        payload.target_id,
         payload.chat_id,
       );
+      const muteds = await this.chatService.channelMutedUsers(
+        payload.channelId,
+      );
+      this.server.to(payload.channelId).emit('fetch muted', muteds);
     } catch (error) {
       return { error, body: null };
     }
@@ -595,11 +603,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const sender = jwtPayload.login;
       const chat_id = payload.chatId;
       const message = payload.message;
-
       if (!sender) throwError(client, 'No sender');
       if (!chat_id) throwError(client, 'No chat_id');
       if (!message) throwError(client, 'No message');
-      const isMuted = this.chatService.findMutedInChannel(chat_id, sender.id);
+      const isMuted = await this.chatService.findMutedInChannel(
+        chat_id,
+        jwtPayload.id,
+      );
       if (isMuted) return;
       const msg_id = await this.chatService.addMessage(
         chat_id,

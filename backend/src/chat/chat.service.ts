@@ -405,8 +405,6 @@ export class ChatService {
     duration: number,
     chat_id: number,
   ) {
-    const expired = await this.getExpiredMutedUsers();
-    console.log(expired);
     const channel = await this.channel(chat_id);
     // console.log(channel);
     const isLoginChannelAdmin =
@@ -442,7 +440,7 @@ export class ChatService {
       const mutedUser = this.mutedUserRepo.create(mutedUserOpts);
       // await this.mutedUserRepo.save(mutedUser); // TODO
       channelWithMuteds.mutedUsers.push(mutedUser);
-      console.log(channelWithMuteds);
+
       await this.mutedUserRepo.save(mutedUser);
       // const data = await this.channelForMute(chat_id);
     }
@@ -464,24 +462,18 @@ export class ChatService {
    * - check that login is an admin of the channel
    * - check that target is a member of the channel and is muted ? unmute
    */
-  async unmuteForChannel(login: string, target: string, chat_id: number) {
+  async unmuteForChannel(login: string, target: number, chat_id: number) {
     const channel = await this.channel(chat_id);
     const isLoginChannelAdmin =
       channel.owner.login === login ||
       channel.admins.some((user) => user.login === login);
     if (!isLoginChannelAdmin) return;
     const isTargetChannelMember = channel.members.some(
-      (user) => user.login === target,
+      (user) => user.id === target,
     );
     if (!isTargetChannelMember) return;
-    const mutedTarget = channel.mutedUsers.find(
-      (mutedUser) => mutedUser.user.login === target,
-    );
+    const mutedTarget = await this.findMutedInChannel(chat_id, target);
     if (!mutedTarget) return;
-    channel.mutedUsers = channel.mutedUsers.filter(
-      (mutedUser) => mutedUser.user.login !== target,
-    );
-    this.chatRepo.save(channel); // TODO
     this.mutedUserRepo.remove(mutedTarget); // TODO
   }
 
@@ -588,6 +580,13 @@ export class ChatService {
     return await this.chatRepo.findOne({
       where: { id: id },
       relations: ['mutedUsers'],
+    });
+  }
+
+  async channelMutedUsers(id: number): Promise<MutedUser[]> {
+    return await this.mutedUserRepo.find({
+      where: { chat: { id: id }, user: {} },
+      relations: ['chat', 'user'],
     });
   }
 

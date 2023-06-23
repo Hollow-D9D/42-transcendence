@@ -146,9 +146,38 @@ function MemberStatus({
   const [owner, setOwner] = useState<oneUser[] | null>([]);
   const [admins, setAdmins] = useState<oneUser[] | null>([]);
   const [members, setMembers] = useState<oneUser[] | null>([]);
+  const [muteds, setMuteds] = useState<string[]>([""]);
   const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
 
   useEffect(() => {
+    setMembers(
+      members?.map((elem): oneUser => {
+        return {
+          nickname: elem.nickname,
+          login: elem.login,
+          id: elem.id,
+          role: "member",
+          isMuted: muteds?.some((e) => {
+            return e === elem.login;
+          }),
+          isFriend: false,
+          status: elem.status,
+          isBlocked: false,
+          profpic_url: elem.profpic_url,
+        };
+      }) || null
+    );
+  }, [muteds]);
+
+  useEffect(() => {
+    socket.on("fetch muted", (data: any) => {
+      setMuteds(
+        data.map((e: any) => {
+          return e.user.login;
+        })
+      );
+    });
+
     socket.on("fetch owner", (data: any) => {
       // console.log(data);
       if (data.length === 0) {
@@ -198,7 +227,9 @@ function MemberStatus({
             login: elem.login,
             id: elem.id,
             role: "member",
-            isMuted: false,
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
             isFriend: false,
             status: elem.status,
             isBlocked: false,
@@ -215,6 +246,7 @@ function MemberStatus({
 
     return () => {
       socket.off("fetch owner");
+      socket.off("fetch muted");
       socket.off("fetch admins");
       socket.off("fetch members");
       socket.off("fetch inviteds");
@@ -234,6 +266,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
       <p
         className="status-type"
@@ -246,6 +279,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
       <p
         className="status-type"
@@ -258,6 +292,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
       {/* <p
         className="status-type"
@@ -280,11 +315,13 @@ function Status({
   current,
   role,
   blockedList,
+  mutedList,
 }: {
   users: oneUser[] | null;
   current: chatPreview | undefined;
   role: string;
   blockedList: [];
+  mutedList: string[];
 }) {
   const email = localStorage.getItem("userEmail");
   const [selData, setSelData] = useState<any>(null);
@@ -347,7 +384,8 @@ function Status({
     let update = {
       login: email,
       target: global.selectedUser.login,
-      channelId: current!.id,
+      target_id: global.selectedUser.id,
+      chat_id: current!.id,
     };
     socket.emit("unmute user", update);
   }
