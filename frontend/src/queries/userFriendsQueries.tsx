@@ -22,7 +22,7 @@ export const getUserFriends = async () => {
   }
 };
 
-export const getFriendFriends = async (username: string) => {
+export const getFriendFriends = async (username: string, str: string) => {
   try {
     const response = await fetch(
       `${process.env.REACT_APP_BACKEND_SOCKET}/profile/friends/friends?login=${username}`,
@@ -36,7 +36,10 @@ export const getFriendFriends = async (username: string) => {
     if (!response.ok) {
       return "error";
     }
-    return result.friends;
+    if (str === "friends")
+      return result.friends;
+    else
+      return result.blocked_users;
   } catch (error) {
     return console.log("error", error);
   }

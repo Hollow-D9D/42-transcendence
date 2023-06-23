@@ -3,40 +3,47 @@ import { Menu, Item } from "react-contexify";
 import { useNavigate } from "react-router-dom";
 import { NotifCxt } from "../App";
 import { addFriendQuery, getFriendFriends } from "../queries/userFriendsQueries";
-import { getOtherUser } from "../queries/otherUserQueries";
-import { setUserInfo } from "../queries/userInfoSlice";
-import { getUserFriends } from "../queries/userFriendsQueries";
 
 export const COnUser = (props: any) => {
   const navigate = useNavigate();
   const notif = useContext(NotifCxt);
-  const [isFriend, setIsFriend] = useState(false);
-  // console.log(props)
-  // Function to handle adding user as friend
-  const handleClick = (otherId: number, otherUsername: string) => {
-    const addFriend = async () => {
-      const result = await addFriendQuery(otherId);
-      if (result !== "error") {
-        notif?.setNotifText("Friend request sent to " + otherUsername + "!");
-      } else notif?.setNotifText("Could not send friend request :(.");
-      notif?.setNotifShow(true);
-    };
-    addFriend();
-  };
+  // const [isInBlocked, setIsInBlocked] = useState<boolean>(false);
 
-  // JSX to display menu items for user
+  // useEffect(() => {
+  //   const fetchDataFriends = async () => {
+  //     const result = await getFriendFriends(props.userModel.username, "");
+  //     if (result.length !== 0) {
+  //       result.some((block: any) => {
+  //         if (block.login === localStorage.getItem("userEmail")) {
+  //           setIsInBlocked(true);
+  //           console.log("isInBlocked", block.login, localStorage.getItem("userEmail"), isInBlocked);
+  //           return
+  //         }
+  //       });
+  //     }
+  //   };
+
+  //   fetchDataFriends()
+
+  //   console.log("login:", props.userModel.username);
+  // })
+
+
   return (
-    <Menu id="onUser">
-      <Item
-        data={{ key: "value" }}
-        onClick={({ props }) => {
-          navigate("/app/public/" + props.userModel.username);
-          window.location.reload();
-        }}
-      >
-        see profile
-      </Item>
-     
-    </Menu>
+
+    (<Menu id="onUser">
+      {
+      // isInBlocked ? null :
+        <Item
+          data={{ key: "value" }}
+          onClick={({ props }) => {
+            navigate("/app/public/" + props.userModel.username);
+            window.location.reload();
+          }}
+        >
+          see profile
+        </Item>}
+
+    </Menu>)
   );
 };

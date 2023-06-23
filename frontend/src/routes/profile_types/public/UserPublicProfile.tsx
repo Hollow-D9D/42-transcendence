@@ -88,6 +88,7 @@ export default function UserProfile() {
   const usersStatus = useContext(UsersStatusCxt);
   const notif = useContext(NotifCxt);
   let params = useParams();
+  const [reloadKey, setReloadKey] = useState(0);
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<userModel>(userInfoInit);
   const [isFetched, setIsFetched] = useState(false);
@@ -123,6 +124,7 @@ export default function UserProfile() {
       const result = await addFriendQuery(otherId);
       if (result !== "error") {
         notif?.setNotifText("Friend request sent to " + otherUsername + "!");
+        setReloadKey((prevKey) => prevKey + 1);
       } else notif?.setNotifText("Could not send friend request :(.");
       notif?.setNotifShow(true);
     };
@@ -134,6 +136,7 @@ export default function UserProfile() {
       const result = await blockUserQuery(otherId);
       if (result !== "error") {
         notif?.setNotifText(otherUsername + " blocked!");
+        setReloadKey((prevKey) => prevKey + 1);
       } else notif?.setNotifText("Could not block user :(.");
       notif?.setNotifShow(true);
     };
@@ -144,7 +147,7 @@ export default function UserProfile() {
   if (localStorage.getItem("userID"))
     myId = Number(localStorage.getItem("userID"));
   return (
-    <main>
+    <main key={reloadKey}>
       {isUser && isFetched ? (
         <main
           className="p-5"

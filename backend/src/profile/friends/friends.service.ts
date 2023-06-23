@@ -30,8 +30,10 @@ export class FriendsService {
     try {
       const user = await this.userRepo.findOne({
         where: { login },
-        relations: ['friends'],
+        relations: ['friends', 'blocked_users'],
       });
+      console.log(user);
+      
       return user;
     } catch (error) {
       throw error;
@@ -171,6 +173,7 @@ export class FriendsService {
     try {
       const users = await this.userRepo.find({
         where: { login: Like(`%${login}%`) },
+        relations: ['blocked_users'],
       });
       return users;
     } catch (err) {
