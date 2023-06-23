@@ -13,8 +13,8 @@ services:
     env_file: ${DB_PATH}/.env
     expose:
       - 5432
-    ports:
-      - 5432:5432
+    # ports:
+    #   - 5432:5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: u8Wqc7ABxC6RxxenPCT&
@@ -41,8 +41,10 @@ services:
       context: ${BACK_PATH} # maybe just replace with regular one-line build?
       dockerfile: ${BACK_PATH}/Dockerfile
     restart: always
-    environment:
-      - name=value
+    expose:
+      - 3001
+    # environment:
+    #   - name=value
     depends_on: 
       - database
     networks:
@@ -68,9 +70,9 @@ services:
     volumes:
       - ${FRONT_PATH}:/app
     ports:
-      # - "$HOST_IP:3000:3000"
       - "3000:3000"
-    # restart: unless-stopped
+      # - "$HOST_IP:3000:3000"
+    restart: unless-stopped
     networks:
       - backend
     depends_on:
