@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../../App";
 import { ItableRow, IUserStatus } from "../../../globals/Interfaces";
 import { getFriendFriends } from "../../../queries/userFriendsQueries";
-import { COnUser } from "../../../ContextMenus/COnUser";
 
 export default function DisplayUserFriends(props: any) {
   const usersStatus = useContext(UsersStatusCxt);
@@ -28,7 +27,7 @@ export default function DisplayUserFriends(props: any) {
   useEffect(() => {
     const fetchDataFriends = async () => {
 
-      const result = await getFriendFriends(props.userInfo.username);
+      const result = await getFriendFriends(props.userInfo.username, "friends");
       if (result !== "error") return result;
     };
 
@@ -104,7 +103,7 @@ export default function DisplayUserFriends(props: any) {
                         userModel={h.userModel}
                         myId={props.myId}
                       />
-                      
+
                     );
                   })
                 ) : (
@@ -124,6 +123,27 @@ export default function DisplayUserFriends(props: any) {
 const DisplayFriendsRow = (props: any) => {
   const { show } = useContextMenu();
   const navigate = useNavigate();
+
+  const [isInBlocked, setIsInBlocked] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchDataFriends = async () => {
+      const result = await getFriendFriends(props.userModel.login, "");
+      if (result && result.length !== 0) {
+        result.some((block: any) => {
+          if (block.login === localStorage.getItem("userEmail")) {
+            setIsInBlocked(true);
+            console.log("isInBlocked", block.login, localStorage.getItem("userEmail"), isInBlocked);
+            return
+          }
+        });
+      }
+    };
+
+    fetchDataFriends()
+
+    console.log("login:", props.userModel.login);
+  })
 
   function displayMenu(
     e: React.MouseEvent<HTMLElement>,
@@ -162,8 +182,11 @@ const DisplayFriendsRow = (props: any) => {
                   backgroundPosition: "center",
                 }}
                 id="clickableIcon"
+
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
-                  displayMenu(e, props.userModel.id, props.userModel.login)
+                  if (!isInBlocked) {
+                    displayMenu(e, props.userModel.id, props.userModel.login)
+                  }
                 }
                 }
               ></div>
@@ -184,7 +207,9 @@ const DisplayFriendsRow = (props: any) => {
             id="clickableIcon"
             className="text-left public-hover"
             onClick={(e: React.MouseEvent<HTMLElement>) => {
-              displayMenu(e, props.userModel.id, props.userModel.login)
+              if (!isInBlocked) {
+                displayMenu(e, props.userModel.id, props.userModel.login)
+              }
             }
             }
           >
