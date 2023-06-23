@@ -59,7 +59,7 @@ export default function Preview({
       if (data) setPreviews(data);
     });
     socket.on("fetch channel", (value) => {
-      // console.log(value);
+      console.log("fetchChannel");
       onSelect({
         id: value.id,
         dm: !value.group,

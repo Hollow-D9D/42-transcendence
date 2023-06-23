@@ -132,7 +132,7 @@ function MsgStream({
     });
 
     socket.on("new connection", (msg) => {
-      // console.log(msg);
+      console.log(msg);
 
       if (msg.user.login !== localStorage.getItem("userEmail")) {
         notif?.setNotifText(`${msg.user.nickname} is joined!`);

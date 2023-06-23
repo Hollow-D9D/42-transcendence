@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Chat, User, MutedUser, Message } from 'src/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ChannelMode } from 'src/typeorm/channelmode.enum';
-import { Repository, In } from 'typeorm';
+import { Repository, In, LessThan } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 interface chatSettings {
@@ -17,7 +17,7 @@ export class ChatService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Message)
     private readonly messageRepo: Repository<Message>,
-    @InjectRepository(User)
+    @InjectRepository(MutedUser)
     private readonly mutedUserRepo: Repository<MutedUser>,
   ) {}
 
@@ -300,7 +300,9 @@ export class ChatService {
    */
   async kickFromChannel(login: string, target: string, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    const isChannelAdmin =
+      channel.admins.some((user) => user.login === login) ||
+      channel.owner.login === login;
     if (isChannelAdmin) {
       const isChannelMember = channel.members.some(
         (user) => user.login === target,
@@ -311,9 +313,22 @@ export class ChatService {
         channel.members = channel.members.filter(
           (user) => user.login !== target,
         );
+        console.log(channel.members);
         await this.chatRepo.save(channel);
       }
     }
+  }
+
+  async chatWithBanned(chat_id: number) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chat_id },
+      relations: ['blocked'],
+    });
+    if (chat)
+      return {
+        blocked: chat.blocked,
+      };
+    else return null;
   }
 
   async getChatRoles(chat_id: number) {
@@ -341,14 +356,17 @@ export class ChatService {
    */
   async banFromChannel(login: string, target: string, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    const isChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
-      this.kickFromChannel(login, target, chat_id);
       const isChannelOwner = channel.owner.login === target;
       if (!isChannelOwner) {
         const user = await this.userRepo.findOne({ where: { login: target } });
         channel.blocked.push(user);
         await this.chatRepo.save(channel);
+        await this.kickFromChannel(login, target, chat_id);
+        // console.log(channel.blocked);
       }
     }
   }
@@ -363,18 +381,30 @@ export class ChatService {
    */
   async unbanForChannel(login: string, target: string, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isChannelAdmin = channel.admins.some((user) => user.login === login);
+    const isChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (isChannelAdmin) {
       const isBannedFromChannel = channel.blocked.some(
-        (user) => user.login === login,
+        (user) => user.login === target,
       );
+      // console.log(channel.blocked);
       if (isBannedFromChannel) {
         channel.blocked = channel.blocked.filter(
           (user) => user.login != target,
         );
-        this.chatRepo.save(channel);
+        await this.chatRepo.save(channel);
       }
     }
+  }
+
+  async getExpiredMutedUsers(): Promise<MutedUser[]> {
+    const currentDate = new Date();
+    return this.mutedUserRepo.find({
+      where: {
+        expiration: LessThan(currentDate),
+      },
+    });
   }
 
   /**
@@ -387,6 +417,7 @@ export class ChatService {
    * - check that duration isn't more than 24h and isn't less than 1m
    * - check that target is a member of the channel and isn't its owner ? mute the user (that is replace the old mute with the new one)
    */
+
   async muteForChannel(
     login: string,
     target: string,
@@ -394,9 +425,10 @@ export class ChatService {
     chat_id: number,
   ) {
     const channel = await this.channel(chat_id);
-    const isLoginChannelAdmin = channel.admins.some(
-      (user) => user.login === login,
-    );
+    // console.log(channel);
+    const isLoginChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (!isLoginChannelAdmin) return;
     if (!Number.isInteger(duration) || duration < 1 || duration > 1440) return;
     const userToBeMuted = channel.members.find((user) => user.login === target);
@@ -406,26 +438,40 @@ export class ChatService {
     const expiration = new Date( // expiration = now + duration minutes
       new Date().setMinutes(new Date().getMinutes() + duration),
     );
-    const alreadyMutedUser = channel.mutedUsers.find(
-      (mutedUser) => mutedUser.user.login === target,
+    const alreadyMutedUser = await this.findMutedInChannel(
+      chat_id,
+      userToBeMuted.id,
     );
+    // console.log(alreadyMutedUser);
+    // console.log('hey:::: ', alreadyMutedUser);
     if (alreadyMutedUser) {
       // update muted user's deadline if found
       alreadyMutedUser.expiration = expiration;
       await this.mutedUserRepo.save(alreadyMutedUser);
     } else {
+      const channelWithMuteds = await this.channelMuteds(chat_id);
       // insert a new muted user entry if not found
       const mutedUserOpts = {
-        chat: channel,
+        chat: channelWithMuteds,
         user: userToBeMuted,
         expiration: expiration,
       };
       const mutedUser = this.mutedUserRepo.create(mutedUserOpts);
       // await this.mutedUserRepo.save(mutedUser); // TODO
-      channel.mutedUsers.push(mutedUser);
-      await this.chatRepo.save(channel);
+      channelWithMuteds.mutedUsers.push(mutedUser);
+
+      await this.mutedUserRepo.save(mutedUser);
+      // const data = await this.channelForMute(chat_id);
     }
   }
+
+  //TODO paste this logic to make it a background task
+  // setInterval(async () => {
+  //   const expiredMutedUsers = await this.getExpiredMutedUsers();
+  //   for (const mutedUser of expiredMutedUsers) {
+  //     await this.unmuteUser(mutedUser);
+  //   }
+  // }, 60000);//every minute
 
   /**
    * @param login who's trying to unmute a user
@@ -435,25 +481,19 @@ export class ChatService {
    * - check that login is an admin of the channel
    * - check that target is a member of the channel and is muted ? unmute
    */
-  async unmuteForChannel(login: string, target: string, chat_id: number) {
+  async unmuteForChannel(login: string, target: number, chat_id: number) {
     const channel = await this.channel(chat_id);
-    const isLoginChannelAdmin = channel.admins.some(
-      (user) => user.login === login,
-    );
+    const isLoginChannelAdmin =
+      channel.owner.login === login ||
+      channel.admins.some((user) => user.login === login);
     if (!isLoginChannelAdmin) return;
     const isTargetChannelMember = channel.members.some(
-      (user) => user.login === target,
+      (user) => user.id === target,
     );
     if (!isTargetChannelMember) return;
-    const mutedTarget = channel.mutedUsers.find(
-      (mutedUser) => mutedUser.user.login === target,
-    );
+    const mutedTarget = await this.findMutedInChannel(chat_id, target);
     if (!mutedTarget) return;
-    channel.mutedUsers = channel.mutedUsers.filter(
-      (mutedUser) => mutedUser.user.login !== target,
-    );
-    this.chatRepo.save(channel); // TODO
-    this.mutedUserRepo.remove(mutedTarget); // TODO
+    await this.mutedUserRepo.remove(mutedTarget); // TODO
   }
 
   /**
@@ -474,6 +514,7 @@ export class ChatService {
         where: { login: sender_login },
       });
       if (!sender) throw new Error('No user found!');
+
       const msg = new Message();
       msg.content = message;
       msg.sender = sender;
@@ -551,6 +592,30 @@ export class ChatService {
     return await this.chatRepo.findOne({
       where: { id: id },
       relations: ['members', 'admins', 'blocked', 'owner'],
+    });
+  }
+
+  async channelMuteds(id: number): Promise<Chat> {
+    return await this.chatRepo.findOne({
+      where: { id: id },
+      relations: ['mutedUsers'],
+    });
+  }
+
+  async channelMutedUsers(id: number): Promise<MutedUser[]> {
+    return await this.mutedUserRepo.find({
+      where: { chat: { id: id }, user: {} },
+      relations: ['chat', 'user'],
+    });
+  }
+
+  async findMutedInChannel(
+    chat_id: number,
+    user_id: number,
+  ): Promise<MutedUser> {
+    return await this.mutedUserRepo.findOne({
+      where: { chat: { id: chat_id }, user: { id: user_id } },
+      relations: ['chat', 'user'],
     });
   }
 

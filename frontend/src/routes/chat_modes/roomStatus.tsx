@@ -146,9 +146,38 @@ function MemberStatus({
   const [owner, setOwner] = useState<oneUser[] | null>([]);
   const [admins, setAdmins] = useState<oneUser[] | null>([]);
   const [members, setMembers] = useState<oneUser[] | null>([]);
-  const [inviteds, setInviteds] = useState<oneUser[] | null>([]);
+  const [muteds, setMuteds] = useState<string[]>([""]);
+  const [banned, setBanned] = useState<oneUser[] | null>([]);
 
   useEffect(() => {
+    setMembers(
+      members?.map((elem): oneUser => {
+        return {
+          nickname: elem.nickname,
+          login: elem.login,
+          id: elem.id,
+          role: "member",
+          isMuted: muteds?.some((e) => {
+            return e === elem.login;
+          }),
+          isFriend: false,
+          status: elem.status,
+          isBlocked: false,
+          profpic_url: elem.profpic_url,
+        };
+      }) || null
+    );
+  }, [muteds]);
+
+  useEffect(() => {
+    socket.on("fetch muted", (data: any) => {
+      setMuteds(
+        data.map((e: any) => {
+          return e.user.login;
+        })
+      );
+    });
+
     socket.on("fetch owner", (data: any) => {
       // console.log(data);
       if (data.length === 0) {
@@ -178,7 +207,9 @@ function MemberStatus({
             login: elem.login,
             id: elem.id,
             role: "admin",
-            isMuted: false,
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
             isFriend: false,
             status: elem.status,
             isBlocked: false,
@@ -189,15 +220,19 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
+      console.log(data);
+
       setMembers(
         data.map((elem: any): oneUser => {
-          // console.log(owner);
+          console.log(elem);
           return {
             nickname: elem.login,
             login: elem.login,
             id: elem.id,
             role: "member",
-            isMuted: false,
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
             isFriend: false,
             status: elem.status,
             isBlocked: false,
@@ -208,15 +243,33 @@ function MemberStatus({
       // console.log(members);
     });
 
-    socket.on("fetch inviteds", (data: oneUser[] | null) => {
-      setInviteds(data);
+    socket.on("fetch banned", (data) => {
+      setBanned(
+        data.map((elem: any): oneUser => {
+          console.log(elem);
+          return {
+            nickname: elem.login,
+            login: elem.login,
+            id: elem.id,
+            role: "banned",
+            isMuted: muteds?.some((e) => {
+              return e === elem.login;
+            }),
+            isFriend: false,
+            status: elem.status,
+            isBlocked: false,
+            profpic_url: elem.profpic_url,
+          };
+        })
+      );
     });
 
     return () => {
       socket.off("fetch owner");
+      socket.off("fetch muted");
       socket.off("fetch admins");
       socket.off("fetch members");
-      socket.off("fetch inviteds");
+      socket.off("fetch banned");
     };
   }, [current]);
 
@@ -233,6 +286,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
       <p
         className="status-type"
@@ -245,6 +299,7 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
       <p
         className="status-type"
@@ -257,19 +312,21 @@ function MemberStatus({
         current={current}
         role={role}
         blockedList={blockedList}
+        mutedList={muteds}
       />
-      {/* <p
+      <p
         className="status-type"
-        style={{ display: inviteds?.length ? "" : "none" }}
+        style={{ display: banned?.length ? "" : "none" }}
       >
-        Invited Users
+        BANNED
       </p>
       <Status
-        users={inviteds}
+        users={banned}
         current={current}
         role={role}
         blockedList={blockedList}
-      /> */}
+        mutedList={muteds}
+      />
     </div>
   );
 }
@@ -279,11 +336,13 @@ function Status({
   current,
   role,
   blockedList,
+  mutedList,
 }: {
   users: oneUser[] | null;
   current: chatPreview | undefined;
   role: string;
   blockedList: [];
+  mutedList: string[];
 }) {
   const email = localStorage.getItem("userEmail");
   const [selData, setSelData] = useState<any>(null);
@@ -331,16 +390,27 @@ function Status({
       navigate("/app/privateGame");
     });
   }
-
+  //TODO
   function handleMute(mins: number) {
     let update: mute = {
+      login: email,
       duration: mins,
-      login: global.selectedUser.login,
+      target: global.selectedUser.login,
       channelId: current!.id,
     };
     socket.emit("mute user", update);
   }
-
+  //TODO
+  function handleUnmute() {
+    let update = {
+      login: email,
+      target: global.selectedUser.login,
+      target_id: global.selectedUser.id,
+      chat_id: current!.id,
+    };
+    socket.emit("unmute user", update);
+  }
+  //TODO
   function handleBlockUser() {
     let update: updateUser = {
       selfEmail: email,
@@ -348,7 +418,7 @@ function Status({
     };
     socket.emit("block user", update);
   }
-
+  //TODO
   function handleUnblockUser() {
     let update: updateUser = {
       selfEmail: email,
@@ -386,6 +456,34 @@ function Status({
       dm: false,
     };
     socket.emit("not admin", update);
+  }
+  //TODO
+  function handleBanUser() {
+    let update: updateChannel = {
+      chat_id: current!.id,
+      login: email,
+      password: "",
+      target: global.selectedUser.login,
+      private: false,
+      isPassword: false,
+      newPassword: "",
+      dm: false,
+    };
+    socket.emit("ban user", update);
+  }
+  //TODO
+  function handleUnbanUser() {
+    let update: updateChannel = {
+      chat_id: current!.id,
+      login: email,
+      password: "",
+      target: global.selectedUser.login,
+      private: false,
+      isPassword: false,
+      newPassword: "",
+      dm: false,
+    };
+    socket.emit("unban user", update);
   }
 
   function handleKickOut() {
@@ -429,7 +527,7 @@ function Status({
           <Item onClick={handleBlockUser}>block user</Item>
         )}
         <Separator />
-        {role === "owner" ? (
+        {role === "owner" && global.selectedUser?.role !== "banned" ? (
           //  && global.selectedUser?.isInvited === false
           <>
             <Item
@@ -452,32 +550,33 @@ function Status({
         ) : (
           <></>
         )}
-        {role === "admin" || role === "owner" ? (
-          // &&
-          // global.selectedUser?.isInvited === false
-          <>
-            <Submenu
-              style={{
-                display: global.selectedUser?.role !== "owner" ? "" : "none",
-              }}
-              label="mute"
-            >
+        {role === "admin" ||
+        (role === "owner" && global.selectedUser?.role !== "banned") ? (
+          <div
+            style={{
+              display: global.selectedUser?.role !== "owner" ? "" : "none",
+            }}
+          >
+            <Submenu label="mute">
               <Item onClick={() => handleMute(5)}>5 mins</Item>
               <Item onClick={() => handleMute(10)}>10 mins</Item>
               <Item onClick={() => handleMute(15)}>15 mins</Item>
               <Item onClick={() => handleMute(20)}>20 mins</Item>
             </Submenu>
-            <Item
-              style={{
-                display: global.selectedUser?.role !== "owner" ? "" : "none",
-              }}
-              onClick={handleKickOut}
-            >
-              kick out
-            </Item>
-          </>
+
+            {global.selectedUser?.isMuted && (
+              <Item onClick={() => handleUnmute()}>unmute</Item>
+            )}
+            <Item onClick={handleKickOut}>kick out</Item>
+            <Item onClick={() => handleBanUser()}>ban</Item>
+          </div>
         ) : (
-          <></>
+          role === "admin" ||
+          (role === "owner" ? (
+            <Item onClick={() => handleUnbanUser()}>unban</Item>
+          ) : (
+            <></>
+          ))
         )}
       </Menu>
     </>
