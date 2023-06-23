@@ -27,6 +27,7 @@
     ]
   },
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
@@ -50,7 +51,7 @@
     "react-redux": "^8.0.7",
     "react-router-dom": "^6.3.0",
     "react-scripts": "^5.0.1",
-    "react-search-autocomplete": "^7.2.2",
+    "react-search-autocomplete": "^8.5.2",
     "react-switch": "^7.0.0",
     "react-tag-autocomplete": "^6.3.0",
     "react-tsparticles": "^2.1.0",

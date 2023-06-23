@@ -10,12 +10,12 @@ endif
 
 
 all: update_ip
-	cd deploy && docker compose -f docker-compose.yml up 
-	@echo "\033[1;0mStarting service with host IP: \033[1;33m  http://localhost:3000\033[1;0m"
+	@cd deploy && docker compose -f docker-compose.yml up -d
+	@echo "\033[1;0mStarting service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 build: update_ip
 	cd deploy && docker compose -f docker-compose.yml up -d --build
-	@echo "\033[1;0mBuilding service with host IP: \033[1;33m  http://localhost:3000\033[1;0m"
+	@echo "\033[1;0mBuilding service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 stop:
 	cd deploy && docker-compose stop
@@ -30,15 +30,16 @@ fclean: clean
 re:	fclean all
 
 update_ip:
-	@if [ -f .env ]; then \
-		if grep -q '^HOST_IP=' .env; then \
-			sed -i~ 's/^HOST_IP=.*/HOST_IP=${HOST_IP}/' .env; \
+	@if [ -f deploy/.env ]; then \
+		if grep -q '^HOST_IP=' deploy/.env; then \
+			sed -i~ 's/^HOST_IP=.*/HOST_IP=${HOST_IP}/' deploy/.env; \
 		else \
-			echo 'HOST_IP=${HOST_IP}' >> .env; \
+			echo 'HOST_IP=${HOST_IP}' >> deploy/.env; \
 		fi \
 	else \
-		echo '.env file not found'; \
+		echo 'deploy/.env file not found'; \
 	fi
+	@rm deploy/.env~
 
 f:
 	docker exec frontend sh -c "rm -rf /app/src/*"

@@ -11,7 +11,7 @@
   --basic-color-yellow: #fee440;
   --basic-color-red: #ff0000;
   /* Cards */
-  --cards-color-gray-up: #2e3238;
+  --cards-color-gray-up: #191717;
   --cards-color-gray: #31353c;
   --cards-color-blue: #4361ee;
   /* Buttons */
@@ -51,12 +51,15 @@
 /* GENERAL CLASSES */
 
 .App {
-  background-color: var(--basic-color-background);
+  background-image: url(../public/background.jpg);
+  /* background-color: var(--basic-color-background); */
+  background-size:cover;
+  background-position:initial;
   font-family: "Roboto" sans-serif;
   color: var(--text-color-white);
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow:auto;
 }
 
 /* .Home {
@@ -106,7 +109,7 @@
 .submit-button {
   margin-left: 30px;
   background: var(--buttons-color-pink);
-  box-shadow: 2px 3.5px 15px #1f2427, -2px -3.5px 15px #485057;
+  box-shadow: 2px 3.5px 15px #a819c8, -2px -3.5px 15px #54bae9;
   transition: 0.2s ease;
   border: none;
   outline: none;
