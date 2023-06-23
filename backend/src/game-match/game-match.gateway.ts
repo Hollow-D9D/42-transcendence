@@ -97,8 +97,7 @@ export class GameMatchGateway implements OnGatewayInit {
   async handleEndGame(client: Socket, payload: any) {
     try {
       if (!payload.login) throw new Error('No login provided!');
-      // this.checkEndGameValid(payload.stats);
-      // const reponse = await 
+      // const reponse = await
     } catch (err) {
       throwError(client, err.message);
     }

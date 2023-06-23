@@ -5,11 +5,22 @@ services:
 
 # DB
   database:
-    image: database:v1
+    image: postgres:15-alpine
     container_name: database
-    build: ${DB_PATH}
+    # build: ${DB_PATH}
     restart: always
+    user: postgres
     env_file: ${DB_PATH}/.env
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: u8Wqc7ABxC6RxxenPCT&
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - backend
     volumes:
       - type: bind
         source: ${PGDATA_PATH}
@@ -30,6 +41,8 @@ services:
       context: ${BACK_PATH} # maybe just replace with regular one-line build?
       dockerfile: ${BACK_PATH}/Dockerfile
     restart: always
+    environment:
+      - name=value
     depends_on: 
       - database
     networks:
@@ -62,7 +75,7 @@ services:
       - backend
     depends_on:
       - backend
-    # env_file: ${FRONT_PATH}/.env
+    env_file: ${FRONT_PATH}/.env
 
 
 networks:
