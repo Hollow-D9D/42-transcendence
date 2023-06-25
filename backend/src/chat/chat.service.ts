@@ -96,11 +96,12 @@ export class ChatService {
     try {
       const user = await this.userRepo.findOne({
         where: { login },
-        relations: ['chatsMemberOf'],
+        relations: ['friends'],
       });
       const publics = await this.chatRepo.find({
         where: [{ mode: ChannelMode.PUBLIC }, { mode: ChannelMode.PROTECTED }],
       });
+      
       const merged = user.chatsMemberOf
         .filter((obj1) => !publics.find((obj2) => obj1.id === obj2.id))
         .concat(publics);
@@ -465,14 +466,6 @@ export class ChatService {
     }
   }
 
-  //TODO paste this logic to make it a background task
-  // setInterval(async () => {
-  //   const expiredMutedUsers = await this.getExpiredMutedUsers();
-  //   for (const mutedUser of expiredMutedUsers) {
-  //     await this.unmuteUser(mutedUser);
-  //   }
-  // }, 60000);//every minute
-
   /**
    * @param login who's trying to unmute a user
    * @param target the to-be-unmuted member
@@ -494,6 +487,13 @@ export class ChatService {
     const mutedTarget = await this.findMutedInChannel(chat_id, target);
     if (!mutedTarget) return;
     await this.mutedUserRepo.remove(mutedTarget); // TODO
+  }
+
+  async circularUnmute() {
+    const expiredMutedUsers = await this.getExpiredMutedUsers();
+    for (const mutedUser of expiredMutedUsers) {
+      await mutedUser.remove();
+    }
   }
 
   /**
@@ -543,7 +543,7 @@ export class ChatService {
     try {
       const message = this.messageRepo.findOne({
         where: { id: message_id },
-        relations: ['sender'],
+        relations: ['sender', 'chat'],
       });
       return message;
     } catch (err) {
