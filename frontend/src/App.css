@@ -51,8 +51,8 @@
 /* GENERAL CLASSES */
 
 .App {
-  background-image: url(../public/background.jpg);
-  /* background-color: var(--basic-color-background); */
+  /* background-image: url(../public/background.jpg); */
+  background-color: var(--basic-color-background);
   background-size:cover;
   background-position:initial;
   font-family: "Roboto" sans-serif;

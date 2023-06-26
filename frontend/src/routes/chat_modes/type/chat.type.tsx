@@ -1,7 +1,7 @@
 import { Player } from "../../game.interfaces";
 
 export type oneSuggestion = {
-  catagory: string;
+  category: string;
   picture: string;
   name: string;
   id: number;
@@ -20,6 +20,7 @@ export type chatPreview = {
   ownerEmail: string;
   ownerId: number;
   isBlocked: boolean;
+  avatar: string;
 };
 
 export type newChannel = {
@@ -32,7 +33,7 @@ export type newChannel = {
 
 export type newDM = {
   email: string | null;
-  targetId: number;
+  target_login: string;
 };
 
 export type fetchDM = {

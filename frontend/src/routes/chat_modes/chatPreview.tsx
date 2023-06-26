@@ -15,6 +15,7 @@ import { getUserAvatarQuery } from "../../queries/avatarQueries";
 import { current } from "@reduxjs/toolkit";
 import { socket } from "../../App";
 
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MENU_CHANNEL = "menu_channel";
 const MENU_DM = "menu_dm";
@@ -41,13 +42,47 @@ export default function Preview({
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
   const [menuEvent, setMenuEvent] = useState<any>(null);
-
+  
   // console.log("global:::::", global.selectedChat);
-
+  
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
-    socket.on("search suggest", (data: chatPreview[] | null) => {
-      if (data) setPreviews(data);
+    socket.on("search suggest", (data: any) => {
+      let previews: chatPreview[] = [];
+      console.log("1111", data.friends);
+      data.friends.forEach((elem: any) => {
+        previews.push({
+          id: elem.id,
+          dm: true,
+          name: elem.nickname,
+          isPassword: false,
+          password: '',
+          updateAt: '',
+          lastMsg: '',
+          unreadCount: 0,
+          ownerEmail: '',
+          ownerId: 0,
+          isBlocked: false,
+          avatar: elem.profpic_url
+        })
+      })
+      data.channels.forEach((elem: any) => {
+        previews.push({
+          id: elem.id,
+          dm: false,
+          name: elem.name,
+          isPassword: elem.mode === "PROTECTED",
+          password: elem.password,
+          updateAt: '',
+          lastMsg: '',
+          unreadCount: 0,
+          ownerEmail: '',
+          ownerId: 0,
+          isBlocked: false,
+          avatar: "",
+        })
+      })
+      if (data) setPreviews(previews);
     });
     return () => {
       socket.off("search suggest");
@@ -62,7 +97,7 @@ export default function Preview({
       socket.emit("get search suggest", { login: email });
     });
     socket.on("fetch channel", (value) => {
-      console.log("fetchChannel");
+      console.log("fetchChannel", value);
       onSelect({
         id: value.id,
         dm: !value.group,
@@ -74,6 +109,7 @@ export default function Preview({
         ownerEmail: "",
         ownerId: -1,
         isBlocked: false,
+        avatar: "",
       });
     });
     return () => {
@@ -221,10 +257,41 @@ function ChatSearch({
     socket.emit("get search suggest", { login: email });
   }, [updateStatus, email]);
 
+  let lastId = 20000;
+
+  function returnId() : number {
+    lastId++;
+    return lastId;
+}
+
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
-    socket.on("search suggest", (data: oneSuggestion[]) => {
-      setSug(data);
+    socket.on("search suggest", (data: any) => {
+      let previews: oneSuggestion[] = [];
+      console.log("1111", data.friends);
+      if (data) {
+
+        data.friends.forEach((elem: any) => {
+          previews.push({
+            category: 'user',
+            picture: elem.profpic_url,
+            name: elem.nickname,
+            id: elem.id,
+            data_id: returnId(),
+          })
+        })
+        data.channels.forEach((elem: any) => {
+          previews.push({
+            category: 'public chat',
+            picture: '',
+            name: elem.name,
+            id: elem.id,
+            data_id: returnId(),
+          })
+        })
+
+        setSug(previews);
+      }
     });
 
     return () => {
@@ -233,7 +300,7 @@ function ChatSearch({
   }, [email]);
 
   const handleOnSelect = (data: oneSuggestion) => {
-    // console.log(data);
+    console.log(data);
     // updateStatus = data.id;
 
     // socket.emit("into channel", {
@@ -247,9 +314,10 @@ function ChatSearch({
     // // if (data.catagory === "user") {
     let dm: newDM = {
       email: email,
-      targetId: data.data_id,
+      
+      target_login: data.name,
     };
-    socket.emit("create", dm);
+    socket.emit("create dm", dm);
     //   });
     // } else if (data.catagory === "my chat") onSearchMyChat(data.data_id);
     // else if (data.catagory === "public chat") onSearchPublicChat(data.data_id);
@@ -259,18 +327,18 @@ function ChatSearch({
     return (
       <div className="search-result">
         <div className="result-type">
-          <p style={{ display: data.catagory === "my chat" ? "" : "none" }}>
+          <p style={{ display: data.category === "my chat" ? "" : "none" }}>
             My Chat
           </p>
-          <p style={{ display: data.catagory === "public chat" ? "" : "none" }}>
+          <p style={{ display: data.category === "public chat" ? "" : "none" }}>
             Public Chat
           </p>
-          <p style={{ display: data.catagory === "user" ? "" : "none" }}>
+          <p style={{ display: data.category === "user" ? "" : "none" }}>
             User
           </p>
         </div>
         <p className="result">
-          {data.picture} {data.name}
+          {data.name}
         </p>
       </div>
     );
@@ -318,12 +386,7 @@ function PreviewChat({
 
   useEffect(() => {
     const getAvatar = async () => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(data.ownerId);
-
-      if (result !== undefined && result instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result));
-      }
+      setAvatarURL(data.avatar);
     };
     getAvatar();
   }, [data.ownerId]);

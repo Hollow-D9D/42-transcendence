@@ -53,7 +53,8 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) {
-
+      console.log("role", role);
+      
       setOutsider(role === "" || role === "noRole" ? true : false);
       socket.emit("read blocked", email);
     }
@@ -62,15 +63,19 @@ export default function Chat() {
   useEffect(() => {
     
     if (selectedChat) {
+      console.log(outsider);
+      
       setShow(!selectedChat.isPassword || !outsider);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outsider]);
 
   useEffect(() => {
-    if (show && selectedChat) {
+    
+    if (selectedChat) {
       const cId = selectedChat.id;
-
+      console.log("aaaaa");
+      
       socket.emit("into channel", { chat_id: cId, login: email, password: "" });
       socket.emit("read msgs", cId);
       socket.emit("get setting", cId);
