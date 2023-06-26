@@ -2,6 +2,8 @@ include .env
 
 .PHONY: all clean fclean re f help
 
+CMP := deploy/docker-compose.yml
+
 ifeq ($(shell uname), Darwin)
     HOST_IP := $(shell ipconfig getifaddr en0)
 else 
@@ -10,18 +12,18 @@ endif
 
 
 all: update_ip create_dir
-	@docker compose -f deploy/docker-compose.yml up -d
+	@docker compose -f ${CMP} up -d
 	@echo "\033[1;0mStarting service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 build: update_ip
-	@docker compose -f deploy/docker-compose.yml up -d --build
+	@docker compose -f ${CMP} up -d --build
 	@echo "\033[1;0mBuilding service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 stop:
-	@docker-compose -f deploy/docker-compose.yml stop
+	@docker-compose -f ${CMP} stop
 
 clean:
-	@docker compose -f deploy/docker-compose.yml down
+	@docker compose -f ${CMP} down
 
 fclean: clean
 	rm -rf ./deploy/pgdata
