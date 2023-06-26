@@ -88,7 +88,7 @@ export default function RoomStatus({
   return (
     <div className="chat-status-zone">
       <div className="status-top">
-        {role !== "noRole" ? (
+        {role !== "noRole" || current?.dm ? (
           add ? (
             <div className="add-box">
               <ReactTags
@@ -186,15 +186,15 @@ function MemberStatus({
       }
       setOwner([
         {
-          nickname: data[0].nickname,
-          login: data[0].login,
-          id: data[0].id,
+          nickname: data[0]?.nickname,
+          login: data[0]?.login,
+          id: data[0]?.id,
           role: "owner",
           isMuted: false,
           isFriend: false,
-          status: data[0].status,
+          status: data[0]?.status,
           isBlocked: false,
-          profpic_url: data[0].profpic_url,
+          profpic_url: data[0]?.profpic_url,
         },
       ]);
     });

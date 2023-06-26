@@ -6,7 +6,7 @@ import RoomStatus from "./chat_modes/roomStatus";
 import { chatPreview } from "./chat_modes/type/chat.type";
 import { NewRoomCard } from "./chat_modes/newRoomCard";
 import { SettingCard } from "./chat_modes/settingCard";
-import { NotifCxt} from "../App";
+import { NotifCxt } from "../App";
 import { socket } from "../App";
 
 export default function Chat() {
@@ -53,29 +53,25 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) {
-      console.log("role", role);
-      
+      console.log("chat", selectedChat);
       setOutsider(role === "" || role === "noRole" ? true : false);
       socket.emit("read blocked", email);
     }
   }, [selectedChat, role, email, updateStatus]);
 
   useEffect(() => {
-    
     if (selectedChat) {
-      console.log(outsider);
-      
+      console.log("ISDM", selectedChat.dm);
+
       setShow(!selectedChat.isPassword || !outsider);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outsider]);
 
   useEffect(() => {
-    
     if (selectedChat) {
       const cId = selectedChat.id;
-      console.log("aaaaa");
-      
+
       socket.emit("into channel", { chat_id: cId, login: email, password: "" });
       socket.emit("read msgs", cId);
       socket.emit("get setting", cId);

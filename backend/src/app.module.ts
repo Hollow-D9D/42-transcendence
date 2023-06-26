@@ -47,12 +47,10 @@ import { join } from 'path';
   providers: [AppService, GameGateway, ChatService],
 })
 export class AppModule {
-  constructor(
-    private readonly chatService: ChatService,
-  ) {
+  constructor(private readonly chatService: ChatService) {
     //TODO paste this logic to make it a background task
     setInterval(async () => {
       await this.chatService.circularUnmute();
-    }, 500) ;//every minute
+    }, 500); //every minute
   }
 }

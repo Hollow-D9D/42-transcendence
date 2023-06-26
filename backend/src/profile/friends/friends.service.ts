@@ -3,7 +3,6 @@ import { User } from 'src/typeorm';
 import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { log } from 'console';
-
 @Injectable()
 export class FriendsService {
   constructor(
@@ -33,7 +32,7 @@ export class FriendsService {
         relations: ['friends', 'blocked_users'],
       });
       console.log(user);
-      
+
       return user;
     } catch (error) {
       throw error;
@@ -43,7 +42,10 @@ export class FriendsService {
   async blockUser(user_id: number, friend_id: number) {
     try {
       await this.removeFriend(user_id, friend_id);
-      const user = await this.userRepo.findOne({ where: { id: user_id }, relations: ['blocked_users'] });
+      const user = await this.userRepo.findOne({
+        where: { id: user_id },
+        relations: ['blocked_users'],
+      });
       user.blocked_users.forEach((friend) => {
         if (friend.id === friend_id) {
           throw new Error('is already blocked');
@@ -59,8 +61,13 @@ export class FriendsService {
 
   async unblockUser(user_id: number, blocked_id: number) {
     try {
-      const user = await this.userRepo.findOne({ where: { id: user_id }, relations: ['blocked_users'] });
-      user.blocked_users = user.blocked_users.filter((user) => user.id !== blocked_id);
+      const user = await this.userRepo.findOne({
+        where: { id: user_id },
+        relations: ['blocked_users'],
+      });
+      user.blocked_users = user.blocked_users.filter(
+        (user) => user.id !== blocked_id,
+      );
       user.save();
     } catch (error) {
       throw error;
@@ -107,13 +114,12 @@ export class FriendsService {
       if (user_id == friend_id) throw new Error('cannot same user as friends');
       await this.adding_friend(user_id, friend_id);
       await this.adding_friend(friend_id, user_id);
-
     } catch (error) {
       throw error;
     }
   }
 
-  async adding_friend(user_id:number, friend_id: number) {
+  async adding_friend(user_id: number, friend_id: number) {
     try {
       const user = await this.userRepo.findOne({
         where: { id: user_id },

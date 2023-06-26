@@ -30,7 +30,7 @@ export default function ChatRoom({
   blockedList: [];
 }) {
   const email = localStorage.getItem("userEmail");
-
+  console.log(outsider);
   return (
     <>
       <div className="chat-room-zone">

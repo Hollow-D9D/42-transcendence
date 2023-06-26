@@ -14,6 +14,7 @@ export function SettingCard({
   settingRequest: boolean;
   onSettingRequest: () => void;
 }) {
+  const email = localStorage.getItem("userEmail");
   const [newPass, setNewPass] = useState("");
   const [isPrivate, setPrivate] = useState(false);
   const [isPassword, setIsPassword] = useState(false);
@@ -37,6 +38,8 @@ export function SettingCard({
   };
 
   const handlePrivate = () => {
+    setIsPassword(false);
+    setNewPass("");
     setPrivate((old) => {
       return !old;
     });
@@ -49,9 +52,13 @@ export function SettingCard({
   };
 
   const onUpdate = () => {
+    let mode = "PUBLIC";
+    if (isPrivate) mode = "PRIVATE";
+    else if (isPassword) mode = "PROTECTED";
+
     let data: updateChannel = {
       chat_id: channelId,
-      login: null,
+      login: email,
       password: "",
       target: 0,
       private: isPrivate,
@@ -60,6 +67,8 @@ export function SettingCard({
       dm: false,
     };
     socket.emit("update setting", data);
+    socket.emit("get setting");
+    // socket.emit("get search suggest", { login: email });
     onSettingRequest();
   };
 
@@ -84,24 +93,22 @@ export function SettingCard({
           uncheckedIcon={false}
         />
       </div>
-      <div
-        className="foot-info-tag"
-        style={{ display: isPrivate === current?.private ? "none" : "" }}
-      >
-        You changed the privacy setting
-      </div>
-      <div className="div-switch">
-        <label style={{ color: isPassword ? "rgb(0,136,0)" : "grey" }}>
-          password
-        </label>
-        <Switch
-          className="switch"
-          onChange={handleIsPassword}
-          checked={isPassword}
-          checkedIcon={false}
-          uncheckedIcon={false}
-        />
-      </div>
+
+      {isPrivate || (
+        <div className="div-switch">
+          <label style={{ color: isPassword ? "rgb(0,136,0)" : "grey" }}>
+            password
+          </label>
+
+          <Switch
+            className="switch"
+            onChange={handleIsPassword}
+            checked={isPassword}
+            checkedIcon={false}
+            uncheckedIcon={false}
+          />
+        </div>
+      )}
       <div style={{ display: isPassword ? "" : "none" }}>
         <input
           value={newPass}
@@ -111,15 +118,7 @@ export function SettingCard({
           placeholder="new channel password"
         />
       </div>
-      <div
-        className="foot-info-tag"
-        style={{
-          display:
-            isPassword === current?.isPassword && newPass === "" ? "none" : "",
-        }}
-      >
-        You changed the password setting
-      </div>
+
       <div className="flex-block" />
       <div onMouseUp={onUpdate} className="card-confirm-button">
         UPDATE

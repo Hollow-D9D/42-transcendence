@@ -15,7 +15,6 @@ import { getUserAvatarQuery } from "../../queries/avatarQueries";
 import { current } from "@reduxjs/toolkit";
 import { socket } from "../../App";
 
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MENU_CHANNEL = "menu_channel";
 const MENU_DM = "menu_dm";
@@ -42,46 +41,54 @@ export default function Preview({
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
   const [menuEvent, setMenuEvent] = useState<any>(null);
-  
+
   // console.log("global:::::", global.selectedChat);
-  
+
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
     socket.on("search suggest", (data: any) => {
       let previews: chatPreview[] = [];
-      console.log("1111", data.friends);
-      data.friends.forEach((elem: any) => {
-        previews.push({
-          id: elem.id,
-          dm: true,
-          name: elem.nickname,
-          isPassword: false,
-          password: '',
-          updateAt: '',
-          lastMsg: '',
-          unreadCount: 0,
-          ownerEmail: '',
-          ownerId: 0,
-          isBlocked: false,
-          avatar: elem.profpic_url
-        })
-      })
+      console.log("Search suggest", data);
+      // data.friends.forEach((elem: any) => {
+      //   previews.push({
+      //     id: elem.id,
+      //     dm: true,
+      //     name: elem.nickname,
+      //     isPassword: false,
+      //     password: '',
+      //     updateAt: '',
+      //     lastMsg: '',
+      //     unreadCount: 0,
+      //     ownerEmail: '',
+      //     ownerId: 0,
+      //     isBlocked: false,
+      //     avatar: elem.profpic_url
+      //   })
+      // })
       data.channels.forEach((elem: any) => {
+        let name = elem.group ? elem.name : elem.name.split(":");
+        if (!elem.group) {
+          name = name[1] === email ? name[2] : name[1];
+        }
         previews.push({
           id: elem.id,
-          dm: false,
-          name: elem.name,
+          dm: !elem.group,
+          name: name,
           isPassword: elem.mode === "PROTECTED",
           password: elem.password,
-          updateAt: '',
-          lastMsg: '',
+          updateAt: "",
+          lastMsg: "",
           unreadCount: 0,
-          ownerEmail: '',
+          ownerEmail: "",
           ownerId: 0,
           isBlocked: false,
-          avatar: "",
-        })
-      })
+          avatar: elem.group
+            ? ""
+            : data.friends.find((e: any) => {
+                return e.nickname === name;
+              }).profpic_url,
+        });
+      });
       if (data) setPreviews(previews);
     });
     return () => {
@@ -91,17 +98,43 @@ export default function Preview({
 
   useEffect(() => {
     socket.on("add preview", (data) => {
-      if (data) setPreviews(data);
+      let previews: chatPreview[] = [];
+      console.log("1111", data);
+      data.forEach((elem: any) => {
+        let name = elem.group ? elem.name : elem.name.split(":");
+        if (!elem.group) name = name[1] === email ? name[2] : name[1];
+        previews.push({
+          id: elem.id,
+          dm: !elem.group,
+          name: name,
+          isPassword: elem.mode === "PROTECTED",
+          password: elem.password,
+          updateAt: "",
+          lastMsg: "",
+          unreadCount: 0,
+          ownerEmail: "",
+          ownerId: 0,
+          isBlocked: false,
+          avatar: elem.group
+            ? ""
+            : data.friends?.find((e: any) => {
+                return e.nickname === name;
+              }).profpic_url,
+        });
+      });
+      if (data) setPreviews(previews);
     });
     socket.on("update preview", (data: chatPreview[] | null) => {
       socket.emit("get search suggest", { login: email });
     });
     socket.on("fetch channel", (value) => {
       console.log("fetchChannel", value);
+      let name = value.group ? value.name : value.name.split(":");
+      if (!value.group) name = name[1] === email ? name[2] : name[1];
       onSelect({
         id: value.id,
         dm: !value.group,
-        name: value.name,
+        name: name,
         isPassword: value.mode === "PROTECTED",
         password: value.password,
         updateAt: "",
@@ -139,6 +172,7 @@ export default function Preview({
   const search = (channelId: number) => {
     for (let i = 0; i < roomPreview.length; i++) {
       if (roomPreview[i].id === channelId) {
+        console.log("room preview", roomPreview[i]);
         onSelect(roomPreview[i]);
         break;
       }
@@ -207,6 +241,7 @@ export default function Preview({
               <PreviewChat
                 data={value}
                 onClick={() => {
+                  console.log(roomPreview);
                   onSelect(value);
                 }}
                 selected={value.id === current?.id}
@@ -259,10 +294,10 @@ function ChatSearch({
 
   let lastId = 20000;
 
-  function returnId() : number {
+  function returnId(): number {
     lastId++;
     return lastId;
-}
+  }
 
   useEffect(() => {
     socket.emit("get search suggest", { login: email });
@@ -270,25 +305,24 @@ function ChatSearch({
       let previews: oneSuggestion[] = [];
       console.log("1111", data.friends);
       if (data) {
-
         data.friends.forEach((elem: any) => {
           previews.push({
-            category: 'user',
+            category: "user",
             picture: elem.profpic_url,
             name: elem.nickname,
             id: elem.id,
             data_id: returnId(),
-          })
-        })
-        data.channels.forEach((elem: any) => {
-          previews.push({
-            category: 'public chat',
-            picture: '',
-            name: elem.name,
-            id: elem.id,
-            data_id: returnId(),
-          })
-        })
+          });
+        });
+        // data.channels.forEach((elem: any) => {
+        //   previews.push({
+        //     category: "public chat",
+        //     picture: "",
+        //     name: elem.name,
+        //     id: elem.id,
+        //     data_id: returnId(),
+        //   });
+        // });
 
         setSug(previews);
       }
@@ -314,7 +348,7 @@ function ChatSearch({
     // // if (data.catagory === "user") {
     let dm: newDM = {
       email: email,
-      
+
       target_login: data.name,
     };
     socket.emit("create dm", dm);
@@ -337,9 +371,7 @@ function ChatSearch({
             User
           </p>
         </div>
-        <p className="result">
-          {data.name}
-        </p>
+        <p className="result">{data.name}</p>
       </div>
     );
   };

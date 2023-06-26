@@ -255,6 +255,61 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('create dm')
+  async handleCreateDm(client: Socket, query: any) {
+    try {
+      if (query) {
+        if (!query.email) {
+          // shouldn't get here
+          throw new Error('Invalid user info!');
+        }
+        const logins: string[] = [query.email];
+        // add another login if necessary
+
+        // chat, not a channel
+        if (query.target_login) logins.push(query.target_login);
+        // `target` user is expected to be provided
+        else
+          throw new Error('No valid target user specified for the new chat!');
+
+        // retreive user(s)
+        const users = await this.chatService.users(logins);
+        // and validate `login`, `target`, `name` and `password` whenever necessary
+
+        if (users.length !== 2) {
+          // both `login` and `target` are expected to yield valid users
+          // if not, the request in invalid
+          throw new Error('No valid target user specified for the new chat!');
+        }
+        if (await this.chatService.isBlocked(query.email, query.target_login)) {
+          // `login` cannot create a chat with `target` that has blocked them
+          throw new Error('You are blocked by the target user!');
+        }
+        const channelWithName = await this.chatService.channelByName(
+          users[0].id > users[1].id
+            ? `DM:${users[0].nickname}:${users[1].nickname}`
+            : `DM:${users[1].nickname}:${users[0].nickname}`,
+        );
+        // all main checks passed
+        if (!channelWithName) {
+          await this.chatService.create(
+            users,
+            null,
+            query.name,
+            query.password,
+          );
+        }
+        const suggest = await this.chatService.getSearchChats(query.email);
+
+        client.emit('add preview', suggest);
+      } else {
+        throw new Error('Invalid input');
+      }
+    } catch (error) {
+      throwError(client, error.message);
+    }
+  }
+
   @SubscribeMessage('create')
   async handleCreate(client: Socket, query: any) {
     try {
@@ -332,6 +387,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('update setting')
+  async handleUpdateSetting(client: Socket, query: any) {
+    try {
+      if (query) {
+        if (!query.login) {
+          // shouldn't get here
+          throw 'Invalid user info!';
+        }
+      }
+      if (!query.chat_id) {
+        // doesn't have a valid channel `name`/`target` user specified
+        throw 'No valid channel name/target user specified!';
+      }
+      const channelWithName = await this.chatService.channel(query.chat_id);
+      if (!channelWithName) {
+        // no channel with this name
+        throw 'No channel with this name!';
+      }
+      if (
+        query.isPassword &&
+        !this.chatService.isValidPassword(query.newPassword)
+      ) {
+        throw new Error('The password provided is invalid!');
+      }
+
+      await this.chatService.updateChannel(query);
+    } catch (error) {
+      return { error, body: null };
+    }
+  }
+
   // @SubscribeMessage('get chats')
   // async getUserChannels (client: Socket, payload: any) {
 
@@ -346,19 +432,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const settings = await this.chatService.getSettings(chat_id);
       client.emit('setting info', settings);
       const roles = await this.chatService.getChatRoles(chat_id);
-      client.emit('fetch owner', [roles.owner]);
-      client.emit('fetch admins', roles.admins);
+      if (roles.owner) client.emit('fetch owner', [roles.owner]);
+      if (roles.admins.length !== 0) client.emit('fetch admins', roles.admins);
       this.server.to(chat_id).emit(
         'fetch members',
         roles.members.filter((elem) => {
           return (
-            elem.login !== roles.owner.login &&
+            elem.login !== roles.owner?.login &&
             roles.admins.find((e) => {
               return e.login === elem.login;
             }) === undefined
-            );
-          }),
           );
+        }),
+      );
       const chatWithBanned = await this.chatService.chatWithBanned(chat_id);
       client.emit('fetch banned', chatWithBanned.blocked);
       client.emit('fetch role', role);
@@ -496,7 +582,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // await this.chatService.joinChannel(login, chat_id, password);
       // join to a room
       const role: string = await this.chatService.getRole(login, chat_id);
-      // console.log(role);
       client.emit('fetch role', role);
 
       if (isMember) {
@@ -517,11 +602,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
-      const suggest = await this.friendsService.getFriends(login);
-      client.emit('search suggest', suggest.friends);
+      const friends = await (
+        await this.friendsService.getFriends(login)
+      ).friends;
+      const channels = await this.chatService.getSearchChats(login);
+      client.emit('search suggest', { friends: friends, channels: channels });
     } catch (err) {
       console.log(err);
-      
+
       throwError(client, 'Somexxdhing went wriong!');
     }
   }
@@ -551,10 +639,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         password,
         isInvited,
       );
-      
+
       if (userLogin !== undefined)
         await this.sendChatStuff(client, chat_id, userLogin, 'member');
-        
+
       const role = await this.chatService.getRole(payload.login, chat_id);
       client.emit('fetch role', role);
     } catch (err) {
@@ -690,15 +778,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         payload.target_id,
         payload.chat_id,
       );
-      const muteds = await this.chatService.channelMutedUsers(
-        payload.chat_id,
-      );
-      
+      const muteds = await this.chatService.channelMutedUsers(payload.chat_id);
+
       this.server.to(payload.chat_id).emit('fetch muted', muteds);
     } catch (error) {
       console.log(error);
-      
-      throwError(client, 'Something went wrong')
+
+      throwError(client, 'Something went wrong');
     }
   }
 

@@ -44,8 +44,8 @@ export class ChatService {
         owner: null,
       };
       const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
       if (mode !== null) {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
         // create a channel
         entityLike.group = true;
         entityLike.mode = mode;
@@ -54,10 +54,42 @@ export class ChatService {
           entityLike.password = hashedPassword;
         entityLike.owner = users[0]; // the first one is `login` from request
         // TODO: check that the fail condition works properly
+      } else {
+        entityLike.name =
+          users[0].id > users[1].id
+            ? `DM:${users[0].nickname}:${users[1].nickname}`
+            : `DM:${users[1].nickname}:${users[0].nickname}`;
       }
       // no else since no new fields need to be added for chats
       const newOne = this.chatRepo.create(entityLike);
       await this.chatRepo.save(newOne);
+      return newOne;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async updateChannel(query) {
+    try {
+      // null
+      const chat = await this.chatRepo.findOne({
+        where: { id: query.chat_id },
+      });
+
+      if (query.private) {
+        chat.mode = ChannelMode.PRIVATE;
+        chat.password = null;
+      } else if (query.isPassword) {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(query.newPassword, saltRounds);
+        chat.mode = ChannelMode.PROTECTED;
+        chat.password = hashedPassword;
+      } else {
+        chat.mode = ChannelMode.PUBLIC;
+        chat.password = null;
+      }
+      await this.chatRepo.save(chat);
+      return chat;
     } catch (err) {
       throw err;
     }
@@ -96,12 +128,12 @@ export class ChatService {
     try {
       const user = await this.userRepo.findOne({
         where: { login },
-        relations: ['friends'],
+        relations: ['chatsMemberOf'],
       });
       const publics = await this.chatRepo.find({
         where: [{ mode: ChannelMode.PUBLIC }, { mode: ChannelMode.PROTECTED }],
       });
-      
+
       const merged = user.chatsMemberOf
         .filter((obj1) => !publics.find((obj2) => obj1.id === obj2.id))
         .concat(publics);
@@ -125,7 +157,7 @@ export class ChatService {
       chat.admins.forEach((admin) => {
         if (admin.login == login) role = 'admin';
       });
-      if (chat.owner.login == login) role = 'owner';
+      if (chat.owner?.login == login) role = 'owner';
     }
     return role;
   }
@@ -577,6 +609,7 @@ export class ChatService {
   async isBlocked(blocked: string, blocker: string): Promise<boolean> {
     const blockerFound = await this.userRepo.findOne({
       where: { login: blocker },
+      relations: ['blocked_users'],
     });
     if (!blockerFound) {
       return false; // shouldn't get here
