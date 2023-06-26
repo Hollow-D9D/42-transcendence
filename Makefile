@@ -9,25 +9,34 @@ else
 endif
 
 
-all: update_ip
-	@cd deploy && docker compose -f docker-compose.yml up -d
+all: update_ip create_dir
+	@docker compose -f deploy/docker-compose.yml up -d
 	@echo "\033[1;0mStarting service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 build: update_ip
-	cd deploy && docker compose -f docker-compose.yml up -d --build
+	@docker compose -f deploy/docker-compose.yml up -d --build
 	@echo "\033[1;0mBuilding service with host IP: \033[1;33m  http://${HOST_IP}:3000\033[1;0m"
 
 stop:
-	cd deploy && docker-compose stop
+	@docker-compose -f deploy/docker-compose.yml stop
 
 clean:
-	cd deploy && docker compose -f docker-compose.yml down
+	@docker compose -f deploy/docker-compose.yml down
 
 fclean: clean
 	rm -rf ./deploy/pgdata
 	docker system prune --all --force
 
 re:	fclean all
+
+create_dir:
+	@if [ ! -d "deploy/pgdata" ]; then \
+		mkdir deploy/pgdata; \
+		chmod 755 deploy/pgdata; \
+		echo "Directory 'pgdata' created."; \
+	else \
+		echo "\033[0;30m Directory 'pgdata' already exists.\033[1;0m"; \
+	fi
 
 update_ip:
 	@if [ -f deploy/.env ]; then \

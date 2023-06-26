@@ -1,0 +1,82 @@
+version: "3.3"
+
+services:
+
+  database:
+    image: postgres:15-alpine
+    container_name: database
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PWD}
+    networks:
+      - backend
+    expose:
+      - 5432
+    volumes:
+      - type: bind
+        source: ${PGDATA_PATH}
+        target: /data/postgres
+        bind:
+          create_host_path: true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: backend:v1
+    container_name: backend
+    build:
+      context: ${BACK_PATH}
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PWD: ${DB_PWD}
+      DB_NAME: ${DB_NAME}
+      API42_CID: ${API42_CID}
+      API42_CSECRET: ${API42_CSECRET}
+      API42_URL: ${API42_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      BACKEND_URL: ${BACK_URL}
+    expose:
+      - 3001
+    networks:
+      - backend
+    depends_on: 
+      - database
+  
+  frontend:
+    image: frontend:v1
+    container_name: frontend
+    build:
+      context: ${FRONT_PATH}
+      dockerfile: Dockerfile
+    working_dir: /app
+    environment:
+      PUBLIC_URL: ${FRONT_URL}
+      REACT_APP_BACKEND_URL: ${BACK_URL}
+      REACT_APP_BACKEND_SOCKET: ${SOCKET_URL}
+      SITE_URL: ${SITE_URL}
+      HOST_IP: ${HOST_IP}
+      BACK_PORT: ${BACK_PORT}
+    volumes:
+      - ${FRONT_PATH}:/app
+    ports:
+      - "3000:80"
+      - "$HOST_IP:3000:80"
+    restart: unless-stopped
+    networks:
+      - backend
+    depends_on:
+      - backend
+
+
+networks:
+  backend:
