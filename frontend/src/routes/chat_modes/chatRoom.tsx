@@ -128,7 +128,7 @@ function MsgStream({
         createAt: msg.date,
       };
 
-      setMsgs((oldMsgs) => [...oldMsgs, newMsg]);
+      if (channelId === msg.chat.id) setMsgs((oldMsgs) => [...oldMsgs, newMsg]);
     });
 
     socket.on("new connection", (msg) => {

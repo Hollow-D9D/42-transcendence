@@ -72,7 +72,7 @@ export default function RoomStatus({
 
     let update: updateChannel = {
       chat_id: current!.id,
-      login: member.name,
+      login: email,
       password: "",
       target: member.name,
       private: false,
@@ -220,11 +220,8 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
-      console.log(data);
-
       setMembers(
         data.map((elem: any): oneUser => {
-          console.log(elem);
           return {
             nickname: elem.login,
             login: elem.login,
@@ -246,7 +243,6 @@ function MemberStatus({
     socket.on("fetch banned", (data) => {
       setBanned(
         data.map((elem: any): oneUser => {
-          console.log(elem);
           return {
             nickname: elem.login,
             login: elem.login,
@@ -528,7 +524,6 @@ function Status({
         )}
         <Separator />
         {role === "owner" && global.selectedUser?.role !== "banned" ? (
-          //  && global.selectedUser?.isInvited === false
           <>
             <Item
               style={{
@@ -550,18 +545,18 @@ function Status({
         ) : (
           <></>
         )}
-        {role === "admin" ||
-        (role === "owner" && global.selectedUser?.role !== "banned") ? (
+        {(role === "admin" || role === "owner") &&
+        global.selectedUser?.role !== "banned" ? (
           <div
             style={{
               display: global.selectedUser?.role !== "owner" ? "" : "none",
             }}
           >
-            <Submenu label="mute">
+            <Submenu style={{}} label="mute">
+              <Item onClick={() => handleMute(1)}>1 mins</Item>
+              <Item onClick={() => handleMute(2)}>2 mins</Item>
               <Item onClick={() => handleMute(5)}>5 mins</Item>
               <Item onClick={() => handleMute(10)}>10 mins</Item>
-              <Item onClick={() => handleMute(15)}>15 mins</Item>
-              <Item onClick={() => handleMute(20)}>20 mins</Item>
             </Submenu>
 
             {global.selectedUser?.isMuted && (
