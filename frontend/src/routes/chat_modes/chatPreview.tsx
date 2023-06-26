@@ -49,6 +49,9 @@ export default function Preview({
     socket.on("search suggest", (data: chatPreview[] | null) => {
       if (data) setPreviews(data);
     });
+    return () => {
+      socket.off("search suggest");
+    };
   }, [updateStatus, email]);
 
   useEffect(() => {
@@ -56,7 +59,7 @@ export default function Preview({
       if (data) setPreviews(data);
     });
     socket.on("update preview", (data: chatPreview[] | null) => {
-      if (data) setPreviews(data);
+      socket.emit("get search suggest", { login: email });
     });
     socket.on("fetch channel", (value) => {
       console.log("fetchChannel");
@@ -233,25 +236,20 @@ function ChatSearch({
     // console.log(data);
     // updateStatus = data.id;
 
-    socket.emit("into channel", {
-      chat_id: data.id,
-      login: email,
-      password: "",
-    });
-    socket.emit("read msgs", data.id);
-    socket.emit("get setting", data.id);
-    socket.emit("get channel", data.id);
+    // socket.emit("into channel", {
+    //   chat_id: data.id,
+    //   login: email,
+    //   password: "",
+    // });
+    // socket.emit("read msgs", data.id);
+    // socket.emit("get setting", data.id);
+    // socket.emit("get channel", data.id);
     // // if (data.catagory === "user") {
-    //   let dm: newDM = {
-    //     email: email,
-    //     targetId: data.data_id,
-    //   };
-    //   socket.emit("new dm", dm, (channelId: number) => {
-    //     let fetch: fetchDM = {
-    //       channelId: channelId,
-    //       targetId: data.data_id,
-    //     };
-    //     socket.emit("fetch new DM", fetch);
+    let dm: newDM = {
+      email: email,
+      targetId: data.data_id,
+    };
+    socket.emit("create", dm);
     //   });
     // } else if (data.catagory === "my chat") onSearchMyChat(data.data_id);
     // else if (data.catagory === "public chat") onSearchPublicChat(data.data_id);
