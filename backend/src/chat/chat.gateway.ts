@@ -15,6 +15,7 @@ import { throwError } from 'src/utils/gateway.utils';
 import { parseToken } from 'src/utils/auth.utils';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
 import { ProfileService } from '../profile/profile.service';
+import { FriendsService } from 'src/profile/friends/friends.service';
 import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway()
@@ -23,7 +24,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly jwtService: JwtService,
     private readonly chatService: ChatService,
-    private readonly profileService: ProfileService,
+    private readonly friendsService: FriendsService,
   ) {}
 
   @WebSocketServer()
@@ -321,7 +322,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         await this.chatService.create(users, mode, query.name, query.password);
         const suggest = await this.chatService.getSearchChats(query.login);
         if (mode !== ChannelMode.PRIVATE)
-          this.server.emit('add preview', suggest);
+          this.server.emit('update preview', suggest);
         else client.emit('add preview', suggest);
       } else {
         throw new Error('Invalid input');
@@ -331,20 +332,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  // @SubscribeMessage('get chats')
+  // async getUserChannels (client: Socket, payload: any) {
+
+  // }
+
   async sendChatStuff(client, chat_id, login, role) {
     // console.log('chat_id', chat_id, 'login', login);
     try {
       this.joinRoom(client, chat_id, login);
       const messages = await this.chatService.getMessages(chat_id);
-      const muteds = await this.chatService.channelMutedUsers(chat_id);
-      this.server.to(chat_id).emit('fetch muted', muteds);
       client.emit('fetch_msgs', messages);
       const settings = await this.chatService.getSettings(chat_id);
       client.emit('setting info', settings);
       const roles = await this.chatService.getChatRoles(chat_id);
       client.emit('fetch owner', [roles.owner]);
       client.emit('fetch admins', roles.admins);
-      client.emit(
+      this.server.to(chat_id).emit(
         'fetch members',
         roles.members.filter((elem) => {
           return (
@@ -352,12 +356,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             roles.admins.find((e) => {
               return e.login === elem.login;
             }) === undefined
+            );
+          }),
           );
-        }),
-      );
       const chatWithBanned = await this.chatService.chatWithBanned(chat_id);
       client.emit('fetch banned', chatWithBanned.blocked);
       client.emit('fetch role', role);
+      const muteds = await this.chatService.channelMutedUsers(chat_id);
+      this.server.to(chat_id).emit('fetch muted', muteds);
     } catch (err) {
       throw err;
     }
@@ -511,10 +517,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
-      // console.log('bulki', payload);
-      const suggest = await this.chatService.getSearchChats(login);
-      client.emit('search suggest', suggest);
+      const suggest = await this.friendsService.getFriends(login);
+      client.emit('search suggest', suggest.friends);
     } catch (err) {
+      console.log(err);
+      
       throwError(client, 'Somexxdhing went wriong!');
     }
   }
@@ -522,7 +529,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join channel')
   async handleJoin(client: any, payload: any) {
     try {
-      const login = payload.login;
+      const login = payload.target === -1 ? payload.login : payload.target;
       const chat_id = payload.chat_id;
       if (!login) throwError(client, 'No login');
       if (!chat_id) throwError(client, 'No chat_id');
@@ -544,8 +551,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         password,
         isInvited,
       );
+      
       if (userLogin !== undefined)
         await this.sendChatStuff(client, chat_id, userLogin, 'member');
+        
+      const role = await this.chatService.getRole(payload.login, chat_id);
+      client.emit('fetch role', role);
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }
@@ -633,7 +644,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           // duration isn't a number
           throw 'Invalid mute duration specified!';
         }
-        this.chatService.muteForChannel(
+        await this.chatService.muteForChannel(
           payload.login,
           payload.target,
           duration,
@@ -674,17 +685,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // no user with the username login/target
         throw 'No user with username login/target!';
       }
-      this.chatService.unmuteForChannel(
+      await this.chatService.unmuteForChannel(
         payload.login,
         payload.target_id,
         payload.chat_id,
       );
       const muteds = await this.chatService.channelMutedUsers(
-        payload.channelId,
+        payload.chat_id,
       );
-      this.server.to(payload.channelId).emit('fetch muted', muteds);
+      
+      this.server.to(payload.chat_id).emit('fetch muted', muteds);
     } catch (error) {
-      return { error, body: null };
+      console.log(error);
+      
+      throwError(client, 'Something went wrong')
     }
   }
 

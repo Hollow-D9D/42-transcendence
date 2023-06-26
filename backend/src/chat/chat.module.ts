@@ -25,6 +25,7 @@ import { Chat, User, Message, Achievement, MutedUser } from 'src/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ChatGateway } from './chat.gateway';
 import { ProfileService } from 'src/profile/profile.service';
+import { FriendsService } from 'src/profile/friends/friends.service';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { ProfileService } from 'src/profile/profile.service';
     JwtModule.register({ secret: process.env.JWT_SECRET }),
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway, ProfileService],
+  providers: [ChatService, ChatGateway, ProfileService, FriendsService],
 })
 export class ChatModule {}

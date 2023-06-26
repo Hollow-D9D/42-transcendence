@@ -9,6 +9,7 @@ import entities from './typeorm';
 import { AchievementsModule } from './achievements/achievements.module';
 import { GameMatchModule } from './game-match/game-match.module';
 import { ChatModule } from './chat/chat.module';
+import { ChatService } from './chat/chat.service';
 import { GameGateway } from './game/game.gateway';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -43,11 +44,15 @@ import { join } from 'path';
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GameGateway],
+  providers: [AppService, GameGateway, ChatService],
 })
 export class AppModule {
-  constructor() {
-    // console.log('AppModule initialized');
-    // console.log(process.env);
+  constructor(
+    private readonly chatService: ChatService,
+  ) {
+    //TODO paste this logic to make it a background task
+    setInterval(async () => {
+      await this.chatService.circularUnmute();
+    }, 500) ;//every minute
   }
 }
