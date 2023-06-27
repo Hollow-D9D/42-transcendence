@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { socket } from "../../App";
 import { setting, updateChannel } from "./type/chat.type";
 import Switch from "react-switch";
+import { NotifCxt } from "../../App";
+// import { useContextMenu } from "react-contexify";
+import { useContext } from "react";
 
 export function SettingCard({
   channelId,
@@ -19,17 +22,22 @@ export function SettingCard({
   const [isPrivate, setPrivate] = useState(false);
   const [isPassword, setIsPassword] = useState(false);
   const [current, setCurrent] = useState<setting | undefined>(undefined);
+  const notif = useContext(NotifCxt);
 
   useEffect(() => {
     socket.on("setting info", (data: setting) => {
       setCurrent(data);
       initVars(data);
     });
-
+    socket.on("invalid password", () => {
+      notif?.setNotifText("invalid password!");
+      notif?.setNotifShow(true);
+    })
     if (settingRequest === false && current) initVars(current);
 
     return () => {
       socket.off("setting info");
+      socket.off("invalid password");
     };
   }, [settingRequest, current]);
 

@@ -12,7 +12,6 @@ export const uploadAvatarQuery = async (file: any) => {
     const formData = new FormData();
     formData.append("image", file, file.name);
     const fileProps = await Api.post("/profile/upload", formData);
-    // console.log("fileProps:::::", fileProps);
     return fileProps.data.fileName;
   } catch (error) {
     console.error("Error saving image:", error);
@@ -32,37 +31,7 @@ export const getUserAvatarQuery = async (otherId: number) => {
   header.append("Content-Type", "application/json");
   return fetchAvatar("GET", body, header, "getProfPic");
 
-  // try {
-  //   const fileProps = await Api.post("/profile/getProfPic");
-  //   console.log("fileProps:::::", fileProps)
-  //   return fileProps.data.fileName;
-  // } catch (error) {
-  //   console.error("Error saving image:", error);
-  //   throw error;
-  // }
 };
-
-// export const fetchAvatarFromServer = async () => {
-
-//   let src = "";
-//   try {
-//     const reponse = await fetch("http://localhost:3001/profile/getProfPic", {
-//       headers: {
-//         "Authorization": `Bearer ${localStorage.getItem("userToken")}`,
-//         "Content-Type": "multipart/form-data"
-//       }
-//     })
-//     if (reponse.ok) {
-//       const blob = await reponse.blob()
-//       src = URL.createObjectURL(blob);
-//       localStorage.setItem("userPicture", src);
-//     }
-//     return src
-//   }
-//   catch (err) {
-//     console.log(err);
-//   }
-// }
 
 const fetchAvatar = async (
   method: string,

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { storeUserInfo } from "../../queries/userQueries";
 import { Api, addAuthHeader } from "../../Config/Api";
+import LoadingAnimation from './LoadingAnimation';
 
 export default function AuthRedirect(props: any) {
   const navigate = useNavigate();
@@ -52,7 +53,8 @@ export default function AuthRedirect(props: any) {
 
   return (
     <div>
-      <h3 className="Auth-form-title">Loading...</h3>
+      {/* <h3 className="Auth-form-title">Loading...</h3> */}
+	  <LoadingAnimation />
       <div className="text-secondary"></div>
     </div>
   );
