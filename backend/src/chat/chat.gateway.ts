@@ -226,7 +226,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         await this.chatService.leaveChannel(query.login, query.chat_id);
         const suggest = await this.chatService.getSearchChats(query.login);
-        client.emit('update preview', suggest);
+        client.emit('update preview');
 
         const roles = await this.chatService.channel(query.chat_id);
         const data = await this.chatService.notInChannelUsers(query.chat_id);
@@ -370,6 +370,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             mode == ChannelMode.PROTECTED &&
             !this.chatService.isValidPassword(query.password)
           ) {
+            client.emit('invalid password');
+
             throw new Error('The password provided is invalid!');
           }
         }
@@ -409,10 +411,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         query.isPassword &&
         !this.chatService.isValidPassword(query.newPassword)
       ) {
+        client.emit('invalid password');
         throw new Error('The password provided is invalid!');
       }
 
       await this.chatService.updateChannel(query);
+      const settings = await this.chatService.getSettings(query.chat_id);
+      client.emit('setting info', settings);
     } catch (error) {
       return { error, body: null };
     }
@@ -639,12 +644,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         password,
         isInvited,
       );
-
       if (userLogin !== undefined)
         await this.sendChatStuff(client, chat_id, userLogin, 'member');
 
       const role = await this.chatService.getRole(payload.login, chat_id);
       client.emit('fetch role', role);
+      if (isInvited) {
+        console.log('emmitting to ', chat_id);
+
+        this.server.emit('update preview');
+      }
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }
