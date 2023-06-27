@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { storeUserInfo } from "../../queries/userQueries";
 import { Api, addAuthHeader } from "../../Config/Api";
-import LoadingAnimation from './LoadingAnimation';
-
+import LoadingAnimation from "./LoadingAnimation";
+import { socket } from "../../App";
 export default function AuthRedirect(props: any) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +39,10 @@ export default function AuthRedirect(props: any) {
                 navigate("/2FA");
               } else {
                 localStorage.setItem("userLogged", "true");
+                console.log("hey");
+                socket.emit("new-connection", {
+                  login: localStorage.getItem("userEmail"),
+                });
                 navigate("/app/private-profile");
               }
             }
@@ -54,7 +58,7 @@ export default function AuthRedirect(props: any) {
   return (
     <div>
       {/* <h3 className="Auth-form-title">Loading...</h3> */}
-	  <LoadingAnimation />
+      <LoadingAnimation />
       <div className="text-secondary"></div>
     </div>
   );

@@ -19,7 +19,7 @@ import {
 import FocusTrap from "focus-trap-react";
 import { getUserAvatarQuery } from "../queries/avatarQueries";
 import SoloGame from "./SoloGame";
-import { socket as chatSocket } from "../App";
+import { socket } from "../App";
 import { Navigate } from "react-router-dom";
 import { NotifCxt } from "../App";
 import { Prev } from "react-bootstrap/esm/PageItem";
@@ -83,12 +83,14 @@ class StartButton extends React.Component<Button, ButtonState> {
     // console.log("mta");
     if (!this.state.onQueue) {
       this.setState({ buttonText: "Cancel", onQueue: true });
-      // socket.emit("on queue");
-      // socket.on("matched" () => {
-      //
-      // });
+      socket.on("start game", (payload) => {
+        console.log(payload);
+      });
+      socket.emit("start game", { login: localStorage.getItem("userEmail") });
     } else {
+      socket.emit("cancel game", { login: localStorage.getItem("userEmail") });
       this.setState({ buttonText: "Start", onQueue: false });
+      socket.off("start game");
     }
   };
 
@@ -233,7 +235,7 @@ export default class Game extends React.Component<PropsPong, StatePong> {
     },
   };
 
-  socket: Socket;
+  // socket: Socket;
 
   MOVE_UP = "ArrowUp";
   MOVE_DOWN = "ArrowDown";
@@ -264,12 +266,12 @@ export default class Game extends React.Component<PropsPong, StatePong> {
       soloGame: false,
       redirectChat: false,
     };
-    if (this.props.pvtGame === false)
-      this.socket = io(
-        `${process.env.REACT_APP_BACKEND_SOCKET}`,
-        this.socketOptions
-      );
-    else this.socket = chatSocket;
+    // if (this.props.pvtGame === false)
+    //   this.socket = io(
+    //     `${process.env.REACT_APP_BACKEND_SOCKET}`,
+    //     this.socketOptions
+    //   );
+    // else this.socket = chatSocket;
     // this.onSettingsKeyDown = this.onSettingsKeyDown.bind(this);
     // this.onSettingsClickClose = this.onSettingsClickClose.bind(this);
     // this.quitSoloMode = this.quitSoloMode.bind(this);
@@ -278,12 +280,12 @@ export default class Game extends React.Component<PropsPong, StatePong> {
   componentDidMount() {
     // document.onkeydown = this.keyDownInput;
     // document.onkeyup = this.keyUpInput;
-    this.socket.on("game_started", () => {
+    socket.on("game_started", () => {
       this.setState({ gameStarted: true, showStartButton: false });
       this.avatarsFetched = false;
-      this.socket.off("rejected");
+      socket.off("rejected");
     });
-    this.socket.on("update", (info: Game_data) => {
+    socket.on("update", (info: Game_data) => {
       this.setState({
         ballX: info.xBall,
         ballY: info.yBall,
@@ -299,7 +301,7 @@ export default class Game extends React.Component<PropsPong, StatePong> {
         this.getAvatars(info.player1Avatar, info.player2Avater);
       }
     });
-    this.socket.on("end_game", (winner: number) =>
+    socket.on("end_game", (winner: number) =>
       winner === this.state.playerNumber
         ? this.setState({
             msgType: 2,
@@ -323,7 +325,7 @@ export default class Game extends React.Component<PropsPong, StatePong> {
       let RoomId = Number(localStorage.getItem("roomid")!);
       this.setState({ roomId: RoomId });
       this.setState({ playerNumber: 1, msgType: 4, buttonState: "Cancel" });
-      this.socket.on("rejected", (targetName: string) => {
+      socket.on("rejected", (targetName: string) => {
         this.setState({
           roomId: 0,
           playerNumber: 0,
@@ -350,18 +352,18 @@ export default class Game extends React.Component<PropsPong, StatePong> {
   }
 
   componentWillUnmount() {
-    this.socket.disconnect();
-    this.socket.connect();
-    this.socket.off("game_started");
-    this.socket.off("update");
-    this.socket.off("end_game");
+    socket.disconnect();
+    socket.connect();
+    socket.off("game_started");
+    socket.off("update");
+    socket.off("end_game");
   }
 
   startButtonHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!this.state.showStartButton) return;
     if (this.state.buttonState === "Cancel") {
-      this.socket.disconnect();
-      this.socket.connect();
+      socket.disconnect();
+      socket.connect();
       this.setState({
         gameStarted: false,
         showStartButton: true,
@@ -370,7 +372,7 @@ export default class Game extends React.Component<PropsPong, StatePong> {
       return;
     }
     this.setState({ buttonState: "Cancel" });
-    this.socket.emit("start", {}, (player: Player) => {
+    socket.emit("start", {}, (player: Player) => {
       if (player.playerNb === 3) {
         this.setState({
           msgType: 5,

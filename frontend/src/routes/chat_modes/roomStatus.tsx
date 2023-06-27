@@ -373,7 +373,7 @@ function Status({
   // }
 
   function handleCreateGame() {
-    socket.emit("start_private", (player: Player) => {
+    socket.emit("send invite", (player: Player) => {
       const invitation: gameInvitation = {
         gameInfo: player,
         inviterId: Number(localStorage.getItem("userID")),
