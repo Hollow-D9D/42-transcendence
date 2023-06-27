@@ -381,14 +381,20 @@ function PreviewChat({
   setHide: (d: any) => void;
   setMenuEvent: (event: any) => void;
 }) {
-  const [avatarURL, setAvatarURL] = useState("");
+  const [avatarURL, setAvatarURL] = useState(process.env.PUBLIC_URL + '/target.png');
 
   useEffect(() => {
     const getAvatar = async () => {
-      setAvatarURL(data.avatar);
+      console.log(data.avatar);
+      
+      if (data.avatar === "") {
+        setAvatarURL(process.env.PUBLIC_URL + '/target.png');
+      } else {
+        setAvatarURL(data.avatar);
+      }
     };
     getAvatar();
-  }, [data.ownerId]);
+  }, [data.ownerId, data.avatar]);
 
   const handleMenu = (event: any) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
