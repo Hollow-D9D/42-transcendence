@@ -5,12 +5,6 @@ import { getUserData } from "./userQueries";
 let myHeaders = new Headers();
 myHeaders.append("Content-Type", "application/json");
 
-// const NavigateTwoFA = (username: string) => {
-//   console.log("username navigate: ", username);
-//   let navigate = useNavigate();
-//   navigate("/2FA?user=" + username);
-// };
-
 const fetchPost = async (
   raw: string,
   userInfo: any,
@@ -85,7 +79,6 @@ export const logOut = async () => {
     });
     const result_1 = await response.text();
     if (!response.ok) {
-      // console.log("POST error on logout");
       return "error";
     }
     return result_1;

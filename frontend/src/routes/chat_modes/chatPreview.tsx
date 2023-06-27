@@ -85,8 +85,8 @@ export default function Preview({
           avatar: elem.group
             ? ""
             : data.friends.find((e: any) => {
-                return e.nickname === name;
-              }).profpic_url,
+              return e.nickname === name;
+            }).profpic_url,
         });
       });
       if (data) setPreviews(previews);
@@ -118,14 +118,16 @@ export default function Preview({
           avatar: elem.group
             ? ""
             : data.friends?.find((e: any) => {
-                return e.nickname === name;
-              }).profpic_url,
+              return e.nickname === name;
+            }).profpic_url,
         });
       });
       if (data) setPreviews(previews);
     });
     socket.on("update preview", (data: chatPreview[] | null) => {
       socket.emit("get search suggest", { login: email });
+      console.log(":::::::::::::::::::::::");
+      
     });
     socket.on("fetch channel", (value) => {
       console.log("fetchChannel", value);
@@ -194,28 +196,6 @@ export default function Preview({
     onSelect(undefined);
   }
 
-  function handleBlockChannel() {
-    let update: updateChannel = {
-      chat_id: global.selectedChat.id,
-      dm: global.selectedChat.dm,
-      login: email,
-      password: "",
-      target: -1,
-      private: false,
-      isPassword: false,
-      newPassword: "",
-    };
-    socket.emit("block channel", update);
-    onSelect(undefined);
-  }
-
-  function handleUnblockUser() {
-    let update: updateUser = {
-      selfEmail: email,
-      otherId: global.selectedChat.ownerId,
-    };
-    socket.emit("unblock user", update);
-  }
   if (global.selectedChat)
     global.selectedChat.isBlocked = blockedList.find(
       (map: any) => map.id === global.selectedChat.ownerId
@@ -252,24 +232,11 @@ export default function Preview({
             </div>
           );
         })}
-        <Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
-          {global.selectedChat?.dm ? (
-            <>
-              <Item onClick={handleLeave}>delete message</Item>
-              {global.selectedChat?.isBlocked ? (
-                <Item onClick={handleUnblockUser}>unblock user</Item>
-              ) : (
-                <Item onClick={handleBlockChannel}>block user</Item>
-              )}
-            </>
-          ) : (
-            <>
-              <Item onClick={handleLeave}>Leave chat</Item>
-              {/* <Item onClick={handleBlockChannel}>Block channel</Item> */}
-            </>
+        {global.selectedChat?.dm ? <></> :
+          (<Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
+            <Item onClick={handleLeave}>Leave chat</Item>
+          </Menu>
           )}
-        </Menu>
-        {/* <Menu id={MENU_DM} theme={theme.dark}></Menu> */}
       </div>
     </div>
   );

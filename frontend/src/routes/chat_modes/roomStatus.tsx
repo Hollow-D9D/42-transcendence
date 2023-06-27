@@ -364,13 +364,13 @@ function Status({
       socket.off("admin success");
     };
   }, []);
-  function handleAddFriend() {
-    let update: updateUser = {
-      selfEmail: email,
-      otherId: global.selectedUser.id,
-    };
-    socket.emit("add friend", update);
-  }
+  // function handleAddFriend() {
+  //   let update: updateUser = {
+  //     selfEmail: email,
+  //     otherId: global.selectedUser.id,
+  //   };
+  //   socket.emit("add friend", update);
+  // }
 
   function handleCreateGame() {
     socket.emit("start_private", (player: Player) => {
@@ -406,27 +406,11 @@ function Status({
     };
     socket.emit("unmute user", update);
   }
-  //TODO
-  function handleBlockUser() {
-    let update: updateUser = {
-      selfEmail: email,
-      otherId: global.selectedUser.id,
-    };
-    socket.emit("block user", update);
-  }
-  //TODO
-  function handleUnblockUser() {
-    let update: updateUser = {
-      selfEmail: email,
-      otherId: global.selectedUser.id,
-    };
-    socket.emit("unblock user", update);
-  }
 
   function handleBeAdmin() {
     // console.log("global.selectedUser", global.selectedUser);
     let update: updateChannel = {
-      chat_id: current!.id,
+      chat_id: current?.id,
       login: email,
       password: "",
       target: global.selectedUser.login,
@@ -511,17 +495,17 @@ function Status({
         );
       })}
       <Menu id={JSON.stringify(global.selectedUser)} theme={theme.dark}>
-        <Item onClick={handleAddFriend}>add friend</Item>
+        {/* <Item onClick={handleAddFriend}>add friend</Item> */}
         {global.selectedUser?.status === 1 ? (
           <Item onClick={handleCreateGame}>invite to a game!</Item>
         ) : (
           <></>
         )}
-        {global.selectedUser?.isBlocked ? (
+        {/* {global.selectedUser?.isBlocked ? (
           <Item onClick={handleUnblockUser}>unblock user</Item>
         ) : (
           <Item onClick={handleBlockUser}>block user</Item>
-        )}
+        )} */}
         <Separator />
         {role === "owner" && global.selectedUser?.role !== "banned" ? (
           <>

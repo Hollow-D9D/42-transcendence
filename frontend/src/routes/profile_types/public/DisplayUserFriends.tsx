@@ -133,7 +133,6 @@ const DisplayFriendsRow = (props: any) => {
         result.some((block: any) => {
           if (block.login === localStorage.getItem("userEmail")) {
             setIsInBlocked(true);
-            console.log("isInBlocked", block.login, localStorage.getItem("userEmail"), isInBlocked);
             return
           }
         });
@@ -141,8 +140,6 @@ const DisplayFriendsRow = (props: any) => {
     };
 
     fetchDataFriends()
-
-    console.log("login:", props.userModel.login);
   })
 
   function displayMenu(

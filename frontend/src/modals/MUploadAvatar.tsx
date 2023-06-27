@@ -12,8 +12,6 @@ export function MUploadAvatar(props: any) {
   };
 
   const handleSubmit = (event: any) => {
-    console.log("newavatar::", newAvatar);
-
     if (newAvatar) {
       const uploadAvatar = async () => {
         try {
@@ -28,7 +26,6 @@ export function MUploadAvatar(props: any) {
               newdata: { avatar_url: fileName },
             },
           });
-          // console.log(response);
           const setAvatarToLocalStorage = async () => {
             localStorage.setItem(
               "userPicture",

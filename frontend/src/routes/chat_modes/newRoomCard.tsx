@@ -93,6 +93,7 @@ export function NewRoomCard({
     };
     socket.emit("create", data);
     socket.on("error", () => {
+      console.log("chat create error");
       
       //TODO HANDLE CREATE ERROR RESPONSES
     });
