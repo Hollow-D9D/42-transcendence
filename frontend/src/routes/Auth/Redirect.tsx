@@ -39,7 +39,6 @@ export default function AuthRedirect(props: any) {
                 navigate("/2FA");
               } else {
                 localStorage.setItem("userLogged", "true");
-                console.log("hey");
                 socket.emit("new-connection", {
                   login: localStorage.getItem("userEmail"),
                 });

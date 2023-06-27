@@ -72,13 +72,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private joinRoom(client: Socket, roomName: string, login: string): boolean {
+  private async joinRoom(
+    client: Socket,
+    roomName: string,
+    login: string,
+  ): Promise<boolean> {
     if (!this.rooms[roomName]) {
       this.rooms[roomName] = new Set();
     }
-    const hasPerm = this.chatService.checkPermission(login, +roomName);
+    const hasPerm = await this.chatService.checkPermission(login, +roomName);
     if (hasPerm) {
-      client.join(roomName);
+      await client.join(roomName);
       this.rooms[roomName].add(login);
       return true;
     }
@@ -125,21 +129,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           query.target,
           query.chat_id,
         );
-        const chat = await this.chatService.channel(query.chat_id);
-        // console.log(chat.members);
-        client.emit('fetch admins', chat.admins);
-        client.emit(
-          'fetch members',
-          chat.members.filter((elem) => {
-            return (
-              elem.login !== chat.owner.login &&
-              chat.admins.find((e) => {
-                return e.login === elem.login;
-              }) === undefined
-            );
-          }) || null,
-        );
-        client.emit('fetch banned', chat.blocked);
+        await this.server.emit('update channel request');
       }
     } catch (error) {
       return { error, body: null };
@@ -176,20 +166,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           query.target,
           query.chat_id,
         );
-        const chat = await this.chatService.channel(query.chat_id);
-        client.emit('fetch admins', chat.admins);
-        client.emit(
-          'fetch members',
-          chat.members.filter((elem) => {
-            return (
-              elem.login !== chat.owner.login &&
-              chat.admins.find((e) => {
-                return e.login === elem.login;
-              }) === undefined
-            );
-          }),
-        );
-        client.emit('fetch banned', chat.blocked);
+        await this.server.emit('update channel request');
+        //   const chat = await this.chatService.channel(query.chat_id);
+        //   client.emit('fetch admins', chat.admins);
+        //   client.emit(
+        //     'fetch members',
+        //     chat.members.filter((elem) => {
+        //       return (
+        //         elem.login !== chat.owner.login &&
+        //         chat.admins.find((e) => {
+        //           return e.login === elem.login;
+        //         }) === undefined
+        //       );
+        //     }),
+        //   );
+        //   client.emit('fetch banned', chat.blocked);
+        // }
       }
     } catch (error) {
       return { error, body: null };
@@ -225,30 +217,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           return;
         }
         await this.chatService.leaveChannel(query.login, query.chat_id);
-        const suggest = await this.chatService.getSearchChats(query.login);
-        client.emit('update preview');
+        // const suggest = await this.chatService.getSearchChats(query.login);
+        // client.emit('update preview');
 
-        const roles = await this.chatService.channel(query.chat_id);
-        const data = await this.chatService.notInChannelUsers(query.chat_id);
-        this.server.to(query.chat_id).emit('invitation tags', data);
-        this.server.to(query.chat_id).emit('fetch owner', [roles.owner]);
-        this.server.to(query.chat_id).emit('fetch admins', roles.admins);
-        this.server.to(query.chat_id).emit(
-          'fetch members',
-          roles.members.filter((elem) => {
-            return (
-              elem.login !== roles.owner.login &&
-              roles.admins.find((e) => {
-                return e.login === elem.login;
-              }) === undefined
-            );
-          }),
-        );
+        // const roles = await this.chatService.channel(query.chat_id);
+        // const data = await this.chatService.notInChannelUsers(query.chat_id);
 
-        client.emit('fetch_msgs', []);
-        client.emit('fetch owner', []);
-        client.emit('fetch admins', []);
-        client.emit('fetch members', []);
+        // ('invitation tags', data);
+        // this.server.to(query.chat_id).emit('fetch owner', [roles.owner]);
+        // this.server.to(query.chat_id).emit('fetch admins', roles.admins);
+        // this.server.to(query.chat_id).emit(
+        //   'fetch members',
+        //   roles.members.filter((elem) => {
+        //     return (
+        //       elem.login !== roles.owner.login &&
+        //       roles.admins.find((e) => {
+        //         return e.login === elem.login;
+        //       }) === undefined
+        //     );
+        //   }),
+        // );
+        await this.server.emit('update channel request');
       }
     } catch (error) {
       throwError(client, error.message);
@@ -418,6 +407,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.chatService.updateChannel(query);
       const settings = await this.chatService.getSettings(query.chat_id);
       client.emit('setting info', settings);
+      this.server.emit('update preview');
     } catch (error) {
       return { error, body: null };
     }
@@ -431,7 +421,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async sendChatStuff(client, chat_id, login, role) {
     // console.log('chat_id', chat_id, 'login', login);
     try {
-      this.joinRoom(client, chat_id, login);
+      await this.joinRoom(client, chat_id, login);
       const messages = await this.chatService.getMessages(chat_id);
       client.emit('fetch_msgs', messages);
       const settings = await this.chatService.getSettings(chat_id);
@@ -439,7 +429,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const roles = await this.chatService.getChatRoles(chat_id);
       if (roles.owner) client.emit('fetch owner', [roles.owner]);
       if (roles.admins.length !== 0) client.emit('fetch admins', roles.admins);
-      this.server.to(chat_id).emit(
+      client.emit(
         'fetch members',
         roles.members.filter((elem) => {
           return (
@@ -450,11 +440,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           );
         }),
       );
+
       const chatWithBanned = await this.chatService.chatWithBanned(chat_id);
       client.emit('fetch banned', chatWithBanned.blocked);
       client.emit('fetch role', role);
       const muteds = await this.chatService.channelMutedUsers(chat_id);
-      this.server.to(chat_id).emit('fetch muted', muteds);
+      client.emit('fetch muted', muteds);
+      const data = await this.chatService.notInChannelUsers(chat_id);
+      client.emit('invitation tags', data);
     } catch (err) {
       throw err;
     }
@@ -507,20 +500,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         query.target,
         query.chat_id,
       );
-      const chat = await this.chatService.channel(query.chat_id);
-      client.emit('fetch admins', chat.admins);
-      client.emit(
-        'fetch members',
-        chat.members.filter((elem) => {
-          return (
-            elem.login !== chat.owner.login &&
-            chat.admins.find((e) => {
-              return e.login === elem.login;
-            }) === undefined
-          );
-        }),
-      );
-      client.emit('admin success', { role: 'member' });
+
+      await this.server.emit('update channel request');
     } catch (error) {
       return { error, body: null };
     }
@@ -556,20 +537,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         query.target,
         query.chat_id,
       );
-      const chat = await this.chatService.channel(query.chat_id);
-      client.emit('fetch admins', chat.admins);
-      client.emit(
-        'fetch members',
-        chat.members.filter((elem) => {
-          return (
-            elem.login !== chat.owner.login &&
-            chat.admins.find((e) => {
-              return e.login === elem.login;
-            }) === undefined
-          );
-        }),
-      );
-      client.emit('admin success', { role: 'admin' });
+      await this.server.emit('update channel request');
     } catch (error) {
       throwError(client, error.message);
     }
@@ -588,7 +556,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // join to a room
       const role: string = await this.chatService.getRole(login, chat_id);
       client.emit('fetch role', role);
-
+      console.log(isMember, role, login);
       if (isMember) {
         await this.sendChatStuff(client, chat_id, login, role);
       } else {
@@ -644,16 +612,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         password,
         isInvited,
       );
+      console.log(userLogin);
       if (userLogin !== undefined)
-        await this.sendChatStuff(client, chat_id, userLogin, 'member');
+        await this.server.emit('update channel request');
 
-      const role = await this.chatService.getRole(payload.login, chat_id);
-      client.emit('fetch role', role);
+      // const role = await this.chatService.getRole(payload.login, chat_id);
+      // client.emit('fetch role', role);
       if (isInvited) {
         console.log('emmitting to ', chat_id);
 
         this.server.emit('update preview');
       }
+      console.log('es hasa ste');
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }
@@ -689,21 +659,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         payload.target,
         payload.chat_id,
       );
-      const roles = await this.chatService.getChatRoles(payload.chat_id);
-      const data = await this.chatService.notInChannelUsers(payload.chat_id);
-      this.server.to(payload.chat_id).emit('invitation tags', data);
-      this.server.to(payload.chat_id).emit('fetch admins', roles.admins);
-      this.server.to(payload.chat_id).emit(
-        'fetch members',
-        roles.members.filter((elem) => {
-          return (
-            elem.login !== roles.owner.login &&
-            roles.admins.find((e) => {
-              return e.login === elem.login;
-            }) === undefined
-          );
-        }),
-      );
+      await this.server.emit('update channel request');
     } catch (error) {
       return { error, body: null };
     }

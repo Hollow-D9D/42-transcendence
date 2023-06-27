@@ -32,7 +32,7 @@ export function SettingCard({
     socket.on("invalid password", () => {
       notif?.setNotifText("invalid password!");
       notif?.setNotifShow(true);
-    })
+    });
     if (settingRequest === false && current) initVars(current);
 
     return () => {
@@ -74,8 +74,10 @@ export function SettingCard({
       newPassword: newPass,
       dm: false,
     };
-    socket.emit("update setting", data);
-    socket.emit("get setting");
+    (async function () {
+      await socket.emit("update setting", data);
+      await socket.emit("get setting");
+    })();
     // socket.emit("get search suggest", { login: email });
     onSettingRequest();
   };

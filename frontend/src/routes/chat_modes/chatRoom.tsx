@@ -131,8 +131,6 @@ function MsgStream({
     });
 
     socket.on("new connection", (msg) => {
-      console.log(msg);
-
       if (msg.user.login !== localStorage.getItem("userEmail")) {
         notif?.setNotifText(`${msg.user.nickname} is joined!`);
         notif?.setNotifShow(true);
@@ -242,7 +240,9 @@ function InputArea({
         chatId: channelId,
         message: msg,
       };
-      socket.emit("new_message", data);
+      (async function () {
+        await socket.emit("new_message", data);
+      })();
       setMsg("");
     }
   };

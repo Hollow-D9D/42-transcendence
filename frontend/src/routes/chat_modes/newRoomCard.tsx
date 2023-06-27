@@ -31,13 +31,17 @@ export function NewRoomCard({
 
   useEffect(() => {
     if (updateStatus === 0) return;
-    socket.emit("get user tags", email);
+    (async function () {
+      await socket.emit("get user tags", email);
+    })();
   }, [email, updateStatus]);
 
   useEffect(() => {
     if (newRoomRequest === false) initVars();
 
-    socket.emit("get user tags", email);
+    (async function () {
+      await socket.emit("get user tags", email);
+    })();
     socket.on("user tags", (data: Tag[]) => {
       setUserTag(data);
     });
@@ -91,15 +95,19 @@ export function NewRoomCard({
       login: email,
       mode: mode,
     };
-    socket.emit("create", data);
+    (async function () {
+      await socket.emit("create", data);
+    })();
     socket.on("error", () => {
       console.log("chat create error");
-      
+
       //TODO HANDLE CREATE ERROR RESPONSES
     });
     initVars();
     onNewRoomRequest();
-    socket.emit("get search suggest", { login: email });
+    (async function () {
+      await socket.emit("get search suggest", { login: email });
+    })();
   };
   const initVars = () => {
     setRoomName("");

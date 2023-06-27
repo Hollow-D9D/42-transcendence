@@ -45,10 +45,11 @@ export default function Preview({
   // console.log("global:::::", global.selectedChat);
 
   useEffect(() => {
-    socket.emit("get search suggest", { login: email });
+    (async function () {
+      await socket.emit("get search suggest", { login: email });
+    })();
     socket.on("search suggest", (data: any) => {
       let previews: chatPreview[] = [];
-      console.log("Search suggest", data);
       // data.friends.forEach((elem: any) => {
       //   previews.push({
       //     id: elem.id,
@@ -85,8 +86,8 @@ export default function Preview({
           avatar: elem.group
             ? ""
             : data.friends.find((e: any) => {
-              return e.nickname === name;
-            }).profpic_url,
+                return e.nickname === name;
+              }).profpic_url,
         });
       });
       if (data) setPreviews(previews);
@@ -99,7 +100,6 @@ export default function Preview({
   useEffect(() => {
     socket.on("add preview", (data) => {
       let previews: chatPreview[] = [];
-      console.log("1111", data);
       data.forEach((elem: any) => {
         let name = elem.group ? elem.name : elem.name.split(":");
         if (!elem.group) name = name[1] === email ? name[2] : name[1];
@@ -118,19 +118,18 @@ export default function Preview({
           avatar: elem.group
             ? ""
             : data.friends?.find((e: any) => {
-              return e.nickname === name;
-            }).profpic_url,
+                return e.nickname === name;
+              }).profpic_url,
         });
       });
       if (data) setPreviews(previews);
     });
     socket.on("update preview", (data: chatPreview[] | null) => {
-      socket.emit("get search suggest", { login: email });
-      console.log(":::::::::::::::::::::::");
-      
+      (async function () {
+        await socket.emit("get search suggest", { login: email });
+      })();
     });
     socket.on("fetch channel", (value) => {
-      console.log("fetchChannel", value);
       let name = value.group ? value.name : value.name.split(":");
       if (!value.group) name = name[1] === email ? name[2] : name[1];
       onSelect({
@@ -174,7 +173,6 @@ export default function Preview({
   const search = (channelId: number) => {
     for (let i = 0; i < roomPreview.length; i++) {
       if (roomPreview[i].id === channelId) {
-        console.log("room preview", roomPreview[i]);
         onSelect(roomPreview[i]);
         break;
       }
@@ -192,8 +190,10 @@ export default function Preview({
       isPassword: false,
       newPassword: "",
     };
-    socket.emit("leave channel", update);
-    onSelect(undefined);
+    (async function () {
+      await socket.emit("leave channel", update);
+    })();
+    // onSelect(undefined);
   }
 
   if (global.selectedChat)
@@ -221,7 +221,6 @@ export default function Preview({
               <PreviewChat
                 data={value}
                 onClick={() => {
-                  console.log(roomPreview);
                   onSelect(value);
                 }}
                 selected={value.id === current?.id}
@@ -232,11 +231,13 @@ export default function Preview({
             </div>
           );
         })}
-        {global.selectedChat?.dm ? <></> :
-          (<Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
+        {global.selectedChat?.dm ? (
+          <></>
+        ) : (
+          <Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
             <Item onClick={handleLeave}>Leave chat</Item>
           </Menu>
-          )}
+        )}
       </div>
     </div>
   );
@@ -256,7 +257,9 @@ function ChatSearch({
 
   useEffect(() => {
     if (updateStatus === 0) return;
-    socket.emit("get search suggest", { login: email });
+    (async function () {
+      await socket.emit("get search suggest", { login: email });
+    })();
   }, [updateStatus, email]);
 
   let lastId = 20000;
@@ -267,10 +270,11 @@ function ChatSearch({
   }
 
   useEffect(() => {
-    socket.emit("get search suggest", { login: email });
+    (async function () {
+      await socket.emit("get search suggest", { login: email });
+    })();
     socket.on("search suggest", (data: any) => {
       let previews: oneSuggestion[] = [];
-      console.log("1111", data.friends);
       if (data) {
         data.friends.forEach((elem: any) => {
           previews.push({
@@ -301,7 +305,6 @@ function ChatSearch({
   }, [email]);
 
   const handleOnSelect = (data: oneSuggestion) => {
-    console.log(data);
     // updateStatus = data.id;
 
     // socket.emit("into channel", {
@@ -318,7 +321,9 @@ function ChatSearch({
 
       target_login: data.name,
     };
-    socket.emit("create dm", dm);
+    (async function () {
+      await socket.emit("create dm", dm);
+    })();
     //   });
     // } else if (data.catagory === "my chat") onSearchMyChat(data.data_id);
     // else if (data.catagory === "public chat") onSearchPublicChat(data.data_id);
@@ -381,14 +386,14 @@ function PreviewChat({
   setHide: (d: any) => void;
   setMenuEvent: (event: any) => void;
 }) {
-  const [avatarURL, setAvatarURL] = useState(process.env.PUBLIC_URL + '/target.png');
+  const [avatarURL, setAvatarURL] = useState(
+    process.env.PUBLIC_URL + "/target.png"
+  );
 
   useEffect(() => {
-    const getAvatar = async () => {
-      console.log(data.avatar);
-      
+    const getAvatar = () => {
       if (data.avatar === "") {
-        setAvatarURL(process.env.PUBLIC_URL + '/target.png');
+        setAvatarURL(process.env.PUBLIC_URL + "/target.png");
       } else {
         setAvatarURL(data.avatar);
       }

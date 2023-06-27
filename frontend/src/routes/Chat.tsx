@@ -38,10 +38,6 @@ export default function Chat() {
       setBlockedList(data);
     });
 
-    socket.on("update channel request", () => {
-      setUpdateStatus((u) => u + 1);
-    });
-
     return () => {
       socket.off("exception");
       socket.off("fetch role");
@@ -53,16 +49,15 @@ export default function Chat() {
 
   useEffect(() => {
     if (selectedChat) {
-      console.log("chat", selectedChat);
       setOutsider(role === "" || role === "noRole" ? true : false);
-      socket.emit("read blocked", email);
+      (async function () {
+        await socket.emit("read blocked", email);
+      })();
     }
   }, [selectedChat, role, email, updateStatus]);
 
   useEffect(() => {
     if (selectedChat) {
-      console.log("ISDM", selectedChat.dm);
-
       setShow(!selectedChat.isPassword || !outsider);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,11 +66,28 @@ export default function Chat() {
   useEffect(() => {
     if (selectedChat) {
       const cId = selectedChat.id;
-
-      socket.emit("into channel", { chat_id: cId, login: email, password: "" });
-      socket.emit("read msgs", cId);
-      socket.emit("get setting", cId);
+      socket.on("update channel request", async () => {
+        if (selectedChat) {
+          await socket.emit("into channel", {
+            chat_id: selectedChat.id,
+            login: email,
+            password: "",
+          });
+        }
+      });
+      (async function () {
+        await socket.emit("into channel", {
+          chat_id: cId,
+          login: email,
+          password: "",
+        });
+        await socket.emit("read msgs", cId);
+        await socket.emit("get setting", cId);
+      })();
     }
+    return () => {
+      socket.off("update channel request");
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateStatus, selectedChat, show]);
 

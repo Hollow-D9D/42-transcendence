@@ -52,8 +52,13 @@ export default function RoomStatus({
 
   useEffect(() => {
     if (current) {
-      socket.emit("read room status", { channelId: current?.id, login: email });
-      socket.emit("get invitation tags", { chat_id: current?.id });
+      (async function () {
+        await socket.emit("read room status", {
+          channelId: current?.id,
+          login: email,
+        });
+        await socket.emit("get invitation tags", { chat_id: current?.id });
+      })();
     }
   }, [updateStatus, current, email]);
 
@@ -80,7 +85,9 @@ export default function RoomStatus({
       newPassword: "",
       dm: false,
     };
-    socket.emit("join channel", update);
+    (async function () {
+      await socket.emit("join channel", update);
+    })();
   };
 
   const onDelete = (i: number) => {};
@@ -394,7 +401,9 @@ function Status({
       target: global.selectedUser.login,
       channelId: current!.id,
     };
-    socket.emit("mute user", update);
+    (async function () {
+      await socket.emit("mute user", update);
+    })();
   }
   //TODO
   function handleUnmute() {
@@ -404,7 +413,9 @@ function Status({
       target_id: global.selectedUser.id,
       chat_id: current!.id,
     };
-    socket.emit("unmute user", update);
+    (async function () {
+      await socket.emit("unmute user", update);
+    })();
   }
 
   function handleBeAdmin() {
@@ -420,8 +431,9 @@ function Status({
       dm: false,
     };
     // console.log("update::", update);
-
-    socket.emit("be admin", update);
+    (async function () {
+      await socket.emit("be admin", update);
+    })();
   }
 
   function handleNotAdmin() {
@@ -435,7 +447,9 @@ function Status({
       newPassword: "",
       dm: false,
     };
-    socket.emit("not admin", update);
+    (async function () {
+      await socket.emit("not admin", update);
+    })();
   }
   //TODO
   function handleBanUser() {
@@ -449,7 +463,9 @@ function Status({
       newPassword: "",
       dm: false,
     };
-    socket.emit("ban user", update);
+    (async function () {
+      await socket.emit("ban user", update);
+    })();
   }
   //TODO
   function handleUnbanUser() {
@@ -463,7 +479,9 @@ function Status({
       newPassword: "",
       dm: false,
     };
-    socket.emit("unban user", update);
+    (async function () {
+      await socket.emit("unban user", update);
+    })();
   }
 
   function handleKickOut() {
@@ -477,7 +495,9 @@ function Status({
       newPassword: "",
       dm: false,
     };
-    socket.emit("kick out", update);
+    (async function () {
+      await socket.emit("kick out", update);
+    })();
   }
 
   return (
@@ -666,8 +686,9 @@ function JoinChannel({
       newPassword: "",
       dm: false,
     };
-
-    socket.emit("join channel", update);
+    (async function () {
+      await socket.emit("join channel", update);
+    })();
     setPass("");
   };
 
