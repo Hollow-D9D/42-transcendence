@@ -25,7 +25,7 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          {/* <Route index element={<Navigate to="/auth/signin" />} /> */}
+          <Route index element={<Navigate to="/auth/signin" />} />
           <Route path="/2FA" element={<TwoFAValidation />} />
           <Route path="/auth" element={<Auth />}>
             <Route index element={<Navigate to="/auth/signin" />} />
