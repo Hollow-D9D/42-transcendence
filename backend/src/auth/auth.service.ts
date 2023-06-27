@@ -34,14 +34,12 @@ export class AuthService {
         redirect_uri: process.env.API42_URL,
         state: u_state,
       });
-      // console.log('token::::::::', token.data);
       if (token.data.error) throw new Error(token.data.error);
       me = await axios.get('https://api.intra.42.fr/v2/me', {
         headers: {
           Authorization: `Bearer ${token.data.access_token}`,
         },
       });
-      // console.log("auth42::::::::", me.data.login, me.data.displayname, me.data.image.link)
       return {
         login: me.data.login ? me.data.login : null,
         nickname: me.data.login ? me.data.login : null,

@@ -1,5 +1,4 @@
-version: "3.9"
-name: "transcendence"
+version: "3.3"
 
 services:
 
@@ -19,7 +18,7 @@ services:
     volumes:
       - type: bind
         source: ${PGDATA_PATH}
-        target: /var/lib/postgresql/data
+        target: /data/postgres
         bind:
           create_host_path: true
     healthcheck:
@@ -33,7 +32,7 @@ services:
     container_name: backend
     build:
       context: ${BACK_PATH}
-      dockerfile: ${BACK_PATH}/Dockerfile
+      dockerfile: Dockerfile
     restart: always
     environment:
       DB_HOST: ${DB_HOST}
@@ -58,7 +57,7 @@ services:
     container_name: frontend
     build:
       context: ${FRONT_PATH}
-      dockerfile: ${FRONT_PATH}/Dockerfile
+      dockerfile: Dockerfile
     working_dir: /app
     environment:
       PUBLIC_URL: ${FRONT_URL}
@@ -70,7 +69,7 @@ services:
     volumes:
       - ${FRONT_PATH}:/app
     ports:
-      - "3000:80"
+      - "8790:80"
       - "$HOST_IP:3000:80"
     restart: unless-stopped
     networks:
