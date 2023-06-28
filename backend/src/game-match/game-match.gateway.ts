@@ -69,6 +69,43 @@ export class GameMatchGateway implements OnGatewayInit {
   //   // Additional logic for handling disconnection
   // }
 
+  @SubscribeMessage('send invite')
+  async handleInviteGame(client: Socket, payload: any) {
+    try {
+      const userSockets: UserSocket[] =
+        (await this.cacheM.get('user_sockets')) || [];
+      const player1 = userSockets.find((e) => {
+        return e.login === payload.login;
+      });
+      const player2 = userSockets.find((e) => {
+        return e.login === payload.target;
+      });
+      if (player1 === undefined || player2 === undefined)
+        throw 'invalid user or target';
+      const info = await this.gameMatchService.getInviteInfo(payload.login);
+      this.server
+        .to(player2.socket)
+        .emit('game invitation', { user: info.user });
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
+  @SubscribeMessage('decline game')
+  async handleDeclineGame(client: Socket, payload: any) {
+    try {
+      const userSockets: UserSocket[] =
+        (await this.cacheM.get('user_sockets')) || [];
+      const player1 = userSockets.find((e) => {
+        return e.login === payload.game.inviterLogin;
+      });
+      if (player1 === undefined) throw 'invalid user or target';
+      this.server.to(player1.socket).emit('game declined', payload.login);
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
   @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
     try {

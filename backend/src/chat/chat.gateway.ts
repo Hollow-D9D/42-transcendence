@@ -427,8 +427,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const settings = await this.chatService.getSettings(chat_id);
       client.emit('setting info', settings);
       const roles = await this.chatService.getChatRoles(chat_id);
-      if (roles.owner) client.emit('fetch owner', [roles.owner]);
-      if (roles.admins.length !== 0) client.emit('fetch admins', roles.admins);
+      client.emit('fetch owner', [roles.owner]);
+      client.emit('fetch admins', roles.admins);
       client.emit(
         'fetch members',
         roles.members.filter((elem) => {
@@ -448,6 +448,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('fetch muted', muteds);
       const data = await this.chatService.notInChannelUsers(chat_id);
       client.emit('invitation tags', data);
+      const blocked = (await this.friendsService.getFriends(login))
+        .blocked_users;
+      client.emit('fetch blocked', blocked);
     } catch (err) {
       throw err;
     }
@@ -575,11 +578,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
-      const friends = await (
-        await this.friendsService.getFriends(login)
-      ).friends;
+      const blocked_users = (await this.friendsService.getFriends(login))
+        .blocked_users;
+      const users = await this.chatService.allUsers();
       const channels = await this.chatService.getSearchChats(login);
-      client.emit('search suggest', { friends: friends, channels: channels });
+      client.emit('search suggest', {
+        blocked: blocked_users,
+        friends: users,
+        channels: channels,
+      });
     } catch (err) {
       console.log(err);
 

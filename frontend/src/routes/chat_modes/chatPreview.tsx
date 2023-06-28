@@ -68,8 +68,23 @@ export default function Preview({
       // })
       data.channels.forEach((elem: any) => {
         let name = elem.group ? elem.name : elem.name.split(":");
+        let isBlocked = false;
+        let avatarPic = '';
         if (!elem.group) {
           name = name[1] === email ? name[2] : name[1];
+          let user = data.blocked.find((e: any) => {
+            return e.nickname === name;
+          });
+          if (user === undefined)
+          {
+            user = data.friends.find((e: any) => {
+              return e.nickname === name;
+            })
+          }
+          else
+            isBlocked = true;
+
+            avatarPic = user.profpic_url;
         }
         previews.push({
           id: elem.id,
@@ -82,12 +97,8 @@ export default function Preview({
           unreadCount: 0,
           ownerEmail: "",
           ownerId: 0,
-          isBlocked: false,
-          avatar: elem.group
-            ? ""
-            : data.friends.find((e: any) => {
-                return e.nickname === name;
-              }).profpic_url,
+          isBlocked: isBlocked,
+          avatar: avatarPic
         });
       });
       if (data) setPreviews(previews);
@@ -216,7 +227,7 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
-          return (
+          return (value.isBlocked ? <></> :
             <div key={index}>
               <PreviewChat
                 data={value}
@@ -277,6 +288,10 @@ function ChatSearch({
       let previews: oneSuggestion[] = [];
       if (data) {
         data.friends.forEach((elem: any) => {
+          if (elem.login === email || data.blocked.find((e: any) => {
+            return e.login === elem.login
+          }))
+            return;
           previews.push({
             category: "user",
             picture: elem.profpic_url,
