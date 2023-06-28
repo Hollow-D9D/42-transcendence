@@ -41,6 +41,10 @@ export class GameMatchService {
     }
   }
 
+  async getInviteInfo(target: string) {
+    return await this.profileService.getProfile(target);
+  }
+
   async matchPlayers(queue: Array<User>) {
     try {
       if (queue.length % 2 == 0) {
