@@ -586,9 +586,11 @@ export class ChatService {
   async users(logins: string[]): Promise<User[]> {
     return await this.userRepo.find({ where: { login: In(logins) } });
   }
+
   async allUsers(): Promise<User[]> {
     return await this.userRepo.find();
   }
+  
   async notInChannelUsers(chat_id: number) {
     const users = await this.userRepo.find({ where: {} });
     const chat = await this.chatRepo.findOne({
