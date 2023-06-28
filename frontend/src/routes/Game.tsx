@@ -79,16 +79,20 @@ class StartButton extends React.Component<Button, ButtonState> {
   //     buttonText: props.buttonText
   //   };
   // }
-  handleClick = () => {
+  handleClick = async () => {
     // console.log("mta");
     if (!this.state.onQueue) {
       this.setState({ buttonText: "Cancel", onQueue: true });
       socket.on("start game", (payload) => {
         console.log(payload);
       });
-      socket.emit("start game", { login: localStorage.getItem("userEmail") });
+      await socket.emit("start game", {
+        login: localStorage.getItem("userEmail"),
+      });
     } else {
-      socket.emit("cancel game", { login: localStorage.getItem("userEmail") });
+      await socket.emit("cancel game", {
+        login: localStorage.getItem("userEmail"),
+      });
       this.setState({ buttonText: "Start", onQueue: false });
       socket.off("start game");
     }

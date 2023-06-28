@@ -556,7 +556,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // join to a room
       const role: string = await this.chatService.getRole(login, chat_id);
       client.emit('fetch role', role);
-      console.log(isMember, role, login);
+      // console.log(isMember, role, login);
       if (isMember) {
         await this.sendChatStuff(client, chat_id, login, role);
       } else {
@@ -612,7 +612,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         password,
         isInvited,
       );
-      console.log(userLogin);
+      // console.log(userLogin);
       if (userLogin !== undefined)
         await this.server.emit('update channel request');
 
@@ -623,7 +623,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         this.server.emit('update preview');
       }
-      console.log('es hasa ste');
+      // console.log('es hasa ste');
     } catch (err) {
       throwError(client, 'Somexxdhing went wriong!');
     }

@@ -39,7 +39,7 @@ export default function AuthRedirect(props: any) {
                 navigate("/2FA");
               } else {
                 localStorage.setItem("userLogged", "true");
-                socket.emit("new-connection", {
+                await socket.emit("new-connection", {
                   login: localStorage.getItem("userEmail"),
                 });
                 navigate("/app/private-profile");

@@ -10,6 +10,7 @@ import { GameMatchService } from './game-match.service';
 import { ProfileService } from 'src/profile/profile.service';
 import { Server, Socket } from 'socket.io';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
+
 import { Cache } from 'cache-manager';
 import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from 'src/typeorm/userstatus.enum';
@@ -17,7 +18,7 @@ import { throwError } from 'src/utils/gateway.utils';
 
 interface UserSocket {
   login: string;
-  socket: Socket;
+  socket: string;
 }
 
 @WebSocketGateway({ cors: true })
@@ -28,7 +29,7 @@ export class GameMatchGateway implements OnGatewayInit {
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly jwtService: JwtService,
   ) {
-    this.cacheM.set('user_sockets', []);
+    this.cacheM.set('user_sockets', [], 0);
   }
 
   @WebSocketServer()
@@ -68,16 +69,27 @@ export class GameMatchGateway implements OnGatewayInit {
   //   // Additional logic for handling disconnection
   // }
 
-  @SubscribeMessage('start-game')
+  @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
     try {
-      console.log('start-game', payload);
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
+      console.log('start game', response);
       if (response.matching) {
-        this.startGameUpdate(response.response.player1.login);
-        this.startGameUpdate(response.response.player2.login);
+        await this.startGameUpdate(response.response.player1.login);
+        await this.startGameUpdate(response.response.player2.login);
       }
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
+  @SubscribeMessage('cancel game')
+  async handleCancelGame(client: Socket, payload: any) {
+    try {
+      console.log('cancel game', payload);
+      if (!payload.login) throw new Error('No login provided!');
+      await this.gameMatchService.cancelMatchLookup(payload.login);
     } catch (err) {
       throwError(client, err.message);
     }
@@ -87,10 +99,11 @@ export class GameMatchGateway implements OnGatewayInit {
     const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
-        userSocket.socket.emit('start-game', { login });
+        console.log('start game', login);
+        // this.server.to(userSocket.socket).emit('start game', { login });
       }
     });
-    this.profileService.editStatus(login, UserStatus.INGAME);
+    // await this.profileService.editStatus(login, UserStatus.INGAME);
   }
 
   @SubscribeMessage('end-game')
@@ -112,16 +125,18 @@ export class GameMatchGateway implements OnGatewayInit {
   async addUserSocket(login: string, socket: Socket) {
     try {
       let had = false;
-      const pair: UserSocket = { login, socket };
-      const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
-      userSockets.forEach((userSocket) => {
+      const pair: UserSocket = { login, socket: socket.id };
+      const userSockets: UserSocket[] =
+        (await this.cacheM.get('user_sockets')) || [];
+      userSockets?.forEach((userSocket) => {
         if (userSocket.login === login) {
-          userSocket.socket = socket;
+          userSocket.socket = socket.id;
           had = true;
         }
       });
       if (!had) userSockets.push(pair);
-      await this.cacheM.set('user_sockets', userSockets);
+      await this.cacheM.set('user_sockets', userSockets, 0);
+      console.log(userSockets);
     } catch (error) {
       throw error;
     }

@@ -14,7 +14,7 @@ export class GameMatchService {
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly profileService: ProfileService,
   ) {
-    this.cacheM.set('queue', []);
+    this.cacheM.set('queue', [], 0);
   }
 
   async addToQueue(login: string) {
@@ -32,7 +32,8 @@ export class GameMatchService {
       }
       const user = await this.profileService.getProfile(login);
       queue.push(user.user);
-      await this.cacheM.set('queue', queue);
+      console.log(queue);
+      await this.cacheM.set('queue', queue, 0);
       const response = await this.matchPlayers(queue);
       return response;
     } catch (err) {
@@ -62,7 +63,7 @@ export class GameMatchService {
         match.player1 = player1;
         match.player2 = player2;
         const newmatch = await match.save();
-        await this.cacheM.set('queue', queue);
+        await this.cacheM.set('queue', queue, 0);
         return newmatch;
       }
     } catch (err) {
@@ -73,7 +74,6 @@ export class GameMatchService {
   async endMatch(match_id: number) {
     try {
       await GameMatch.delete({ id: match_id });
-      
     } catch (err) {
       throw err;
     }
@@ -81,16 +81,14 @@ export class GameMatchService {
 
   async cancelMatchLookup(login: string) {
     try {
-      const queue: Array<User> = await this.cacheM.get('queue');
-      queue.forEach((element, index) => {
-        if (element.login === login) {
-          queue.splice(index, 1);
-        }
+      let queue: Array<User> = await this.cacheM.get('queue');
+      queue = queue.filter((element) => {
+        return element.login !== login;
       });
-      await this.cacheM.set('queue', queue);
+      console.log(queue);
+      await this.cacheM.set('queue', queue, 0);
     } catch (err) {
       throw err;
     }
   }
-  
 }
