@@ -109,4 +109,6 @@ export type gameInvitation = {
   inviterId: number;
   inviterName: string;
   targetId: number;
+  avatar: string;
+  inviterLogin: string;
 };

@@ -90,7 +90,7 @@ export default function RoomStatus({
     })();
   };
 
-  const onDelete = (i: number) => {};
+  const onDelete = (i: number) => { };
 
   return (
     <div className="chat-status-zone">
@@ -186,7 +186,6 @@ function MemberStatus({
     });
 
     socket.on("fetch owner", (data: any) => {
-      // console.log(data);
       if (data.length === 0) {
         setOwner([]);
         return;
@@ -244,7 +243,6 @@ function MemberStatus({
           };
         })
       );
-      // console.log(members);
     });
 
     socket.on("fetch banned", (data) => {
@@ -371,29 +369,27 @@ function Status({
       socket.off("admin success");
     };
   }, []);
-  // function handleAddFriend() {
-  //   let update: updateUser = {
-  //     selfEmail: email,
-  //     otherId: global.selectedUser.id,
-  //   };
-  //   socket.emit("add friend", update);
-  // }
 
   function handleCreateGame() {
-    socket.emit("send invite", (player: Player) => {
-      const invitation: gameInvitation = {
-        gameInfo: player,
-        inviterId: Number(localStorage.getItem("userID")),
-        inviterName: localStorage.getItem("userNickname")!,
-        targetId: global.selectedUser.id,
-      };
-      socket.emit("send invitation", invitation);
-      localStorage.setItem("roomid", player.roomId.toString());
-      localStorage.setItem("playernb", player.playerNb.toString());
-      navigate("/app/privateGame");
-    });
+    (async () => {
+      console.log("send invite");
+      
+      await socket.emit("send invite", { login: localStorage.getItem("userEmail"), target: global.selectedUser.login });
+    })();
+    //  (player: Player) => {
+    //   const invitation: gameInvitation = {
+    //     gameInfo: player,
+    //     inviterId: Number(localStorage.getItem("userID")),
+    //     inviterName: localStorage.getItem("userNickname")!,
+    //     targetId: global.selectedUser.id,
+    //   };
+    //   socket.emit("send invitation", invitation);
+    //   localStorage.setItem("roomid", player.roomId.toString());
+    //   localStorage.setItem("playernb", player.playerNb.toString());
+    //   navigate("/app/privateGame");
+    // });
   }
-  //TODO
+
   function handleMute(mins: number) {
     let update: mute = {
       login: email,
@@ -405,7 +401,7 @@ function Status({
       await socket.emit("mute user", update);
     })();
   }
-  //TODO
+
   function handleUnmute() {
     let update = {
       login: email,
@@ -419,7 +415,6 @@ function Status({
   }
 
   function handleBeAdmin() {
-    // console.log("global.selectedUser", global.selectedUser);
     let update: updateChannel = {
       chat_id: current?.id,
       login: email,
@@ -430,7 +425,6 @@ function Status({
       newPassword: "",
       dm: false,
     };
-    // console.log("update::", update);
     (async function () {
       await socket.emit("be admin", update);
     })();
@@ -451,7 +445,7 @@ function Status({
       await socket.emit("not admin", update);
     })();
   }
-  //TODO
+
   function handleBanUser() {
     let update: updateChannel = {
       chat_id: current!.id,
@@ -515,17 +509,11 @@ function Status({
         );
       })}
       <Menu id={JSON.stringify(global.selectedUser)} theme={theme.dark}>
-        {/* <Item onClick={handleAddFriend}>add friend</Item> */}
         {global.selectedUser?.status === 1 ? (
           <Item onClick={handleCreateGame}>invite to a game!</Item>
         ) : (
           <></>
         )}
-        {/* {global.selectedUser?.isBlocked ? (
-          <Item onClick={handleUnblockUser}>unblock user</Item>
-        ) : (
-          <Item onClick={handleBlockUser}>block user</Item>
-        )} */}
         <Separator />
         {role === "owner" && global.selectedUser?.role !== "banned" ? (
           <>
@@ -550,7 +538,7 @@ function Status({
           <></>
         )}
         {(role === "admin" || role === "owner") &&
-        global.selectedUser?.role !== "banned" ? (
+          global.selectedUser?.role !== "banned" ? (
           <div
             style={{
               display: global.selectedUser?.role !== "owner" ? "" : "none",
