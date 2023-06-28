@@ -7,10 +7,11 @@ import { INotifCxt, IUserStatus } from "./globals/Interfaces";
 import { TAlert } from "./toasts/TAlert";
 import { GameRequestCard } from "./routes/gameRequestCard";
 import { gameInvitation } from "./routes/chat_modes/type/chat.type";
+import { useContext } from "react";
 
 let LoginStatus = {
   islogged: false,
-  setUserName: () => {},
+  setUserName: () => { },
 };
 
 export const UsernameCxt = createContext(LoginStatus);
@@ -69,19 +70,46 @@ export default function App() {
     // }
   }, [usersStatus]);
 
+  // useEffect(() => {
+  //   socket.on("game invitation", (game: gameInvitation) => {
+
+
+  //     setGameRequest(true);
+  //     setGameInfo(game);
+
+  //   });
+  //   // setGameRequest(true);
+  //   socket.on("error", (data) => {
+  //     console.log("ERROROOOOROROOR:::: ", data.error);
+  //   });
+  // }, []);
   useEffect(() => {
-    socket.on("game invitation", (game: gameInvitation) => {
+    socket.on("game invitation", (payload) => {
       setGameRequest(true);
-      setGameInfo(game);
+      setGameInfo({
+        inviterId: payload.user.id,
+        inviterName: payload.user.nickname,
+        targetId: -1,
+        gameInfo: {
+          roomId: 0,
+          playerNb: 2,
+        },
+        avatar: payload.user.profpic_url,
+        inviterLogin: payload.user.login,
+      })
       return () => {
         socket.off("game invitation");
       };
-    });
-    // setGameRequest(true);
-    socket.on("error", (data) => {
-      console.log("ERROROOOOROROOR:::: ", data.error);
-    });
-  }, []);
+    })
+    socket.on("game declined", (payload) => {
+      setNotifText(payload + " declined invitation!");
+      setNotifShow(true);
+      return () => {
+        socket.off("game declined");
+      };
+    })
+  }, [])
+
 
   return (
     <div className="App">
