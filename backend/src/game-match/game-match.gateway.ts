@@ -59,10 +59,11 @@ export class GameMatchGateway implements OnGatewayInit {
     });
   }
 
-  // handleConnection(client: Socket) {
-  //   // console.log('Client connected:', client.id);
-  //   // Additional logic for handling connection
-  // }
+  handleConnection(client: Socket) {
+    // Additional logic for handling connection
+    console.log('Client connected:', client.id);
+    client.emit('request new connection', {});
+  }
 
   // handleDisconnect(client: Socket) {
   //   console.log('Client disconnected:', client.id);
@@ -113,10 +114,31 @@ export class GameMatchGateway implements OnGatewayInit {
       const response = await this.gameMatchService.addToQueue(payload.login);
       console.log('start game', response);
       if (response.matching) {
-        await this.startGameUpdate(response.response.player1.login);
-        await this.startGameUpdate(response.response.player2.login);
+        await this.startGameUpdate(response.response.player1.login, response.response);
+        await this.startGameUpdate(response.response.player2.login, response.response);
       }
     } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
+  @SubscribeMessage('accept game invite')
+  async handleAcceptGameInvite(client: Socket, payload: any) {
+    try {
+      
+      if (!payload.login1) throw new Error('No login1 provided!');
+      if (!payload.login2) throw new Error('No login2 provided!');
+      const user1: any = await this.profileService.getProfile(payload.login1);
+      const user2: any = await this.profileService.getProfile(payload.login2);
+      const response = await this.gameMatchService.startMatch(user1.user, user2.user);
+      console.log('accepting', response);
+      if (response) {
+        await this.startGameUpdate(response.player1.login, response);
+        await this.startGameUpdate(response.player2.login, response);
+      }
+    } catch (err) {
+      console.log(err);
+      
       throwError(client, err.message);
     }
   }
@@ -132,15 +154,15 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
-  async startGameUpdate(login: string) {
+  async startGameUpdate(login: string, response: any) {
     const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
-        console.log('start game', login);
-        // this.server.to(userSocket.socket).emit('start game', { login });
+        console.log('start game', userSocket);
+        this.server.to(userSocket.socket).emit('start game', { matching:true, response });
       }
     });
-    // await this.profileService.editStatus(login, UserStatus.INGAME);
+    await this.profileService.editStatus(login, UserStatus.INGAME);
   }
 
   @SubscribeMessage('end-game')
@@ -173,7 +195,6 @@ export class GameMatchGateway implements OnGatewayInit {
       });
       if (!had) userSockets.push(pair);
       await this.cacheM.set('user_sockets', userSockets, 0);
-      console.log(userSockets);
     } catch (error) {
       throw error;
     }

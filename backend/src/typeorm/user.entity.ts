@@ -6,6 +6,7 @@ import {
   JoinTable,
   CreateDateColumn,
   BaseEntity,
+  OneToOne,
   OneToMany,
 } from 'typeorm';
 import { Achievement, GameMatch, Message, Chat, MutedUser } from '.';
@@ -126,11 +127,11 @@ export class User extends BaseEntity {
   })
   blocked_users: User[];
 
-  @OneToMany(() => GameMatch, (gameMatch) => gameMatch.player1)
-  gameMatchesAsPlayer1: GameMatch[];
+  @OneToOne(() => GameMatch, match => match.player1)
+  matchesAsPlayer1: GameMatch;
 
-  @OneToMany(() => GameMatch, (gameMatch) => gameMatch.player2)
-  gameMatchesAsPlayer2: GameMatch[];
+  @OneToOne(() => GameMatch, match => match.player2)
+  matchesAsPlayer2: GameMatch;
 
   @ManyToMany(() => Chat, (chat) => chat.members)
   @JoinTable({
