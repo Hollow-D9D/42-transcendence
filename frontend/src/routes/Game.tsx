@@ -83,7 +83,7 @@ class StartButton extends React.Component<Button, ButtonState> {
     // console.log("mta");
     if (!this.state.onQueue) {
       this.setState({ buttonText: "Cancel", onQueue: true });
-      socket.on("start game", (payload) => {
+      socket.on("start-game", (payload) => {
         console.log(payload);
       });
       await socket.emit("start game", {

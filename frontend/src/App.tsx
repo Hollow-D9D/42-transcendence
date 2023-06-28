@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { createContext, useEffect, useState } from "react";
@@ -8,10 +8,9 @@ import { TAlert } from "./toasts/TAlert";
 import { GameRequestCard } from "./routes/gameRequestCard";
 import { gameInvitation } from "./routes/chat_modes/type/chat.type";
 import { useContext } from "react";
-
 let LoginStatus = {
   islogged: false,
-  setUserName: () => { },
+  setUserName: () => {},
 };
 
 export const UsernameCxt = createContext(LoginStatus);
@@ -31,7 +30,6 @@ const socketOptions = {
     },
   },
 };
-
 export const socket = io(
   `${process.env.REACT_APP_BACKEND_SOCKET}`,
   socketOptions
@@ -69,10 +67,10 @@ export default function App() {
     //   socket.off('update-status')
     // }
   }, [usersStatus]);
+  const navigate = useNavigate();
 
   // useEffect(() => {
   //   socket.on("game invitation", (game: gameInvitation) => {
-
 
   //     setGameRequest(true);
   //     setGameInfo(game);
@@ -84,6 +82,13 @@ export default function App() {
   //   });
   // }, []);
   useEffect(() => {
+    socket.on("request new connection", () => {
+      if (localStorage.getItem("userLogged") === "true")
+        socket.emit("new-connection", {
+          login: localStorage.getItem("userEmail"),
+        });
+    });
+
     socket.on("game invitation", (payload) => {
       setGameRequest(true);
       setGameInfo({
@@ -96,20 +101,28 @@ export default function App() {
         },
         avatar: payload.user.profpic_url,
         inviterLogin: payload.user.login,
-      })
+      });
       return () => {
         socket.off("game invitation");
       };
-    })
+    });
     socket.on("game declined", (payload) => {
       setNotifText(payload + " declined invitation!");
       setNotifShow(true);
       return () => {
         socket.off("game declined");
       };
-    })
-  }, [])
+    });
 
+    socket.on("start game", () => {
+      console.log("start game");
+      navigate("/app/game");
+      setGameRequest(false);
+      return () => {
+        socket.off("start game");
+      };
+    });
+  }, []);
 
   return (
     <div className="App">
