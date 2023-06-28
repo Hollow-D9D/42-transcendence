@@ -1,5 +1,5 @@
 version: "3.3"
-
+name: "pong"
 services:
 
   database:
@@ -34,19 +34,22 @@ services:
       context: ${BACK_PATH}
       dockerfile: Dockerfile
     restart: always
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PWD: ${DB_PWD}
-      DB_NAME: ${DB_NAME}
-      API42_CID: ${API42_CID}
-      API42_CSECRET: ${API42_CSECRET}
-      API42_URL: ${API42_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      BACKEND_URL: ${BACK_URL}
+    env_file: ${BACK_PATH}/.env
+    # environment:
+    #   DB_HOST: ${DB_HOST}
+    #   DB_PORT: ${DB_PORT}
+    #   DB_USER: ${DB_USER}
+    #   DB_PWD: ${DB_PWD}
+    #   DB_NAME: ${DB_NAME}
+    #   API42_CID: ${API42_CID}
+    #   API42_CSECRET: ${API42_CSECRET}
+    #   API42_URL: ${API42_URL}
+    #   JWT_SECRET: ${JWT_SECRET}
+    #   BACKEND_URL: ${BACK_URL}
     expose:
       - 3001
+    ports:
+      - "3001:3001"
     networks:
       - backend
     depends_on: 
@@ -59,24 +62,20 @@ services:
       context: ${FRONT_PATH}
       dockerfile: Dockerfile
     working_dir: /app
+    env_file: ${FRONT_PATH}/.env
     environment:
-      PUBLIC_URL: ${FRONT_URL}
       REACT_APP_BACKEND_URL: ${BACK_URL}
-      REACT_APP_BACKEND_SOCKET: ${SOCKET_URL}
-      SITE_URL: ${SITE_URL}
-      HOST_IP: ${HOST_IP}
-      BACK_PORT: ${BACK_PORT}
+      REACT_APP_BACKEND_SOCKET: deploy_backend
     volumes:
       - ${FRONT_PATH}:/app
     ports:
-      - "8790:80"
+      - "3000:80"
       - "$HOST_IP:3000:80"
     restart: unless-stopped
     networks:
       - backend
     depends_on:
       - backend
-
 
 networks:
   backend:
