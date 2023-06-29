@@ -114,11 +114,15 @@ export default function App() {
       };
     });
 
-    socket.on("start game", () => {
+    socket.on("start game", (payload) => {
       console.log("start game");
+      localStorage.setItem('gameStarted', 'true');
+      localStorage.setItem('room_id', payload.response.id);
+      localStorage.setItem('isPlayer1', payload.response.player1.login === localStorage.getItem('userEmail') ? 'true' : 'false');
       navigate("/app/game");
       setGameRequest(false);
       return () => {
+        console.log('off start game')
         socket.off("start game");
       };
     });

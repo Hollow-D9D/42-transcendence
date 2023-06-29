@@ -585,7 +585,6 @@ function OneStatus({
   const usersStatus = useContext(UsersStatusCxt);
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
-  console.log(":::::::", data);
 
   useEffect(() => {
     setAvatarURL(data.profpic_url);

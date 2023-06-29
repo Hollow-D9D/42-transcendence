@@ -1,33 +1,12 @@
-import React from "react";
-import { io, Socket } from "socket.io-client";
+
 import "./Game.css";
-import {
-  Game_data,
-  Player,
-  Coordinates,
-  StatePong,
-  Button,
-  ButtonState,
-  Msg,
-  MsgState,
-  PaddleProps,
-  StatePaddle,
-  SettingsProps,
-  SettingsState,
-  PropsPong,
-} from "./game.interfaces";
-import FocusTrap from "focus-trap-react";
-import { getUserAvatarQuery } from "../queries/avatarQueries";
-import SoloGame from "./SoloGame";
 import { socket } from "../App";
-import { Navigate } from "react-router-dom";
-import { NotifCxt } from "../App";
-import { Prev } from "react-bootstrap/esm/PageItem";
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
+import { GameEndCard } from "./GameEndCard";
 // import io, { Socket } from "socket.io-client";
 // const socket = io(process.env.REACT_APP_BACKEND_SOCKET || "");
 
-const GameInstance = () => {
+const GameInstance = (props: any) => {
   let windowSize;
   if (window.innerHeight < window.innerWidth) {
     windowSize = (window.innerHeight * 90) / 100;
@@ -61,19 +40,18 @@ const GameInstance = () => {
   const [ratio, setRatio] = useState(1);
   const [leftScore, setLeftScore] = useState(0);
   const [rightScore, setRightScore] = useState(0);
+
   useEffect(() => {
     setRatio(canvasHeight / 100);
   }, [canvasHeight, canvasWidth]);
   // const socket = io("http://localhost:3001");
   useEffect(() => {
-    // console.log("leftTile");
-    console.log(ratio);
     setRatio(canvasHeight / 100);
     draw();
   }, [leftTile, rightTile, ball, ratio, leftScore, rightScore]);
   useEffect(() => {
+
     const TickHandler = (data: any) => {
-      // console.log(ratio);
 
       setLeftTile(data.coordinates.leftTile);
       setRightTile({
@@ -88,51 +66,54 @@ const GameInstance = () => {
       setRightScore(data.coordinates.rightScore);
     };
 
+
     socket.on("game", TickHandler);
-    console.log("Subscribed");
-    socket.emit("game", { room_id: 1 });
+    const room_id = localStorage.getItem('room_id');
+    socket.emit("game", { room_id: room_id });
     //Handle up event for W and S
 
     return () => {
       console.log("Disconnected");
 
       socket.off("game");
-      socket.disconnect();
+      // socket.disconnect();
     };
-  }, []);
+  }, [props.gameStarted]);
+
   const handleKeyUp = (e: KeyboardEvent<HTMLCanvasElement>) => {
+    const room_id = localStorage.getItem('room_id');
+
     if (e.key === "w") {
       //if left player
       socket.emit("input", {
         up: false,
-        room_id: 1,
-        login: localStorage.getItem("userEmail"),
+        room_id: room_id,
+        isPlayer1: localStorage.getItem("isPlayer1"),
       });
     }
     if (e.key === "s") {
       socket.emit("input", {
         down: false,
-        room_id: 1,
-        login: localStorage.getItem("userEmail"),
+        room_id: room_id,
+        isPlayer1: localStorage.getItem("isPlayer1"),
       });
     }
   };
   const handleKeyDown = (e: KeyboardEvent<HTMLCanvasElement>) => {
-    // console.log("aaaa", e.key);
+    const room_id = localStorage.getItem('room_id');
     if (e.key === "w") {
-      console.log("w");
       socket.emit("input", {
         up: true,
-        room_id: 1,
-        login: localStorage.getItem("userEmail"),
+        room_id: room_id,
+        isPlayer1: localStorage.getItem("isPlayer1"),
       });
     }
 
     if (e.key === "s") {
       socket.emit("input", {
         down: true,
-        room_id: 1,
-        login: localStorage.getItem("userEmail"),
+        room_id: room_id,
+        isPlayer1: localStorage.getItem("isPlayer1"),
       });
     }
   };
@@ -228,18 +209,51 @@ const StartButton = () => {
   );
 };
 const Game = () => {
-  const [gameStarted, setGameStarted] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [winner, setWinner] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // setGameStarted(localStorage.getItem("gameStarted") === "true");
+    setGameStarted(localStorage.getItem("gameStarted") === "true");
+    socket.on("start game", (payload) => {
+      localStorage.setItem('room_id', payload.response.id);
+      localStorage.setItem('isPlayer1', payload.response.player1.login === localStorage.getItem('userEmail') ? 'true' : 'false');
+      setGameStarted(true);
+    });
+
+    socket.on("end game", (payload) => {
+      const isWinner = localStorage.getItem('isPlayer1') === 'true' ? payload.winner : !payload.winner;
+      localStorage.setItem('gameStarted', 'false')
+      setWinner(isWinner);
+    })
+
+    return () => {
+      socket.off('start game');
+    }
+
   }, []);
 
-  socket.on("game start", () => {
-    setGameStarted(true);
-  });
+  const handleClick = () => {
+    setGameStarted(false);
+    localStorage.setItem('room_id', '');
+    localStorage.setItem('isPlayer1', '');
+  }
 
   return gameStarted ? (
-    <GameInstance />
+    <div>
+
+      <GameInstance />
+      {winner !== null ?
+        (
+          <div className="card-disappear-click-zone">
+            <div className="add-zone"></div>
+            <div className="game-end-card-container">
+              <GameEndCard winner={winner} handleClick={handleClick} />
+            </div>
+          </div>
+
+        )
+        : <></>}
+    </div>
   ) : (
     <div className="Button-msg-zone">
       <StartButton />
