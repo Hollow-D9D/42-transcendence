@@ -10,7 +10,6 @@ import { AchievementsModule } from './achievements/achievements.module';
 import { GameMatchModule } from './game-match/game-match.module';
 import { ChatModule } from './chat/chat.module';
 import { ChatService } from './chat/chat.service';
-import { GameGateway } from './game/game.gateway';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -44,7 +43,7 @@ import { join } from 'path';
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GameGateway, ChatService],
+  providers: [AppService, ChatService],
 })
 export class AppModule {
   constructor(private readonly chatService: ChatService) {

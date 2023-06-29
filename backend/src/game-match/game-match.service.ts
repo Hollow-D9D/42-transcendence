@@ -32,7 +32,6 @@ export class GameMatchService {
       }
       const user = await this.profileService.getProfile(login);
       queue.push(user.user);
-      console.log(queue);
       await this.cacheM.set('queue', queue, 0);
       const response = await this.matchPlayers(queue);
       return response;
@@ -53,7 +52,7 @@ export class GameMatchService {
           const response = await this.startMatch(queue.shift(), queue.shift());
           return { matching: true, response };
         }
-        return { matching: false } 
+        return { matching: false };
       }
       return { matching: false };
     } catch (err) {
@@ -68,7 +67,7 @@ export class GameMatchService {
       match.player1 = player1;
       match.player2 = player2;
       console.log('match', match);
-      
+
       const newmatch = await match.save();
       console.log('newmatch', newmatch);
       await this.cacheM.set('queue', queue, 0);
