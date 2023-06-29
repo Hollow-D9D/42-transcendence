@@ -32,6 +32,12 @@ const clamp = (num: number, min: number, max: number) =>
   Math.min(Math.max(num, min), max);
 
 class Game {
+  constructor() {
+    this.getRandDirection(null);
+    this.ball.pos.x = 50;
+    this.ball.pos.y = 50;
+  }
+
   id: string;
   leftTile: any = {
     pos: { x: 10, y: 45 },
@@ -108,20 +114,22 @@ class Game {
       }
 
       if (startBX <= 1) {
-        rightScore++;
-        restart(false);
+        this.rightScore++;
+        this.resetGame(false);
       }
       if (startBX >= 100 - 1) {
-        leftScore++;
-        restart(true);
+        this.leftScore++;
+        this.resetGame(true);
       }
     },
   };
   leftScore = 0;
   rightScore = 0;
 
-  upInput: false;
-  downInput: false;
+  upInputL: false;
+  downInputL: false;
+  upInputR: false;
+  downInputR: false;
 
   getRandDirection(leftWon: boolean | null): void {
     if (leftWon == null) {
@@ -153,19 +161,32 @@ class Game {
     this.ball.pos = new Vector2(50, Math.random() * 100);
     this.getRandDirection(leftWon);
   }
-  handleInput(up: boolean, down: boolean): void {
-    if (this.upInput && this.downInput) {
+  handleInputL(): void {
+    if (this.upInputL && this.downInputL) {
       this.leftTile.acc = 0;
-    } else if (this.upInput) {
+    } else if (this.upInputL) {
       this.leftTile.acc = -1;
-    } else if (this.downInput) {
+    } else if (this.downInputL) {
       this.leftTile.acc = 1;
     } else {
       if (this.leftTile.acc !== 0) this.leftTile.acc = 0;
     }
   }
 
-  tick(): void {
+  handleInputR(): void {
+    if (this.upInputR && this.downInputR) {
+      this.rightTile.acc = 0;
+    } else if (this.upInputR) {
+      this.rightTile.acc = -1;
+    } else if (this.downInputR) {
+      this.rightTile.acc = 1;
+    } else {
+      if (this.rightTile.acc !== 0) this.rightTile.acc = 0;
+    }
+  }
+
+  leftTiletick(): void {
+    // console.log('tick');
     if (this.leftTile.acc != 0) {
       this.leftTile.pos.y = clamp(
         this.leftTile.pos.y + this.leftTile.vel,
@@ -182,21 +203,46 @@ class Game {
         (this.leftTile.vel += this.leftTile.vel < 0 ? 0.5 : -0.5);
     }
   }
+
+  rightTiletick(): void {
+    // console.log('tick');
+    if (this.rightTile.acc != 0) {
+      this.rightTile.pos.y = clamp(
+        this.rightTile.pos.y + this.rightTile.vel,
+        0,
+        100 - this.rightTile.size.y,
+      );
+      this.rightTile.vel += this.rightTile.acc;
+    } else if (this.rightTile.vel != 0) {
+      (this.rightTile.pos.y = clamp(
+        this.rightTile.pos.y + this.rightTile.vel,
+        0,
+        100 - this.rightTile.size.y,
+      )),
+        (this.rightTile.vel += this.rightTile.vel < 0 ? 0.5 : -0.5);
+    }
+  }
+
+  tick(): any {
+    this.ball.tick();
+    this.leftTiletick();
+    this.rightTiletick();
+    const coordinates = {
+      leftTile: { x: this.leftTile.pos.x, y: this.leftTile.pos.y },
+      rightTile: {
+        x: this.rightTile.pos.x,
+        y: this.rightTile.pos.y,
+      },
+      ball: { x: this.ball.pos.x, y: this.ball.pos.y },
+      size: 100,
+      leftScore: this.leftScore,
+      rightScore: this.rightScore,
+    };
+    // console.log('game');
+    return coordinates;
+  }
 }
-
-let leftScore = 0;
-let rightScore = 0;
-
-const leftTile = {};
-
-const rightTile = {};
-
-const restart = (leftWon: boolean) => {};
-const ball = {};
-
 //Input
-const handleInput = () => {};
-const leftTileTick = () => {};
 
 @WebSocketGateway({
   cors: {
@@ -207,37 +253,35 @@ export class GameGateway {
   @WebSocketServer()
   server: Server;
 
-  private game: Game = new Game();
+  private game: Game[] = [];
   private interval: NodeJS.Timeout;
-
   @SubscribeMessage('input')
-  handleInput(client: any, payload: any): void {
-    if (payload.up !== undefined) {
-      this.game.upInput = payload.up;
-    } else this.game.downInput = payload.down;
-    handleInput();
+  handleInputL(client: any, payload: any): void {
+    if (payload.login === 'aavetyan') {
+      if (payload.up !== undefined) {
+        this.game[payload.room_id].upInputL = payload.up;
+      } else this.game[payload.room_id].downInputL = payload.down;
+
+      this.game[payload.room_id].handleInputL();
+    } else {
+      if (payload.up !== undefined) {
+        this.game[payload.room_id].upInputR = payload.up;
+      } else this.game[payload.room_id].downInputR = payload.down;
+
+      this.game[payload.room_id].handleInputR();
+    }
   }
 
   @SubscribeMessage('game')
   handleMessage(client: any, payload: any): void {
-    clearInterval(this.interval);
-    this.game.getRandDirection(null);
-    this.game.ball.pos.x = 50;
-    this.game.ball.pos.y = 50;
+    // clearInterval(this.interval);
+    if (!this.game[payload.room_id]) {
+      this.game[payload.room_id] = new Game();
 
-    this.interval = setInterval(() => {
-      this.game.ball.tick();
-      leftTileTick();
-      const coordinates = {
-        leftTile: { x: this.game.leftTile.pos.x, y: this.game.leftTile.pos.y },
-        rightTile: { x: 90, y: 45 },
-        ball: { x: this.game.ball.pos.x, y: this.game.ball.pos.y },
-        size: 100,
-        leftScore: this.game.leftScore,
-        rightScore: this.game.rightScore,
-      };
-      this.server.emit('game', { coordinates });
-      // console.log('game');
-    }, 40);
+      this.interval = setInterval(() => {
+        const coordinates = this.game[payload.room_id].tick();
+        this.server.emit('game', { coordinates }); // FIX emit to room
+      }, 40);
+    }
   }
 }

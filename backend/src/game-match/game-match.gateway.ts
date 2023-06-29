@@ -110,12 +110,18 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
     try {
+      console.log('start game', payload);
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
-      console.log('start game', response);
       if (response.matching) {
-        await this.startGameUpdate(response.response.player1.login, response.response);
-        await this.startGameUpdate(response.response.player2.login, response.response);
+        await this.startGameUpdate(
+          response.response.player1.login,
+          response.response,
+        );
+        await this.startGameUpdate(
+          response.response.player2.login,
+          response.response,
+        );
       }
     } catch (err) {
       throwError(client, err.message);
@@ -125,12 +131,14 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('accept game invite')
   async handleAcceptGameInvite(client: Socket, payload: any) {
     try {
-      
       if (!payload.login1) throw new Error('No login1 provided!');
       if (!payload.login2) throw new Error('No login2 provided!');
       const user1: any = await this.profileService.getProfile(payload.login1);
       const user2: any = await this.profileService.getProfile(payload.login2);
-      const response = await this.gameMatchService.startMatch(user1.user, user2.user);
+      const response = await this.gameMatchService.startMatch(
+        user1.user,
+        user2.user,
+      );
       console.log('accepting', response);
       if (response) {
         await this.startGameUpdate(response.player1.login, response);
@@ -138,7 +146,7 @@ export class GameMatchGateway implements OnGatewayInit {
       }
     } catch (err) {
       console.log(err);
-      
+
       throwError(client, err.message);
     }
   }
@@ -159,7 +167,9 @@ export class GameMatchGateway implements OnGatewayInit {
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
         console.log('start game', userSocket);
-        this.server.to(userSocket.socket).emit('start game', { matching:true, response });
+        this.server
+          .to(userSocket.socket)
+          .emit('start game', { matching: true, response });
       }
     });
     await this.profileService.editStatus(login, UserStatus.INGAME);
