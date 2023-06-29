@@ -21,7 +21,6 @@ import "./context.css";
 import { AddUserIcon, QuitIcon } from "./icon";
 import ReactTags from "react-tag-autocomplete";
 import { socket } from "../../App";
-import { getUserAvatarQuery } from "../../queries/avatarQueries";
 import { Player } from "../game.interfaces";
 import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../App";
@@ -229,7 +228,7 @@ function MemberStatus({
       setMembers(
         data.map((elem: any): oneUser => {
           return {
-            nickname: elem.login,
+            nickname: elem.nickname,
             login: elem.login,
             id: elem.id,
             role: "member",
@@ -249,7 +248,7 @@ function MemberStatus({
       setBanned(
         data.map((elem: any): oneUser => {
           return {
-            nickname: elem.login,
+            nickname: elem.nickname,
             login: elem.login,
             id: elem.id,
             role: "banned",
@@ -351,7 +350,7 @@ function Status({
   const [hide, setHide] = useState<any>();
   const usersStatus = useContext(UsersStatusCxt);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     if (selData && selData.event) {
       if (hide) hide();
@@ -586,6 +585,7 @@ function OneStatus({
   const usersStatus = useContext(UsersStatusCxt);
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
+  console.log(":::::::", data);
 
   useEffect(() => {
     setAvatarURL(data.profpic_url);
@@ -622,7 +622,6 @@ function OneStatus({
     // global.selectedUser.status = global.onlineStatus;
 
     event.preventDefault();
-    // console.log(":::::::", data);
 
     setSelData({ data: data, event: event });
   };

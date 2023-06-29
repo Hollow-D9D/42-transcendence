@@ -66,22 +66,29 @@ export default function Preview({
       //     avatar: elem.profpic_url
       //   })
       // })
+      console.log(data);
+
       data.channels.forEach((elem: any) => {
-        let name = elem.group ? elem.name : elem.name.split(":");
         let isBlocked = false;
-        let avatarPic = "";
+        let avatarPic = '';
+        let name = elem.group ? elem.name : elem.name.split(":");
         if (!elem.group) {
           name = name[1] === email ? name[2] : name[1];
           let user = data.blocked.find((e: any) => {
-            return e.nickname === name;
+            return e.login === name;
           });
           if (user === undefined) {
             user = data.friends.find((e: any) => {
-              return e.nickname === name;
-            });
-          } else isBlocked = true;
+              return e.login === name;
+            })
+          }
+          else
+            isBlocked = true;
+          // console.log(data.friends);
 
-          avatarPic = user?.profpic_url;
+          // if (user)
+          name = user.nickname;
+          avatarPic = user.profpic_url;
         }
         previews.push({
           id: elem.id,
@@ -95,7 +102,7 @@ export default function Preview({
           ownerEmail: "",
           ownerId: 0,
           isBlocked: isBlocked,
-          avatar: avatarPic,
+          avatar: avatarPic
         });
       });
       if (data) setPreviews(previews);
@@ -107,31 +114,35 @@ export default function Preview({
 
   useEffect(() => {
     socket.on("add preview", (data) => {
-      let previews: chatPreview[] = [];
-      data.forEach((elem: any) => {
-        let name = elem.group ? elem.name : elem.name.split(":");
-        if (!elem.group) name = name[1] === email ? name[2] : name[1];
-        previews.push({
-          id: elem.id,
-          dm: !elem.group,
-          name: name,
-          isPassword: elem.mode === "PROTECTED",
-          password: elem.password,
-          updateAt: "",
-          lastMsg: "",
-          unreadCount: 0,
-          ownerEmail: "",
-          ownerId: 0,
-          isBlocked: false,
-          avatar: elem.group
-            ? ""
-            : data.friends?.find((e: any) => {
-                return e.nickname === name;
-              }).profpic_url,
-        });
-      });
-      if (data) setPreviews(previews);
-    });
+      (async () => {
+        await socket.emit('get search suggest', { login: email })
+      })();
+    }
+      //   let previews: chatPreview[] = [];
+      //   data.forEach((elem: any) => {
+      //     let name = elem.group ? elem.name : elem.name.split(":");
+      //     if (!elem.group) name = name[1] === email ? name[2] : name[1];
+      //     previews.push({
+      //       id: elem.id,
+      //       dm: !elem.group,
+      //       name: name,
+      //       isPassword: elem.mode === "PROTECTED",
+      //       password: elem.password,
+      //       updateAt: "",
+      //       lastMsg: "",
+      //       unreadCount: 0,
+      //       ownerEmail: "",
+      //       ownerId: 0,
+      //       isBlocked: false,
+      //       avatar: elem.group
+      //         ? ""
+      //         : data.friends?.find((e: any) => {
+      //           return e.login === name;
+      //         }).profpic_url,
+      //     });
+      //   });
+      //   if (data) setPreviews(previews);
+    );
     socket.on("update preview", (data: chatPreview[] | null) => {
       (async function () {
         await socket.emit("get search suggest", { login: email });
@@ -224,9 +235,7 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
-          return value.isBlocked ? (
-            <></>
-          ) : (
+          return (value.isBlocked ? <></> :
             <div key={index}>
               <PreviewChat
                 data={value}
@@ -287,12 +296,9 @@ function ChatSearch({
       let previews: oneSuggestion[] = [];
       if (data) {
         data.friends.forEach((elem: any) => {
-          if (
-            elem.login === email ||
-            data.blocked.find((e: any) => {
-              return e.login === elem.login;
-            })
-          )
+          if (elem.login === email || data.blocked.find((e: any) => {
+            return e.login === elem.login
+          }))
             return;
           previews.push({
             category: "user",
@@ -333,6 +339,7 @@ function ChatSearch({
     // socket.emit("get setting", data.id);
     // socket.emit("get channel", data.id);
     // // if (data.catagory === "user") {
+
     let dm: newDM = {
       email: email,
 
