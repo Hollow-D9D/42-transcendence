@@ -66,7 +66,6 @@ export default function Preview({
       //     avatar: elem.profpic_url
       //   })
       // })
-      console.log(data);
 
       data.channels.forEach((elem: any) => {
         let isBlocked = false;
