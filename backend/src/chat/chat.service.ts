@@ -57,8 +57,8 @@ export class ChatService {
       } else {
         entityLike.name =
           users[0].id > users[1].id
-            ? `DM:${users[0].nickname}:${users[1].nickname}`
-            : `DM:${users[1].nickname}:${users[0].nickname}`;
+            ? `DM:${users[0].login}:${users[1].login}`
+            : `DM:${users[1].login}:${users[0].login}`;
       }
       // no else since no new fields need to be added for chats
       const newOne = this.chatRepo.create(entityLike);
@@ -587,10 +587,14 @@ export class ChatService {
     return await this.userRepo.find({ where: { login: In(logins) } });
   }
 
+  async userByNickname(nickname: string): Promise<User> {
+    return await this.userRepo.findOne({ where: { nickname: nickname } });
+  }
+
   async allUsers(): Promise<User[]> {
     return await this.userRepo.find();
   }
-  
+
   async notInChannelUsers(chat_id: number) {
     const users = await this.userRepo.find({ where: {} });
     const chat = await this.chatRepo.findOne({

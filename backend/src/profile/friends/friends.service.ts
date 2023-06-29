@@ -31,7 +31,6 @@ export class FriendsService {
         where: { login },
         relations: ['friends', 'blocked_users'],
       });
-      console.log(user);
 
       return user;
     } catch (error) {
@@ -44,16 +43,26 @@ export class FriendsService {
       await this.removeFriend(user_id, friend_id);
       const user = await this.userRepo.findOne({
         where: { id: user_id },
-        relations: ['blocked_users'],
+        relations: ['blocked_users', 'friend_requests'],
       });
       user.blocked_users.forEach((friend) => {
         if (friend.id === friend_id) {
           throw new Error('is already blocked');
         }
       });
-      const friend = await this.userRepo.findOne({ where: { id: friend_id } });
+      const friend = await this.userRepo.findOne({
+        where: { id: friend_id },
+        relations: ['friend_requests'],
+      });
+      user.friend_requests = user.friend_requests.filter(
+        (friend) => friend.id !== friend_id,
+      );
       user.blocked_users.push(friend);
       user.save();
+      friend.friend_requests = friend.friend_requests.filter(
+        (friend) => friend.id !== user_id,
+      );
+      friend.save();
     } catch (error) {
       throw error;
     }

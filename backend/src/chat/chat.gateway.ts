@@ -254,10 +254,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         const logins: string[] = [query.email];
         // add another login if necessary
-
-        // chat, not a channel
-        if (query.target_login) logins.push(query.target_login);
-        // `target` user is expected to be provided
+        let targetUser = null;
+        if (query.target_login) {
+          targetUser = await this.chatService.userByNickname(
+            query.target_login,
+          );
+          logins.push(targetUser.login);
+        } // `target` user is expected to be provided
         else
           throw new Error('No valid target user specified for the new chat!');
 
@@ -276,8 +279,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         const channelWithName = await this.chatService.channelByName(
           users[0].id > users[1].id
-            ? `DM:${users[0].nickname}:${users[1].nickname}`
-            : `DM:${users[1].nickname}:${users[0].nickname}`,
+            ? `DM:${users[0].login}:${users[1].login}`
+            : `DM:${users[1].login}:${users[0].login}`,
         );
         // all main checks passed
         if (!channelWithName) {
