@@ -56,7 +56,6 @@ const initializeUser = async (result: any, setUserInfo: any) => {
 
 const fetchDataFriends = async (userInfo: any, setUserInfo: any) => {
   const result = await getUserFriends();
-
   if (userInfo.paramName === localStorage.getItem('userEmail')) {
     userInfo.isFriend = true;
     setUserInfo(userInfo);
@@ -111,7 +110,6 @@ export default function UserProfile() {
         if (result !== "error") {
           userInfo.paramName = params.userName;
           initializeUser(result.body.user, setUserInfo);
-
           setIsFetched(true);
         } else setIsUser(false);
       }
@@ -123,6 +121,7 @@ export default function UserProfile() {
     const addFriend = async () => {
       const result = await addFriendQuery(otherId);
       if (result !== "error") {
+
         notif?.setNotifText("Friend request sent to " + otherUsername + "!");
         setReloadKey((prevKey) => prevKey + 1);
       } else notif?.setNotifText("Could not send friend request :(.");
@@ -135,6 +134,7 @@ export default function UserProfile() {
     const blockUser = async () => {
       const result = await blockUserQuery(otherId);
       if (result !== "error") {
+        userInfo.isBlocked = true;
         notif?.setNotifText(otherUsername + " blocked!");
         setReloadKey((prevKey) => prevKey + 1);
       } else notif?.setNotifText("Could not block user :(.");
@@ -195,7 +195,7 @@ export default function UserProfile() {
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
                   <Col className="">
-                    {!userInfo.isFriend ?
+                    {!userInfo.isFriend && !userInfo.isBlocked ?
                       <OverlayTrigger overlay={renderTooltip("Add friend")}>
                         <div
                           id="clickableIcon"
