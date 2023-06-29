@@ -270,6 +270,8 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @WebSocketServer()
   server: Server;
+  private game: Game[] = [];
+  private rooms: { [roomName: string]: Set<string> } = {};
 
   afterInit() {
     console.log('should be uncommented');
@@ -305,6 +307,29 @@ export class GameMatchGateway implements OnGatewayInit {
   //   console.log('Client disconnected:', client.id);
   //   // Additional logic for handling disconnection
   // }
+
+  private async joinRoom(
+    client: Socket,
+    roomName: string,
+    login: string,
+  ): Promise<boolean> {
+    if (!this.rooms[roomName]) {
+      this.rooms[roomName] = new Set();
+    }
+    await client.join(roomName);
+    this.rooms[roomName].add(login);
+    return true;
+  }
+
+  private async leaveRoom(client: Socket, roomName: string, login: string) {
+    await client.leave(roomName);
+    if (this.rooms[roomName]) {
+      this.rooms[roomName].delete(login);
+      if (this.rooms[roomName].size === 0) {
+        delete this.rooms[roomName];
+      }
+    }
+  }
 
   @SubscribeMessage('send invite')
   async handleInviteGame(client: Socket, payload: any) {
@@ -351,10 +376,12 @@ export class GameMatchGateway implements OnGatewayInit {
       console.log('response', response.matching);
       if (response.matching) {
         await this.startGameUpdate(
+          client,
           response.response.player1.login,
           response.response,
         );
         await this.startGameUpdate(
+          client,
           response.response.player2.login,
           response.response,
         );
@@ -376,8 +403,8 @@ export class GameMatchGateway implements OnGatewayInit {
         user2.user,
       );
       if (response) {
-        await this.startGameUpdate(response.player1.login, response);
-        await this.startGameUpdate(response.player2.login, response);
+        await this.startGameUpdate(client, response.player1.login, response);
+        await this.startGameUpdate(client, response.player2.login, response);
       }
     } catch (err) {
       console.log(err);
@@ -397,8 +424,9 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
-  async startGameUpdate(login: string, response: any) {
+  async startGameUpdate(client: Socket, login: string, response: any) {
     const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
+    this.joinRoom(client, '' + response.id, login);
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
         this.server
@@ -442,8 +470,6 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
-  private game: Game[] = [];
-
   @SubscribeMessage('input')
   handleInputL(client: any, payload: any): void {
     if (payload.isPlayer1 === 'true') {
@@ -462,7 +488,7 @@ export class GameMatchGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('game')
-  handleMessage(client: any, payload: any): void {
+  handleMessage(client: any, payload: any) {
     // clearInterval(this.interval);
     console.log('game', payload.room_id);
     if (!this.game[payload.room_id]) {
@@ -476,15 +502,22 @@ export class GameMatchGateway implements OnGatewayInit {
         ) {
           clearInterval(this.game[payload.room_id].interval);
           this.game[payload.room_id].interval = null;
-          this.server.emit('end game', {
+          this.server.to(payload.room_id).emit('end game', {
             winner: this.game[payload.room_id].leftScore >= 3,
           });
+          (async () => {
+            (await this.server.in(payload.room_id).fetchSockets()).forEach(
+              (socket) => {
+                socket.leave(payload.room_id);
+              },
+            );
+          })();
           this.game[payload.room_id] = undefined;
           return;
         }
 
         const coordinates = this.game[payload.room_id].tick();
-        this.server.emit('game', { coordinates }); // FIX emit to room
+        this.server.to(payload.room_id).emit('game', { coordinates }); // FIX emit to room
       }, 80);
     }
     console.log(this.game[payload.room_id].interval);

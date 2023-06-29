@@ -13,6 +13,8 @@ export class GameMatchService {
     private readonly gameMatchRepo: Repository<GameMatch>,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly profileService: ProfileService,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {
     this.cacheM.set('queue', [], 0);
   }
@@ -76,6 +78,23 @@ export class GameMatchService {
       throw err;
     }
   }
+
+  // async checkPermission(login: string, chat_id: number) {
+  //   let bool = false;
+  //   try {
+  //     const user = await this.userRepo.findOne({
+  //       where: { login },
+  //       relations: ['chatsMemberOf'],
+  //     });
+  //     if (user)
+  //       user.chatsMemberOf.map((item) => {
+  //         if (item.id == chat_id) bool = true;
+  //       });
+  //     return bool;
+  //   } catch (err) {
+  //     throw err;
+  //   }
+  // }
 
   async endMatch(match_id: number) {
     try {
