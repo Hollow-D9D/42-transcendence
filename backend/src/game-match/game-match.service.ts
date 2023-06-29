@@ -4,7 +4,7 @@ import { GameMatch } from 'src/typeorm';
 import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ProfileService } from 'src/profile/profile.service';
-import { User } from 'src/typeorm';
+import { User, Match } from 'src/typeorm';
 
 @Injectable()
 export class GameMatchService {
@@ -68,12 +68,28 @@ export class GameMatchService {
       const match = new GameMatch();
       match.player1 = player1;
       match.player2 = player2;
-      console.log('match', match);
-
       const newmatch = await match.save();
-      console.log('newmatch', newmatch);
       await this.cacheM.set('queue', queue, 0);
       return newmatch;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  // duration, leftWon, winner_score, loser_score
+  async endGame(stats: any, game_match_id: number) {
+    // const winner_user = await this.userRepo.findOne({ where: { login: winner } });
+    // const loser_user = await this.userRepo.findOne({ where: { login: loser } });
+    try {
+      const liveGame = await this.gameMatchRepo.findOne({ where: { id : game_match_id }, relations: ['player1', 'player2'] });
+      const match = new Match();
+      match.winner = (stats.leftWon) ? liveGame.player1 : liveGame.player2;
+      match.loser = (stats.leftWon) ? liveGame.player2 : liveGame.player1;
+      match.duration += stats.duration;
+      match.playedOn = liveGame.playedOn;
+      match.winnerScore = stats.winner_score;
+      match.loserScore = stats.loser_score;
+      await match.save();
     } catch (err) {
       throw err;
     }

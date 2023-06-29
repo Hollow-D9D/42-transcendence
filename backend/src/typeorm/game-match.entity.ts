@@ -3,6 +3,7 @@ import {
   Entity,
   OneToOne,
   ManyToOne,
+  CreateDateColumn,
   JoinColumn,
   BaseEntity,
 } from 'typeorm';
@@ -31,4 +32,7 @@ export class GameMatch extends BaseEntity {
   @OneToOne(() => User, user => user.matchesAsPlayer2)
   @JoinColumn()
   player2: User;
+
+  @CreateDateColumn()
+  playedOn: Date;
 }

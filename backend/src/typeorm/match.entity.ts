@@ -11,7 +11,7 @@ import {
 import { User } from './user.entity';
 
 @Entity()
-export class GameMatch extends BaseEntity {
+export class Match extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

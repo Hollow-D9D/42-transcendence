@@ -370,18 +370,18 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
+    console.log('start game', payload);
+    
     try {
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
       console.log('response', response.matching);
       if (response.matching) {
         await this.startGameUpdate(
-          client,
           response.response.player1.login,
           response.response,
         );
         await this.startGameUpdate(
-          client,
           response.response.player2.login,
           response.response,
         );
@@ -403,8 +403,8 @@ export class GameMatchGateway implements OnGatewayInit {
         user2.user,
       );
       if (response) {
-        await this.startGameUpdate(client, response.player1.login, response);
-        await this.startGameUpdate(client, response.player2.login, response);
+        await this.startGameUpdate(response.player1.login, response);
+        await this.startGameUpdate(response.player2.login, response);
       }
     } catch (err) {
       console.log(err);
@@ -424,8 +424,10 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
-  async startGameUpdate(client: Socket, login: string, response: any) {
+  async startGameUpdate(login: string, response: any) {
     const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
+    const client = this.server.sockets.sockets.get( userSockets.find((e) => e.login === login).socket);
+    console.log(client.id);
     this.joinRoom(client, '' + response.id, login);
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
@@ -440,7 +442,7 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('end-game')
   async handleEndGame(client: Socket, payload: any) {
     try {
-      if (!payload.login) throw new Error('No login provided!');
+      // if (!payload.login) throw new Error('No login provided!');
     } catch (err) {
       throwError(client, err.message);
     }
@@ -495,7 +497,7 @@ export class GameMatchGateway implements OnGatewayInit {
       this.game[payload.room_id] = new Game();
 
       this.game[payload.room_id].interval = setInterval(() => {
-        console.log('tick');
+        // console.log('tick');
         if (
           this.game[payload.room_id].leftScore >= 3 ||
           this.game[payload.room_id].rightScore >= 3
@@ -505,13 +507,15 @@ export class GameMatchGateway implements OnGatewayInit {
           this.server.to(payload.room_id).emit('end game', {
             winner: this.game[payload.room_id].leftScore >= 3,
           });
-          (async () => {
-            (await this.server.in(payload.room_id).fetchSockets()).forEach(
-              (socket) => {
-                socket.leave(payload.room_id);
-              },
-            );
-          })();
+          // (async () => {
+          //   (await this.server.in(payload.room_id).fetchSockets()).forEach(
+              
+          //     (socket) => {
+          //       console.log(socket);
+          //       socket.leave(payload.room_id);
+          //     },
+          //   );
+          // })();
           this.game[payload.room_id] = undefined;
           return;
         }
@@ -520,6 +524,14 @@ export class GameMatchGateway implements OnGatewayInit {
         this.server.to(payload.room_id).emit('game', { coordinates }); // FIX emit to room
       }, 80);
     }
-    console.log(this.game[payload.room_id].interval);
+    // (async () => {
+    //   (await this.server.in(payload.room_id).fetchSockets()).forEach(
+        
+    //     (socket) => {
+    //       console.log('socket ', socket.id);
+    //       socket.leave(payload.room_id);
+    //     },
+    //   );
+    // })();
   }
 }
