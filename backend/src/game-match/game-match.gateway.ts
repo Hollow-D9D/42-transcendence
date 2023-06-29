@@ -48,10 +48,12 @@ const clamp = (num: number, min: number, max: number) =>
 
 class Game {
   constructor() {
+    this.tickCount = 0;
     this.getRandDirection(null);
     this.ball.pos.x = 50;
     this.ball.pos.y = 50;
   }
+  tickCount: number;
   interval: NodeJS.Timeout;
   id: string;
   leftTile: any = {
@@ -239,6 +241,7 @@ class Game {
   }
 
   tick(): any {
+    this.tickCount++;
     this.ball.tick();
     this.leftTiletick();
     this.rightTiletick();
@@ -371,7 +374,7 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
     console.log('start game', payload);
-    
+
     try {
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
@@ -426,7 +429,9 @@ export class GameMatchGateway implements OnGatewayInit {
 
   async startGameUpdate(login: string, response: any) {
     const userSockets: UserSocket[] = await this.cacheM.get('user_sockets');
-    const client = this.server.sockets.sockets.get( userSockets.find((e) => e.login === login).socket);
+    const client = this.server.sockets.sockets.get(
+      userSockets.find((e) => e.login === login).socket,
+    );
     console.log(client.id);
     this.joinRoom(client, '' + response.id, login);
     userSockets.forEach((userSocket) => {
@@ -491,47 +496,51 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @SubscribeMessage('game')
   handleMessage(client: any, payload: any) {
+    this.joinRoom(client, '' + payload.room_id, payload.login);
     // clearInterval(this.interval);
+    const WINSCORECOUNT = 3;
+    const TICK_INTERVAL = 60;
     console.log('game', payload.room_id);
     if (!this.game[payload.room_id]) {
       this.game[payload.room_id] = new Game();
-
       this.game[payload.room_id].interval = setInterval(() => {
         // console.log('tick');
         if (
-          this.game[payload.room_id].leftScore >= 3 ||
-          this.game[payload.room_id].rightScore >= 3
+          this.game[payload.room_id].leftScore >= WINSCORECOUNT ||
+          this.game[payload.room_id].rightScore >= WINSCORECOUNT
         ) {
           clearInterval(this.game[payload.room_id].interval);
           this.game[payload.room_id].interval = null;
           this.server.to(payload.room_id).emit('end game', {
-            winner: this.game[payload.room_id].leftScore >= 3,
+            winner: this.game[payload.room_id].leftScore >= WINSCORECOUNT,
           });
-          // (async () => {
-          //   (await this.server.in(payload.room_id).fetchSockets()).forEach(
-              
-          //     (socket) => {
-          //       console.log(socket);
-          //       socket.leave(payload.room_id);
-          //     },
-          //   );
-          // })();
+          this.server
+            .in(payload.room_id)
+            .fetchSockets()
+            .then((promise) => {
+              promise.forEach((socket) => {
+                socket.leave(payload.room_id);
+              });
+            });
+          const stats = {
+            duration:
+              (this.game[payload.room_id].tickCount * TICK_INTERVAL) / 1000,
+            winner_score: WINSCORECOUNT,
+            loser_score:
+              this.game[payload.room_id].leftScore === WINSCORECOUNT
+                ? this.game[payload.room_id].rightScore
+                : this.game[payload.room_id].leftScore,
+            leftWon: this.game[payload.room_id].leftScore >= WINSCORECOUNT,
+          };
+          console.log(stats);
+          this.gameMatchService.endGame(stats, payload.room_id).then();
           this.game[payload.room_id] = undefined;
           return;
         }
 
         const coordinates = this.game[payload.room_id].tick();
         this.server.to(payload.room_id).emit('game', { coordinates }); // FIX emit to room
-      }, 80);
+      }, TICK_INTERVAL);
     }
-    // (async () => {
-    //   (await this.server.in(payload.room_id).fetchSockets()).forEach(
-        
-    //     (socket) => {
-    //       console.log('socket ', socket.id);
-    //       socket.leave(payload.room_id);
-    //     },
-    //   );
-    // })();
   }
 }

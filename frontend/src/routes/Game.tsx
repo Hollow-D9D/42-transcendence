@@ -1,4 +1,3 @@
-
 import "./Game.css";
 import { socket } from "../App";
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
@@ -50,9 +49,7 @@ const GameInstance = (props: any) => {
     draw();
   }, [leftTile, rightTile, ball, ratio, leftScore, rightScore]);
   useEffect(() => {
-
     const TickHandler = (data: any) => {
-
       setLeftTile(data.coordinates.leftTile);
       setRightTile({
         x: data.coordinates.rightTile.x * ratio,
@@ -66,10 +63,12 @@ const GameInstance = (props: any) => {
       setRightScore(data.coordinates.rightScore);
     };
 
-
     socket.on("game", TickHandler);
-    const room_id = localStorage.getItem('room_id');
-    socket.emit("game", { room_id: room_id });
+    const room_id = localStorage.getItem("room_id");
+    socket.emit("game", {
+      room_id: room_id,
+      login: localStorage.getItem("userEmail"),
+    });
     //Handle up event for W and S
 
     return () => {
@@ -81,7 +80,7 @@ const GameInstance = (props: any) => {
   }, [props.gameStarted]);
 
   const handleKeyUp = (e: KeyboardEvent<HTMLCanvasElement>) => {
-    const room_id = localStorage.getItem('room_id');
+    const room_id = localStorage.getItem("room_id");
 
     if (e.key === "w") {
       //if left player
@@ -100,7 +99,7 @@ const GameInstance = (props: any) => {
     }
   };
   const handleKeyDown = (e: KeyboardEvent<HTMLCanvasElement>) => {
-    const room_id = localStorage.getItem('room_id');
+    const room_id = localStorage.getItem("room_id");
     if (e.key === "w") {
       socket.emit("input", {
         up: true,
@@ -215,44 +214,50 @@ const Game = () => {
   useEffect(() => {
     setGameStarted(localStorage.getItem("gameStarted") === "true");
     socket.on("start game", (payload) => {
-      localStorage.setItem('room_id', payload.response.id);
-      localStorage.setItem('isPlayer1', payload.response.player1.login === localStorage.getItem('userEmail') ? 'true' : 'false');
+      localStorage.setItem("room_id", payload.response.id);
+      localStorage.setItem(
+        "isPlayer1",
+        payload.response.player1.login === localStorage.getItem("userEmail")
+          ? "true"
+          : "false"
+      );
       setGameStarted(true);
     });
 
     socket.on("end game", (payload) => {
-      const isWinner = localStorage.getItem('isPlayer1') === 'true' ? payload.winner : !payload.winner;
-      localStorage.setItem('gameStarted', 'false')
+      const isWinner =
+        localStorage.getItem("isPlayer1") === "true"
+          ? payload.winner
+          : !payload.winner;
+      localStorage.setItem("gameStarted", "false");
       setWinner(isWinner);
-    })
+    });
 
     return () => {
-      socket.off('start game');
-    }
-
+      socket.off("start game");
+    };
   }, []);
 
   const handleClick = () => {
     setGameStarted(false);
-    localStorage.setItem('room_id', '');
-    localStorage.setItem('isPlayer1', '');
-  }
+    setWinner(null);
+    localStorage.setItem("room_id", "");
+    localStorage.setItem("isPlayer1", "");
+  };
 
   return gameStarted ? (
     <div>
-
       <GameInstance />
-      {winner !== null ?
-        (
-          <div className="card-disappear-click-zone">
-            <div className="add-zone"></div>
-            <div className="game-end-card-container">
-              <GameEndCard winner={winner} handleClick={handleClick} />
-            </div>
+      {winner !== null ? (
+        <div className="card-disappear-click-zone">
+          <div className="add-zone"></div>
+          <div className="game-end-card-container">
+            <GameEndCard winner={winner} handleClick={handleClick} />
           </div>
-
-        )
-        : <></>}
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   ) : (
     <div className="Button-msg-zone">

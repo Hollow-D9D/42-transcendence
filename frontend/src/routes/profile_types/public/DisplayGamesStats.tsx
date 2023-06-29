@@ -12,7 +12,7 @@ export default function DisplayGamesStats(props: any) {
 
   useEffect(() => {
     const getPlayedGamesStats = async () => {
-      const result_1 = await getGameStats(props.userInfo.id);
+      const result_1 = await getGameStats(props.userInfo.login);
       if (result_1 !== "error") {
         // setGames(result_1);
       } else console.log("Could not get games stats.");

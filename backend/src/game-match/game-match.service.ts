@@ -81,15 +81,28 @@ export class GameMatchService {
     // const winner_user = await this.userRepo.findOne({ where: { login: winner } });
     // const loser_user = await this.userRepo.findOne({ where: { login: loser } });
     try {
-      const liveGame = await this.gameMatchRepo.findOne({ where: { id : game_match_id }, relations: ['player1', 'player2'] });
+      const liveGame = await this.gameMatchRepo.findOne({
+        where: { id: game_match_id },
+        relations: ['player1', 'player2'],
+      });
       const match = new Match();
-      match.winner = (stats.leftWon) ? liveGame.player1 : liveGame.player2;
-      match.loser = (stats.leftWon) ? liveGame.player2 : liveGame.player1;
-      match.duration += stats.duration;
+      match.winner = stats.leftWon ? liveGame.player1 : liveGame.player2;
+      match.loser = stats.leftWon ? liveGame.player2 : liveGame.player1;
+      match.duration = (match.duration || 0) + parseInt(stats.duration);
       match.playedOn = liveGame.playedOn;
       match.winnerScore = stats.winner_score;
       match.loserScore = stats.loser_score;
+      console.log(match);
+      match.winner.win_count++;
+      match.loser.lose_count++;
+      match.winner.matchtime += parseInt(stats.duration);
+      match.loser.matchtime += parseInt(stats.duration);
+      match.winner.status = 1;
+      match.loser.status = 1;
+      await match.winner.save();
+      await match.loser.save();
       await match.save();
+      await liveGame.remove();
     } catch (err) {
       throw err;
     }

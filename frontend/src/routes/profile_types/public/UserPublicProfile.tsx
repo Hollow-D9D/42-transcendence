@@ -35,7 +35,6 @@ const userInfoInit: userModel = {
 };
 
 const initializeUser = async (result: any, setUserInfo: any) => {
-
   userInfoInit.id = result.id;
   userInfoInit.username = result.login;
   userInfoInit.full_name = result.full_name;
@@ -56,32 +55,30 @@ const initializeUser = async (result: any, setUserInfo: any) => {
 
 const fetchDataFriends = async (userInfo: any, setUserInfo: any) => {
   const result = await getUserFriends();
-  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+  if (userInfo.paramName === localStorage.getItem("userEmail")) {
     userInfo.isFriend = true;
     setUserInfo(userInfo);
-  }
-  else if (result !== "error") {
+  } else if (result !== "error") {
     result.forEach((e: any) => {
       if (e.login === userInfo.paramName) {
         setUserInfo({ ...userInfo, isFriend: true });
       }
-    })
-  };
-}
+    });
+  }
+};
 
 const fetchDataBlockes = async (userInfo: any, setUserInfo: any) => {
   const result = await getUserBlocked();
-  if (userInfo.paramName === localStorage.getItem('userEmail')) {
+  if (userInfo.paramName === localStorage.getItem("userEmail")) {
     setUserInfo({ ...userInfo, isBlocked: true });
-  }
-  else if (result !== "error") {
+  } else if (result !== "error") {
     result.forEach((e: any) => {
       if (e.login === userInfo.paramName) {
         setUserInfo({ ...userInfo, isBlocked: true });
       }
-    })
-  };
-}
+    });
+  }
+};
 
 export default function UserProfile() {
   const usersStatus = useContext(UsersStatusCxt);
@@ -107,9 +104,10 @@ export default function UserProfile() {
 
       if (!isFetched && params.userName !== undefined) {
         result = await getOtherUser(params.userName);
+        console.log(result);
         if (result !== "error") {
           userInfo.paramName = params.userName;
-          initializeUser(result.body.user, setUserInfo);
+          await initializeUser(result.body.user, setUserInfo);
           setIsFetched(true);
         } else setIsUser(false);
       }
@@ -121,7 +119,6 @@ export default function UserProfile() {
     const addFriend = async () => {
       const result = await addFriendQuery(otherId);
       if (result !== "error") {
-
         notif?.setNotifText("Friend request sent to " + otherUsername + "!");
         setReloadKey((prevKey) => prevKey + 1);
       } else notif?.setNotifText("Could not send friend request :(.");
@@ -187,15 +184,15 @@ export default function UserProfile() {
                     {userInfo.status === 1
                       ? "online"
                       : userInfo.status === 2
-                        ? "playing"
-                        : userInfo.status === 0
-                          ? "offline"
-                          : ""}
+                      ? "playing"
+                      : userInfo.status === 0
+                      ? "offline"
+                      : ""}
                   </div>
                 </Col>
                 {myId !== 0 && userInfo.id === myId ? null : (
                   <Col className="">
-                    {!userInfo.isFriend && !userInfo.isBlocked ?
+                    {!userInfo.isFriend && !userInfo.isBlocked ? (
                       <OverlayTrigger overlay={renderTooltip("Add friend")}>
                         <div
                           id="clickableIcon"
@@ -206,8 +203,9 @@ export default function UserProfile() {
                         >
                           <i className="bi bi-person-plus-fill big-icons" />
                         </div>
-                      </OverlayTrigger> : null}
-                    {!userInfo.isBlocked ?
+                      </OverlayTrigger>
+                    ) : null}
+                    {!userInfo.isBlocked ? (
                       <OverlayTrigger overlay={renderTooltip("Block user")}>
                         <div
                           id="clickableIcon"
@@ -218,7 +216,8 @@ export default function UserProfile() {
                         >
                           <i className="bi bi-person-x-fill big-icons" />
                         </div>
-                      </OverlayTrigger> : null}
+                      </OverlayTrigger>
+                    ) : null}
                   </Col>
                 )}
               </Row>
@@ -229,13 +228,15 @@ export default function UserProfile() {
                 style={{ fontSize: "1.2em", fontWeight: "400" }}
               >
                 <Col>Win Rate</Col>
-                <Col>Total Win</Col>
+                <Col>Games Won</Col>
+                <Col>Total Games</Col>
                 <Col>Play Time</Col>
               </Row>
               <Row className="IBM-text text-huge">
                 <Col>{Math.round(userInfo.winRate * 10) / 10}</Col>
                 <Col>{userInfo.gamesWon}</Col>
-                <Col>{Math.floor(userInfo.playTime / 1000)}s</Col>
+                <Col>{userInfo.gamesPlayed}</Col>
+                <Col>{Math.floor(userInfo.playTime)}s</Col>
               </Row>
             </Container>
             <Container className="">
