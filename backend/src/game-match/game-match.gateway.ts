@@ -334,6 +334,18 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
+  @SubscribeMessage('disconnect')
+  async handleDisconnect(client: Socket, payload: any) {
+    try {
+      console.log('disconnect');
+      let user = await this.profileService.getProfile(payload.login);
+      user.user.status = 0;
+      await user.user.save();
+    } catch (err) {
+      throwError(client, err.message);
+    }
+  }
+
   @SubscribeMessage('send invite')
   async handleInviteGame(client: Socket, payload: any) {
     try {

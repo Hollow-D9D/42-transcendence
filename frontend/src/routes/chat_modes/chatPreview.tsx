@@ -69,7 +69,7 @@ export default function Preview({
 
       data.channels.forEach((elem: any) => {
         let isBlocked = false;
-        let avatarPic = '';
+        let avatarPic = "";
         let name = elem.group ? elem.name : elem.name.split(":");
         if (!elem.group) {
           name = name[1] === email ? name[2] : name[1];
@@ -79,10 +79,8 @@ export default function Preview({
           if (user === undefined) {
             user = data.friends.find((e: any) => {
               return e.login === name;
-            })
-          }
-          else
-            isBlocked = true;
+            });
+          } else isBlocked = true;
           // console.log(data.friends);
 
           // if (user)
@@ -101,7 +99,7 @@ export default function Preview({
           ownerEmail: "",
           ownerId: 0,
           isBlocked: isBlocked,
-          avatar: avatarPic
+          avatar: avatarPic,
         });
       });
       if (data) setPreviews(previews);
@@ -112,11 +110,13 @@ export default function Preview({
   }, [updateStatus, email]);
 
   useEffect(() => {
-    socket.on("add preview", (data) => {
-      (async () => {
-        await socket.emit('get search suggest', { login: email })
-      })();
-    }
+    socket.on(
+      "add preview",
+      (data) => {
+        (async () => {
+          await socket.emit("get search suggest", { login: email });
+        })();
+      }
       //   let previews: chatPreview[] = [];
       //   data.forEach((elem: any) => {
       //     let name = elem.group ? elem.name : elem.name.split(":");
@@ -234,7 +234,10 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
-          return (value.isBlocked ? <></> :
+          // console.log(index);
+          return value.isBlocked ? (
+            <></>
+          ) : (
             <div key={index}>
               <PreviewChat
                 data={value}
@@ -295,9 +298,12 @@ function ChatSearch({
       let previews: oneSuggestion[] = [];
       if (data) {
         data.friends.forEach((elem: any) => {
-          if (elem.login === email || data.blocked.find((e: any) => {
-            return e.login === elem.login
-          }))
+          if (
+            elem.login === email ||
+            data.blocked.find((e: any) => {
+              return e.login === elem.login;
+            })
+          )
             return;
           previews.push({
             category: "user",
@@ -434,7 +440,7 @@ function PreviewChat({
     global.selectedChat.isBlocked = blockedList.find(
       (map: any) => map.id === data.ownerId
     )!;
-    setMenuEvent(event);
+    if (!data.dm) setMenuEvent(event);
   };
 
   return (
