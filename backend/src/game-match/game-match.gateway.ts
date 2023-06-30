@@ -211,6 +211,10 @@ class Game {
         100 - this.leftTile.size.y,
       );
       this.leftTile.vel += this.leftTile.acc;
+      this.leftTile.vel =
+        this.leftTile.vel < 0
+          ? Math.max(this.leftTile.vel, -4)
+          : Math.min(this.leftTile.vel, 4);
     } else if (this.leftTile.vel != 0) {
       (this.leftTile.pos.y = clamp(
         this.leftTile.pos.y + this.leftTile.vel,
@@ -230,6 +234,10 @@ class Game {
         100 - this.rightTile.size.y,
       );
       this.rightTile.vel += this.rightTile.acc;
+      this.rightTile.vel =
+        this.rightTile.vel < 0
+          ? Math.max(this.rightTile.vel, -4)
+          : Math.min(this.rightTile.vel, 4);
     } else if (this.rightTile.vel != 0) {
       (this.rightTile.pos.y = clamp(
         this.rightTile.pos.y + this.rightTile.vel,

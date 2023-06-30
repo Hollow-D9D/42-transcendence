@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameMatch, User, Achievement, Match } from 'src/typeorm';
 import { ProfileService } from 'src/profile/profile.service';
 import { JwtModule } from '@nestjs/jwt';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Module({
   imports: [
@@ -12,6 +13,11 @@ import { JwtModule } from '@nestjs/jwt';
     CacheModule.register(),
     TypeOrmModule.forFeature([GameMatch, User, Achievement, Match]),
   ],
-  providers: [GameMatchGateway, GameMatchService, ProfileService],
+  providers: [
+    GameMatchGateway,
+    GameMatchService,
+    ProfileService,
+    AchievementsService,
+  ],
 })
 export class GameMatchModule {}

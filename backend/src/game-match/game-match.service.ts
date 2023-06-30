@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ProfileService } from 'src/profile/profile.service';
 import { User, Match } from 'src/typeorm';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Injectable()
 export class GameMatchService {
@@ -13,6 +14,7 @@ export class GameMatchService {
     private readonly gameMatchRepo: Repository<GameMatch>,
     @Inject(CACHE_MANAGER) private cacheM: Cache,
     private readonly profileService: ProfileService,
+    private readonly achievementService: AchievementsService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     @InjectRepository(Match) private readonly matchRepo: Repository<Match>,
@@ -97,6 +99,8 @@ export class GameMatchService {
       match.loserScore = stats.loser_score;
       // console.log(match);
       winnerUser.win_count++;
+      if (winnerUser.win_count === 1)
+        this.achievementService.addAchievement(winnerUser.id, 'first_win');
       loserUser.lose_count++;
       winnerUser.matchtime += parseInt(stats.duration);
       loserUser.matchtime += parseInt(stats.duration);

@@ -2,10 +2,14 @@ import "./Game.css";
 import { socket } from "../App";
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
 import { GameEndCard } from "./GameEndCard";
+import Switch from "react-switch";
 // import io, { Socket } from "socket.io-client";
 // const socket = io(process.env.REACT_APP_BACKEND_SOCKET || "");
 
 const GameInstance = (props: any) => {
+  let foregroundColor = props.cool ? "#86D99C" : "aliceblue";
+  let backgroundColor = props.cool ? "#4E1D8E" : "#292d32";
+
   let windowSize;
   if (window.innerHeight < window.innerWidth) {
     windowSize = (window.innerHeight * 90) / 100;
@@ -70,14 +74,14 @@ const GameInstance = (props: any) => {
       login: localStorage.getItem("userEmail"),
     });
     //Handle up event for W and S
-
+    canvasRef.current?.focus();
     return () => {
       console.log("Disconnected");
 
       socket.off("game");
       // socket.disconnect();
     };
-  }, [props.gameStarted]);
+  }, []);
 
   const handleKeyUp = (e: KeyboardEvent<HTMLCanvasElement>) => {
     const room_id = localStorage.getItem("room_id");
@@ -116,8 +120,8 @@ const GameInstance = (props: any) => {
       });
     }
   };
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const draw = () => {
     if (canvasRef !== null) {
       const canvas = canvasRef.current;
@@ -126,7 +130,9 @@ const GameInstance = (props: any) => {
 
         if (context !== null) {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
-          context.fillStyle = "aliceblue";
+          context.fillStyle = backgroundColor;
+          context.fillRect(0, 0, canvasWidth, canvasHeight);
+          context.fillStyle = foregroundColor;
           context.beginPath();
           context.font = "30px Arial";
           context.fillText("" + leftScore, 20 * ratio, 10 * ratio);
@@ -145,7 +151,12 @@ const GameInstance = (props: any) => {
             10 * ratio,
             16
           );
-          context.arc(ball.x * ratio, ball.y * ratio, ratio, 0, 2 * Math.PI);
+          if (
+            !props.cool ||
+            Math.abs(ball.x - canvasWidth / ratio) < 25 ||
+            Math.abs(ball.x) < 25
+          )
+            context.arc(ball.x * ratio, ball.y * ratio, ratio, 0, 2 * Math.PI);
           context.rect(canvasWidth / 2, 0, 4, canvasWidth);
           context.fill();
         }
@@ -153,10 +164,15 @@ const GameInstance = (props: any) => {
     }
   };
 
+  const focusCanvas = () => {
+    canvasRef.current?.focus();
+  };
+
   return (
     <div>
       <div id="canvasDiv">
         <canvas
+          onBlur={focusCanvas}
           ref={canvasRef}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
@@ -210,10 +226,11 @@ const StartButton = () => {
 const Game = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [winner, setWinner] = useState<boolean | null>(null);
+  const [cool, setCool] = useState(false);
 
   useEffect(() => {
     setGameStarted(localStorage.getItem("gameStarted") === "true");
-    socket.on("start game", (payload) => {
+    socket.on("start game", (payload: any) => {
       localStorage.setItem("room_id", payload.response.id);
       localStorage.setItem(
         "isPlayer1",
@@ -225,6 +242,7 @@ const Game = () => {
     });
 
     socket.on("end game", (payload) => {
+      console.log("end game");
       const isWinner =
         localStorage.getItem("isPlayer1") === "true"
           ? payload.winner
@@ -234,7 +252,7 @@ const Game = () => {
     });
 
     return () => {
-      socket.off("start game");
+      // socket.off("start game");
     };
   }, []);
 
@@ -245,9 +263,13 @@ const Game = () => {
     localStorage.setItem("isPlayer1", "");
   };
 
+  const handleCool = () => {
+    setCool(!cool);
+  };
+
   return gameStarted ? (
     <div>
-      <GameInstance />
+      <GameInstance cool={cool} />
       {winner !== null ? (
         <div className="card-disappear-click-zone">
           <div className="add-zone"></div>
@@ -260,8 +282,26 @@ const Game = () => {
       )}
     </div>
   ) : (
-    <div className="Button-msg-zone">
-      <StartButton />
+    <div>
+      <div className="Button-msg-zone">
+        <StartButton />
+      </div>
+      <div className="div-switch">
+        <div>
+          <label style={{ color: cool ? "rgb(0,136,0)" : "grey" }}>
+            Make It Look Cool
+          </label>
+        </div>
+        <div className="div-switch">
+          <Switch
+            className="switch"
+            onChange={handleCool}
+            checked={cool}
+            checkedIcon={false}
+            uncheckedIcon={false}
+          />
+        </div>
+      </div>
     </div>
   );
 };
