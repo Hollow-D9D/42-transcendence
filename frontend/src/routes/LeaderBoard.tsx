@@ -1,7 +1,6 @@
 import "./LeaderBoard.css";
 import { useEffect, useState } from "react";
 import { getAchievements } from "../queries/userQueries";
-import { getUserAvatarQuery } from "../queries/avatarQueries";
 import { useNavigate } from "react-router-dom";
 
 type gameRecord = {
@@ -113,12 +112,12 @@ function OneRow({
 
   useEffect(() => {
     const getAvatar = async () => {
-      const result: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(id);
+      // const result: undefined | string | Blob | MediaSource =
+      //   await getUserAvatarQuery(id);
 
-      if (result !== undefined && result instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result));
-      }
+      // if (result !== undefined && result instanceof Blob) {
+      //   setAvatarURL(URL.createObjectURL(result));
+      // }
     };
     getAvatar();
   }, [id]);

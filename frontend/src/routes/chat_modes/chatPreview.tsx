@@ -11,7 +11,6 @@ import {
 import { Menu, Item, useContextMenu, theme } from "react-contexify";
 import "./context.css";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
-import { getUserAvatarQuery } from "../../queries/avatarQueries";
 import { current } from "@reduxjs/toolkit";
 import { socket } from "../../App";
 

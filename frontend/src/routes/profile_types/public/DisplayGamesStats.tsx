@@ -1,24 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
 import { useContextMenu } from "react-contexify";
-import { UsersStatusCxt } from "../../../App";
-import { IUserStatus } from "../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../queries/avatarQueries";
 import { getGameStats } from "../../../queries/gamesQueries";
+import { getOtherUser } from "../../../queries/otherUserQueries";
 
 export default function DisplayGamesStats(props: any) {
-  const usersStatus = useContext(UsersStatusCxt);
   const [games, setGames] = useState([]);
 
   useEffect(() => {
     const getPlayedGamesStats = async () => {
-      const result_1 = await getGameStats(props.userInfo.login);
+      const result_1 = await getGameStats(props.userInfo.username);
       if (result_1 !== "error") {
-        // setGames(result_1);
+        setGames(result_1);
       } else console.log("Could not get games stats.");
     };
     getPlayedGamesStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -48,11 +44,11 @@ export default function DisplayGamesStats(props: any) {
               {games && games.length !== 0 ? (
                 <div>
                   <Row className="text-title-games">
-                    <Col>Result</Col>
+                    <Col xs={3}>Result</Col>
                     <Col xs={4}>Opponent</Col>
-                    <Col>Rank</Col>
-                    <Col>Duration</Col>
-                    <Col xs={1}></Col>
+                    <Col xs={2}>Score</Col>
+                    <Col >Duration</Col>
+                    <Col ></Col>
                   </Row>
                   <div
                     className=""
@@ -64,14 +60,14 @@ export default function DisplayGamesStats(props: any) {
                   >
                     {games !== undefined
                       ? games!.map((_h, index) => {
-                          return (
-                            <DisplayGamesRow
-                              key={index}
-                              game={games[index]}
-                              statuses={usersStatus}
-                            />
-                          );
-                        })
+                        return (
+                          <DisplayGamesRow
+                            key={index}
+                            game={games[index]}
+                            name={props.userInfo.username}
+                          />
+                        );
+                      })
                       : null}
                   </div>
                 </div>
@@ -91,36 +87,22 @@ export default function DisplayGamesStats(props: any) {
 const DisplayGamesRow = (props: any) => {
   const { show } = useContextMenu();
   const [avatarURL, setAvatarURL] = useState("");
-  const [status, setStatus] = useState(0);
-
-  useEffect(() => {
-    const getOppStatus = () => {
-      let found = undefined;
-
-      if (props.statuses) {
-        found = props.statuses.find(
-          (x: IUserStatus) => x.key === props.game.opponentId
-        );
-        if (found) setStatus(found.userModel.status);
-      }
-    };
-    getOppStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.statuses]);
 
   useEffect(() => {
     const getAvatar = async () => {
-      const result_1: undefined | string | Blob | MediaSource =
-        await getUserAvatarQuery(props.game.opponentId);
-      if (result_1 !== undefined && result_1 instanceof Blob) {
-        setAvatarURL(URL.createObjectURL(result_1));
-      } else if (result_1 === "error")
+      let result;
+      if (props.name === props.game.winnerLogin)
+        result = await getOtherUser(props.game.loserLogin);
+      else
+        result = await getOtherUser(props.game.winnerLogin);
+      if (result)
+        setAvatarURL(result.body.user.profpic_url)
+      else
         setAvatarURL(
           "https://img.myloview.fr/stickers/default-avatar-profile-in-trendy-style-for-social-media-user-icon-400-228654852.jpg"
         );
     };
     getAvatar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function displayMenu(
@@ -132,8 +114,10 @@ const DisplayGamesRow = (props: any) => {
     show(e, {
       id: "onUser",
       props: {
-        who: targetUserId,
-        username: targetUserUsername,
+        userModel: {
+          who: targetUserId,
+          username: targetUserUsername,
+        }
       },
     });
   }
@@ -141,10 +125,10 @@ const DisplayGamesRow = (props: any) => {
   return (
     <main className="text-games">
       <Row className="wrapper">
-        <Col>{props.game.victory ? "Victory" : "Defeat"}</Col>
+        <Col>{props.game.loserLogin !== props.name ? "Victory" : "Defeat"}</Col>
         <Col className="col-auto profile-pic-round-sm">
           <div
-            className={`profile-pic-wrapper-sm ${status === 2 ? "ingame" : ""}`}
+            className={`profile-pic-wrapper-sm`}
           >
             <div
               className="profile-pic-inside-sm"
@@ -157,42 +141,27 @@ const DisplayGamesRow = (props: any) => {
               onClick={(e: React.MouseEvent<HTMLElement>) =>
                 displayMenu(
                   e,
-                  props.game.opponentId,
-                  props.game.opponentUsername
+                  props.game.id,
+                  props.game.winnerLogin
                 )
               }
             ></div>
           </div>
-          <div
-            className={`status-private-sm ${
-              status
-                ? status === 1
-                  ? "online"
-                  : status === 2
-                  ? "ingame"
-                  : props.userModel.status === 0
-                  ? "offline"
-                  : ""
-                : null
-            }`}
-          ></div>
         </Col>
         <Col
           xs={3}
           id="clickableIcon"
           className="text-left public-hover"
           onClick={(e: React.MouseEvent<HTMLElement>) =>
-            displayMenu(e, props.game.opponentId, props.game.opponentUsername)
+            displayMenu(e, props.game.id, props.game.winnerLogin)
           }
         >
-          @
-          {props.game.opponentUsername.length > 10
-            ? props.game.opponentUsername.substring(0, 7) + "..."
-            : props.game.opponentUsername}
+          @{props.name === props.game.winnerLogin ? props.game.loserLogin : props.game.winnerLogin}
+
         </Col>
-        <Col className="text-center">#{props.game.opponentRank}</Col>
+        <Col className="text-center">{`${props.game.winnerScore}:${props.game.loserScore}`}</Col>
         <Col className="text-center">
-          {Math.floor(props.game.duration / 1000)}s
+          {Math.floor(props.game.duration)}s
         </Col>
         <Col xs={1}></Col>
       </Row>
