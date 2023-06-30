@@ -10,7 +10,7 @@ import { gameInvitation } from "./routes/chat_modes/type/chat.type";
 import { useContext } from "react";
 let LoginStatus = {
   islogged: false,
-  setUserName: () => {},
+  setUserName: () => { },
 };
 
 export const UsernameCxt = createContext(LoginStatus);
@@ -132,7 +132,8 @@ export default function App() {
       };
     });
     return () => {
-      socket.emit("disconnect", localStorage.getItem("userEmail"));
+      
+      //socket.emit("disconnect", { login: 'lyuboy urish ban' });
     };
   }, []);
 

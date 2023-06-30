@@ -2,13 +2,10 @@ import "./chat_modes/card.css";
 import { useEffect, useState } from "react";
 import { socket } from "../App";
 import { useNavigate } from "react-router-dom";
-import { Player } from "./game.interfaces";
-import { getUserAvatarQuery } from "../queries/avatarQueries";
 import { gameInvitation } from "./chat_modes/type/chat.type";
 
 export function GameRequestCard({
   game,
-  gameRequest,
   onGameRequest,
 }: {
   game: gameInvitation | undefined;
@@ -31,22 +28,7 @@ export function GameRequestCard({
       login2: localStorage.getItem("userEmail"),
     });
   };
-  //   , (player: Player) => {
-  //     if (player.roomId !== undefined && player.playerNb !== undefined) {
-  //         localStorage.setItem("roomid", player.roomId.toString());
-  //         localStorage.setItem("playernb", player.playerNb.toString());
-  //         onGameRequest();
-  //         navigate("/app/privateGame");
-  //     }
-  //     else {
-  //         socket.disconnect();
-  //         socket.connect();
-  //         onGameRequest();
-  //     }
-  // }
   const declineGame = () => {
-    // socket.disconnect();
-    // socket.connect();'
     socket.emit("decline game", {
       game: game,
       login: localStorage.getItem("userEmail"),

@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { Col, Card, Row, Form } from "react-bootstrap";
 import { NotifCxt } from "../../../App";
 import {
-  // updateUsernameQuery,
   updateNicknameQuery,
 } from "../../../queries/updateUserQueries";
 

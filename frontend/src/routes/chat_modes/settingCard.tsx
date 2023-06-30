@@ -5,7 +5,6 @@ import { socket } from "../../App";
 import { setting, updateChannel } from "./type/chat.type";
 import Switch from "react-switch";
 import { NotifCxt } from "../../App";
-// import { useContextMenu } from "react-contexify";
 import { useContext } from "react";
 
 export function SettingCard({
@@ -78,7 +77,6 @@ export function SettingCard({
       await socket.emit("update setting", data);
       await socket.emit("get setting");
     })();
-    // socket.emit("get search suggest", { login: email });
     onSettingRequest();
   };
 

@@ -15,14 +15,14 @@ const GetIcons = (props: any) => {
     url === "private-profile"
       ? "person"
       : url === "leaderboard"
-      ? "trophy"
-      : url === "chat"
-      ? "chat-left-dots"
-      : url === "game"
-      ? "dpad"
-      : // : url === "watch"
-        // ? "play-btn"
-        "box-arrow-right"; // Determine the icon to display based on the URL
+        ? "trophy"
+        : url === "chat"
+          ? "chat-left-dots"
+          : url === "game"
+            ? "dpad"
+            : // : url === "watch"
+            // ? "play-btn"
+            "box-arrow-right"; // Determine the icon to display based on the URL
 
   return (
     <main>
@@ -35,6 +35,7 @@ const GetIcons = (props: any) => {
             await Api.get(`/auth/logout`, {
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`
               },
             });
           } catch (err) {
@@ -48,9 +49,8 @@ const GetIcons = (props: any) => {
       <div>
         <i
           id="clickableIcon"
-          className={`bi bi-${fill} icons thick ${
-            location.pathname === "/app/" + url ? "hide" : "current"
-          }`}
+          className={`bi bi-${fill} icons thick ${location.pathname === "/app/" + url ? "hide" : "current"
+            }`}
           onClick={
             url === "logout"
               ? () => setModalShow(true)
@@ -59,9 +59,8 @@ const GetIcons = (props: any) => {
         />
         <i
           id="clickableIcon"
-          className={`bi bi-${fill}-fill icons thin ${
-            location.pathname === "/app/" + url ? "current" : "hide"
-          }`}
+          className={`bi bi-${fill}-fill icons thin ${location.pathname === "/app/" + url ? "current" : "hide"
+            }`}
           onClick={() => navigate("/app/" + url)}
         />
       </div>

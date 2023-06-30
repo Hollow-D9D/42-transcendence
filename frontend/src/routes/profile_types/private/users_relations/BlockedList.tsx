@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import { ItableRow, IUserStatus } from "../../../../globals/Interfaces";
-import { getUserAvatarQuery } from "../../../../queries/avatarQueries";
 import { getUserBlocked } from "../../../../queries/userQueries";
 import { DisplayRow } from "./DisplayRowUsers";
 import { UsersStatusCxt } from "../../../../App";

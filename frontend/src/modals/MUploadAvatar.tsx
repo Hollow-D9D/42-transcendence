@@ -17,7 +17,7 @@ export function MUploadAvatar(props: any) {
         try {
           const fileName = await uploadAvatarQuery(newAvatar);
 
-          const response = await Api.get("/profile/editNickname", {
+          await Api.get("/profile/editNickname", {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("userToken")}`,
               "Content-Type": "application/json",
@@ -36,9 +36,7 @@ export function MUploadAvatar(props: any) {
           props.isAvatarUpdated();
           props.onHide();
         } catch (error) {
-          notif?.setNotifText(
-            "Error uploading avatar. Please try again later."
-          );
+          notif?.setNotifText('' + error);
           notif?.setNotifShow(true);
         }
       };

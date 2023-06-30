@@ -270,7 +270,6 @@ const ButtonsAdding = (props: any) => {
       const result = await addFriendQuery(props.id);
       if (result !== "error") {
         notif?.setNotifText(props.username + " added as friend!");
-        // props.hook(!props.state);
       } else
         notif?.setNotifText(
           "Could not accept friend request from " +
