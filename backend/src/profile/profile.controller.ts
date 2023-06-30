@@ -19,6 +19,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { File } from 'multer';
 import * as fs from 'fs';
+import { throwError } from 'rxjs';
 
 @Controller('profile')
 export class ProfileController {
@@ -107,7 +108,7 @@ export class ProfileController {
     try {
       const payload = getPayload(headers);
       // console.log("payload:::", params.login);
-      
+
       const { user } = await this.profileService.getProfile(params.login);
       if (user)
         return {
@@ -118,6 +119,20 @@ export class ProfileController {
         };
       return { error: new Error('No user found!'), body: null };
     } catch (error) {
+      return { error, body: null };
+    }
+  }
+
+  @Get('GameHistory')
+  @UseGuards(AuthGuard)
+  async getGameHistory(@Headers() headers, @Query() params) {
+    try {
+      const payload = getPayload(headers);
+      const matches = await this.profileService.getGameHistory(params.login);
+      return matches;
+    } catch (error) {
+      console.log(error);
+
       return { error, body: null };
     }
   }

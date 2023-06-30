@@ -9,7 +9,7 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import { Achievement, GameMatch, Message, Chat, MutedUser } from '.';
+import { Achievement, GameMatch, Message, Chat, MutedUser, Match } from '.';
 import { UserStatus } from './userstatus.enum';
 
 @Entity()
@@ -87,6 +87,19 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
+  // @ManyToMany(())
+  // @ManyToMany(() => Match, (match) => match.winner)
+  // @JoinTable({
+  //   name: 'winner', // Name of the junction table
+  // })
+  // matchesAsWinner: Match[];
+
+  // @ManyToMany(() => Match, (match) => match.loser)
+  // @JoinTable({
+  //   name: 'loser', // Name of the junction table
+  // })
+  // matchesAsLoser: Match[];
+
   @ManyToMany(() => Achievement, (achievement) => achievement.users, {
     cascade: false,
   })
@@ -127,10 +140,10 @@ export class User extends BaseEntity {
   })
   blocked_users: User[];
 
-  @OneToOne(() => GameMatch, match => match.player1)
+  @OneToOne(() => GameMatch, (match) => match.player1)
   matchesAsPlayer1: GameMatch;
 
-  @OneToOne(() => GameMatch, match => match.player2)
+  @OneToOne(() => GameMatch, (match) => match.player2)
   matchesAsPlayer2: GameMatch;
 
   @ManyToMany(() => Chat, (chat) => chat.members)

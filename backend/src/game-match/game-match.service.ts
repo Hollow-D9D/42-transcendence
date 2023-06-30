@@ -15,6 +15,7 @@ export class GameMatchService {
     private readonly profileService: ProfileService,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Match) private readonly matchRepo: Repository<Match>,
   ) {
     this.cacheM.set('queue', [], 0);
   }
@@ -86,22 +87,26 @@ export class GameMatchService {
         relations: ['player1', 'player2'],
       });
       const match = new Match();
-      match.winner = stats.leftWon ? liveGame.player1 : liveGame.player2;
-      match.loser = stats.leftWon ? liveGame.player2 : liveGame.player1;
+      let winnerUser = stats.leftWon ? liveGame.player1 : liveGame.player2;
+      let loserUser = !stats.leftWon ? liveGame.player1 : liveGame.player2;
+      match.winnerLogin = winnerUser.login;
+      match.loserLogin = loserUser.login;
       match.duration = (match.duration || 0) + parseInt(stats.duration);
       match.playedOn = liveGame.playedOn;
       match.winnerScore = stats.winner_score;
       match.loserScore = stats.loser_score;
-      console.log(match);
-      match.winner.win_count++;
-      match.loser.lose_count++;
-      match.winner.matchtime += parseInt(stats.duration);
-      match.loser.matchtime += parseInt(stats.duration);
-      match.winner.status = 1;
-      match.loser.status = 1;
-      await match.winner.save();
-      await match.loser.save();
-      await match.save();
+      // console.log(match);
+      winnerUser.win_count++;
+      loserUser.lose_count++;
+      winnerUser.matchtime += parseInt(stats.duration);
+      loserUser.matchtime += parseInt(stats.duration);
+      winnerUser.status = 1;
+      loserUser.status = 1;
+      await winnerUser.save();
+      await loserUser.save();
+      // console.log();
+      await this.matchRepo.save(match);
+      // await match.save();
       await liveGame.remove();
     } catch (err) {
       throw err;

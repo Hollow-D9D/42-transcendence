@@ -334,11 +334,14 @@ export class GameMatchGateway implements OnGatewayInit {
     }
   }
 
-  @SubscribeMessage('disconnect')
   async handleDisconnect(client: Socket, payload: any) {
     try {
-      console.log('disconnect');
-      let user = await this.profileService.getProfile(payload.login);
+      let sockets: UserSocket[] = await this.cacheM.get('user_sockets');
+      let login = sockets.find((elem) => {
+        return elem.socket === client.id;
+      }).login;
+      console.log(login);
+      let user = await this.profileService.getProfile(login);
       user.user.status = 0;
       await user.user.save();
     } catch (err) {
@@ -467,6 +470,9 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @SubscribeMessage('new-connection')
   async handleNewConnection(client: Socket, payload: any) {
+    let user = await this.profileService.getProfile(payload.login);
+    user.user.status = 1;
+    user.user.save();
     this.addUserSocket(payload.login, client);
   }
 

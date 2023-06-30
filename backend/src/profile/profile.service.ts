@@ -3,11 +3,14 @@ import { User, Achievement } from 'src/typeorm';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserStatus } from 'src/typeorm/userstatus.enum';
+import { Match } from 'src/typeorm';
 import { share } from 'rxjs';
 
 @Injectable()
 export class ProfileService {
   constructor(
+    @InjectRepository(Match)
+    private readonly matchRepo: Repository<Match>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Achievement)
     private readonly achieveRepo: Repository<Achievement>,
@@ -17,6 +20,27 @@ export class ProfileService {
     try {
       const user = await this.userRepo.findOne({ where: { login } });
       return { user };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getGameHistory(login: string) {
+    try {
+      const matchesWon = await this.matchRepo.find({
+        where: { winnerLogin: login },
+      });
+      const matchesLost = await this.matchRepo.find({
+        where: {
+          loserLogin: login,
+        },
+      });
+      let matches = [...matchesWon, ...matchesLost];
+      matches.sort((a: Match, b: Match) => {
+        return a.playedOn.getTime() - b.playedOn.getTime();
+      });
+      console.log(matches);
+      return matches;
     } catch (error) {
       throw error;
     }
@@ -33,7 +57,8 @@ export class ProfileService {
         user.nickname = data.nickname;
       }
       if (data.avatar_url !== undefined)
-        user.profpic_url = 'http://localhost:3001/upload/' + data.avatar_url;
+        user.profpic_url =
+          process.env.BACKEND_URL + '/upload/' + data.avatar_url; //TODO
       if (data.fullname !== undefined) user.full_name = data.fullname;
       user.save();
     } catch (error) {

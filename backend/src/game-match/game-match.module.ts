@@ -2,7 +2,7 @@ import { Module, CacheModule } from '@nestjs/common';
 import { GameMatchService } from './game-match.service';
 import { GameMatchGateway } from './game-match.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GameMatch, User, Achievement } from 'src/typeorm';
+import { GameMatch, User, Achievement, Match } from 'src/typeorm';
 import { ProfileService } from 'src/profile/profile.service';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -10,7 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     JwtModule.register({ secret: process.env.JWT_SECRET }),
     CacheModule.register(),
-    TypeOrmModule.forFeature([GameMatch, User, Achievement]),
+    TypeOrmModule.forFeature([GameMatch, User, Achievement, Match]),
   ],
   providers: [GameMatchGateway, GameMatchService, ProfileService],
 })

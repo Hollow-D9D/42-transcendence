@@ -7,6 +7,7 @@ import {
   Column,
   ManyToMany,
   CreateDateColumn,
+  JoinTable,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -15,19 +16,45 @@ export class Match extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToMany(() => User, { eager: true })
-  @JoinColumn({ name: 'winner_id' })
-  winner: User;
+  // @ManyToMany(() => User, { eager: true })
+  // @JoinTable({
+  //   name: 'winner',
+  //   joinColumn: {
+  //     name: 'match_id',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'user_id',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
+  // winner: User;
 
-  @ManyToMany(() => User, { eager: true })
-  @JoinColumn({ name: 'loser_id' })
-  loser: User;
+  // @ManyToMany(() => User, { eager: true })
+  // @JoinTable({
+  //   name: 'loser',
+  //   joinColumn: {
+  //     name: 'match_id',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'user_id',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
+  // loser: User;
 
   @CreateDateColumn()
   playedOn: Date;
 
   @Column({ default: 0 })
   winnerScore: number;
+
+  @Column({ default: 0 })
+  winnerLogin: string;
+
+  @Column({ default: 0 })
+  loserLogin: string;
 
   @Column({ default: 0 })
   loserScore: number;

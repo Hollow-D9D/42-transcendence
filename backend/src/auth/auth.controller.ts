@@ -40,7 +40,8 @@ export class AuthController {
   async getLogout(@Headers() headers) {
     try {
       const payload = getPayload(headers);
-      return this.authService.logoutUser(payload.login);
+      console.log('payload', payload);
+      return await this.authService.logoutUser(payload.login);
     } catch (err) {
       return {
         error: err,
