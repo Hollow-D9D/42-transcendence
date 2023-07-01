@@ -62,6 +62,7 @@ export class ChatService {
       }
       // no else since no new fields need to be added for chats
       const newOne = this.chatRepo.create(entityLike);
+
       await this.chatRepo.save(newOne);
       return newOne;
     } catch (err) {
@@ -186,7 +187,6 @@ export class ChatService {
         );
       await this.chatRepo.save(channel);
       if (channel.members.length === 0) {
-        console.log('hey');
         await this.chatRepo.remove(channel);
       }
     } catch (err) {

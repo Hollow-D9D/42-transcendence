@@ -285,7 +285,6 @@ export class GameMatchGateway implements OnGatewayInit {
   private rooms: { [roomName: string]: Set<string> } = {};
 
   afterInit() {
-    console.log('should be uncommented');
     this.server.use((socket, next) => {
       let had = false;
       socket.onAny((event, args) => {
@@ -310,7 +309,6 @@ export class GameMatchGateway implements OnGatewayInit {
 
   handleConnection(client: Socket) {
     // Additional logic for handling connection
-    console.log('Client connected:', client.id);
     client.emit('request new connection', {});
   }
 
@@ -349,10 +347,11 @@ export class GameMatchGateway implements OnGatewayInit {
         return elem.socket === client.id;
       })?.login;
       if (login) {
-        console.log(login);
         let user = await this.profileService.getProfile(login);
-        user.user.status = 0;
-        await user.user.save();
+        if (user.user) {
+          user.user.status = 0;
+          await user.user.save();
+        }
       }
     } catch (err) {
       throwError(client, err.message);
@@ -398,12 +397,9 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @SubscribeMessage('start game')
   async handleStartGame(client: Socket, payload: any) {
-    console.log('start game', payload);
-
     try {
       if (!payload.login) throw new Error('No login provided!');
       const response = await this.gameMatchService.addToQueue(payload.login);
-      console.log('response', response.matching);
       if (response.matching) {
         await this.startGameUpdate(
           response.response.player1.login,
@@ -435,7 +431,6 @@ export class GameMatchGateway implements OnGatewayInit {
         await this.startGameUpdate(response.player2.login, response);
       }
     } catch (err) {
-      console.log(err);
       //asdasd
       throwError(client, err.message);
     }
@@ -444,7 +439,6 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('cancel game')
   async handleCancelGame(client: Socket, payload: any) {
     try {
-      console.log('cancel game', payload);
       if (!payload.login) throw new Error('No login provided!');
       await this.gameMatchService.cancelMatchLookup(payload.login);
     } catch (err) {
@@ -457,7 +451,6 @@ export class GameMatchGateway implements OnGatewayInit {
     const client = this.server.sockets.sockets.get(
       userSockets.find((e) => e.login === login).socket,
     );
-    console.log(client.id);
     this.joinRoom(client, '' + response.id, login);
     userSockets.forEach((userSocket) => {
       if (userSocket.login === login) {
@@ -532,7 +525,6 @@ export class GameMatchGateway implements OnGatewayInit {
     // clearInterval(this.interval);
     const WINSCORECOUNT = 3;
     const TICK_INTERVAL = 60;
-    console.log('game', payload.room_id);
     if (!this.game[payload.room_id]) {
       this.game[payload.room_id] = new Game();
       this.game[payload.room_id].interval = setInterval(() => {
@@ -564,7 +556,6 @@ export class GameMatchGateway implements OnGatewayInit {
                 : this.game[payload.room_id].leftScore,
             leftWon: this.game[payload.room_id].leftScore >= WINSCORECOUNT,
           };
-          console.log(stats);
           this.gameMatchService.endGame(stats, payload.room_id).then();
           this.game[payload.room_id] = undefined;
           return;

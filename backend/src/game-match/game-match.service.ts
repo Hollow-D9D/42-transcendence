@@ -101,6 +101,11 @@ export class GameMatchService {
       winnerUser.win_count++;
       if (winnerUser.win_count === 1)
         this.achievementService.addAchievement(winnerUser.id, 'first_win');
+      if (winnerUser.win_count === 5)
+        this.achievementService.addAchievement(winnerUser.id, 'killing_spree');
+      if (loserUser.lose_count === 5)
+        this.achievementService.addAchievement(loserUser.id, 'fivth_loss');
+
       loserUser.lose_count++;
       winnerUser.matchtime += parseInt(stats.duration);
       loserUser.matchtime += parseInt(stats.duration);
@@ -148,7 +153,6 @@ export class GameMatchService {
       queue = queue.filter((element) => {
         return element.login !== login;
       });
-      console.log(queue);
       await this.cacheM.set('queue', queue, 0);
     } catch (err) {
       throw err;

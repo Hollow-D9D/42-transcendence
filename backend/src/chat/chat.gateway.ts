@@ -572,7 +572,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async UpdateStatus() {
-    console.log(this.chatService === undefined);
     const users = await this.chatService.allUsers();
     if (users) this.server.emit('update-status', users);
   }
@@ -591,8 +590,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         channels: channels,
       });
     } catch (err) {
-      console.log(err);
-
       throwError(client, 'Somexxdhing went wriong!');
     }
   }
@@ -629,8 +626,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // const role = await this.chatService.getRole(payload.login, chat_id);
       // client.emit('fetch role', role);
       if (isInvited) {
-        console.log('emmitting to ', chat_id);
-
         this.server.emit('update preview');
       }
       // console.log('es hasa ste');
@@ -757,8 +752,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(payload.chat_id).emit('fetch muted', muteds);
     } catch (error) {
-      console.log(error);
-
       throwError(client, 'Something went wrong');
     }
   }

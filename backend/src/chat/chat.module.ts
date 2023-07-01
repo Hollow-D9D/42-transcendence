@@ -33,6 +33,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ChatGateway } from './chat.gateway';
 import { ProfileService } from 'src/profile/profile.service';
 import { FriendsService } from 'src/profile/friends/friends.service';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @Module({
   imports: [
@@ -48,6 +49,12 @@ import { FriendsService } from 'src/profile/friends/friends.service';
     JwtModule.register({ secret: process.env.JWT_SECRET }),
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway, ProfileService, FriendsService],
+  providers: [
+    ChatService,
+    ChatGateway,
+    ProfileService,
+    FriendsService,
+    AchievementsService,
+  ],
 })
 export class ChatModule {}

@@ -67,8 +67,6 @@ export class ProfileController {
 
       if (!user.profpic_url.startsWith('http')) {
         fs.readFile(`src/upload/${user.profpic_url}`, (err, data) => {
-          console.log('data', data, 'err', err);
-
           if (err) throw new Error('Image not found');
           else {
             response.setHeader('Content-Type', 'image/png');
@@ -131,8 +129,6 @@ export class ProfileController {
       const matches = await this.profileService.getGameHistory(params.login);
       return matches;
     } catch (error) {
-      console.log(error);
-
       return { error, body: null };
     }
   }
@@ -145,8 +141,6 @@ export class ProfileController {
       await this.profileService.editProf(payload.login, params.newdata);
       return { error: null, body: null };
     } catch (error) {
-      console.log(error);
-
       return { error, body: null };
     }
   }
