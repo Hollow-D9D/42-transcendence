@@ -89,7 +89,7 @@ export default function RoomStatus({
     })();
   };
 
-  const onDelete = (i: number) => { };
+  const onDelete = (i: number) => {};
 
   return (
     <div className="chat-status-zone">
@@ -350,7 +350,7 @@ function Status({
   const [hide, setHide] = useState<any>();
   const usersStatus = useContext(UsersStatusCxt);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (selData && selData.event) {
       if (hide) hide();
@@ -372,8 +372,11 @@ function Status({
   function handleCreateGame() {
     (async () => {
       console.log("send invite");
-      
-      await socket.emit("send invite", { login: localStorage.getItem("userEmail"), target: global.selectedUser.login });
+
+      await socket.emit("send invite", {
+        login: localStorage.getItem("userEmail"),
+        target: global.selectedUser.login,
+      });
     })();
     //  (player: Player) => {
     //   const invitation: gameInvitation = {
@@ -537,7 +540,7 @@ function Status({
           <></>
         )}
         {(role === "admin" || role === "owner") &&
-          global.selectedUser?.role !== "banned" ? (
+        global.selectedUser?.role !== "banned" ? (
           <div
             style={{
               display: global.selectedUser?.role !== "owner" ? "" : "none",

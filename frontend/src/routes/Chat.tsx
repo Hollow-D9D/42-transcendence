@@ -24,9 +24,10 @@ export default function Chat() {
   const email = localStorage.getItem("userEmail");
 
   useEffect(() => {
-    socket.on("exception", (data) => {
-      if (data.message) notif?.setNotifText("error: " + data.message);
-      else notif?.setNotifText("error: " + data);
+    socket.on("notif", (data) => {
+      setSelectedChat(undefined);
+      if (data.message) notif?.setNotifText(data.message);
+      else notif?.setNotifText(data);
       notif?.setNotifShow(true);
     });
 
@@ -39,7 +40,7 @@ export default function Chat() {
     });
 
     return () => {
-      socket.off("exception");
+      socket.off("notif");
       socket.off("fetch role");
       socket.off("fetch blocked");
       socket.off("update channel request");

@@ -179,9 +179,14 @@ export class ChatService {
         (user) => user.login === login,
       );
       if (!userToRemove) return;
-      channel.members = channel.members.filter((user) => user.login !== login);
+      if (channel.owner.login === login) channel.members = [];
+      else
+        channel.members = channel.members.filter(
+          (user) => user.login !== login,
+        );
       await this.chatRepo.save(channel);
-      if (channel.members.length === 0 || channel.owner.login === login) {
+      if (channel.members.length === 0) {
+        console.log('hey');
         await this.chatRepo.remove(channel);
       }
     } catch (err) {
@@ -346,7 +351,6 @@ export class ChatService {
         channel.members = channel.members.filter(
           (user) => user.login !== target,
         );
-        console.log(channel.members);
         await this.chatRepo.save(channel);
       }
     }

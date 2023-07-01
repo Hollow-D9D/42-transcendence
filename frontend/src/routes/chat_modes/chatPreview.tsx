@@ -39,6 +39,7 @@ export default function Preview({
   const email = localStorage.getItem("userEmail");
   const { show } = useContextMenu();
   const [hide, setHide] = useState<any>();
+  const [role, setRole] = useState<any>();
   const [menuEvent, setMenuEvent] = useState<any>(null);
 
   // console.log("global:::::", global.selectedChat);
@@ -47,25 +48,11 @@ export default function Preview({
     (async function () {
       await socket.emit("get search suggest", { login: email });
     })();
+    socket.on("fetch role", (data) => {
+      setRole(data || "noRole");
+    });
     socket.on("search suggest", (data: any) => {
       let previews: chatPreview[] = [];
-      // data.friends.forEach((elem: any) => {
-      //   previews.push({
-      //     id: elem.id,
-      //     dm: true,
-      //     name: elem.nickname,
-      //     isPassword: false,
-      //     password: '',
-      //     updateAt: '',
-      //     lastMsg: '',
-      //     unreadCount: 0,
-      //     ownerEmail: '',
-      //     ownerId: 0,
-      //     isBlocked: false,
-      //     avatar: elem.profpic_url
-      //   })
-      // })
-
       data.channels.forEach((elem: any) => {
         let isBlocked = false;
         let avatarPic = "";
@@ -109,39 +96,12 @@ export default function Preview({
   }, [updateStatus, email]);
 
   useEffect(() => {
-    socket.on(
-      "add preview",
-      (data) => {
-        (async () => {
-          await socket.emit("get search suggest", { login: email });
-        })();
-      }
-      //   let previews: chatPreview[] = [];
-      //   data.forEach((elem: any) => {
-      //     let name = elem.group ? elem.name : elem.name.split(":");
-      //     if (!elem.group) name = name[1] === email ? name[2] : name[1];
-      //     previews.push({
-      //       id: elem.id,
-      //       dm: !elem.group,
-      //       name: name,
-      //       isPassword: elem.mode === "PROTECTED",
-      //       password: elem.password,
-      //       updateAt: "",
-      //       lastMsg: "",
-      //       unreadCount: 0,
-      //       ownerEmail: "",
-      //       ownerId: 0,
-      //       isBlocked: false,
-      //       avatar: elem.group
-      //         ? ""
-      //         : data.friends?.find((e: any) => {
-      //           return e.login === name;
-      //         }).profpic_url,
-      //     });
-      //   });
-      //   if (data) setPreviews(previews);
-    );
-    socket.on("update preview", (data: chatPreview[] | null) => {
+    socket.on("add preview", (data) => {
+      (async () => {
+        await socket.emit("get search suggest", { login: email });
+      })();
+    });
+    socket.on("update preview", () => {
       (async function () {
         await socket.emit("get search suggest", { login: email });
       })();
@@ -247,15 +207,21 @@ export default function Preview({
                 blockedList={blockedList}
                 setHide={setHide}
                 setMenuEvent={setMenuEvent}
+                role={role}
               />
             </div>
           );
         })}
-        {global.selectedChat?.dm ? (
+        {global.selectedChat?.dm ||
+        (role !== "owner" && role !== "member" && role !== "admin") ? (
           <></>
         ) : (
           <Menu id={JSON.stringify(global.selectedChat)} theme={theme.dark}>
-            <Item onClick={handleLeave}>Leave chat</Item>
+            {role !== "owner" ? (
+              <Item onClick={handleLeave}>Leave chat</Item>
+            ) : (
+              <Item onClick={handleLeave}>Delete chat</Item>
+            )}
           </Menu>
         )}
       </div>
@@ -406,6 +372,7 @@ function PreviewChat({
   blockedList,
   setHide,
   setMenuEvent,
+  role,
 }: {
   data: chatPreview;
   onClick?: () => void;
@@ -413,6 +380,7 @@ function PreviewChat({
   blockedList: [];
   setHide: (d: any) => void;
   setMenuEvent: (event: any) => void;
+  role: string;
 }) {
   const [avatarURL, setAvatarURL] = useState(
     process.env.PUBLIC_URL + "/target.png"
@@ -439,7 +407,8 @@ function PreviewChat({
     global.selectedChat.isBlocked = blockedList.find(
       (map: any) => map.id === data.ownerId
     )!;
-    if (!data.dm) setMenuEvent(event);
+    if (!data.dm && (role === "owner" || role === "admin" || role === "member"))
+      setMenuEvent(event);
   };
 
   return (

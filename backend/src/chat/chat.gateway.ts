@@ -217,27 +217,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           return;
         }
         await this.chatService.leaveChannel(query.login, query.chat_id);
-        // const suggest = await this.chatService.getSearchChats(query.login);
-        // client.emit('update preview');
-
-        // const roles = await this.chatService.channel(query.chat_id);
-        // const data = await this.chatService.notInChannelUsers(query.chat_id);
-
-        // ('invitation tags', data);
-        // this.server.to(query.chat_id).emit('fetch owner', [roles.owner]);
-        // this.server.to(query.chat_id).emit('fetch admins', roles.admins);
-        // this.server.to(query.chat_id).emit(
-        //   'fetch members',
-        //   roles.members.filter((elem) => {
-        //     return (
-        //       elem.login !== roles.owner.login &&
-        //       roles.admins.find((e) => {
-        //         return e.login === elem.login;
-        //       }) === undefined
-        //     );
-        //   }),
-        // );
-        await this.server.emit('update channel request');
+        this.server.emit('update preview');
+        this.server.emit('update channel request');
+        // client.emit('fetch_msgs', []);
+        // client.emit('fetch owner', []);
+        // client.emit('fetch admins', []);
+        // client.emit('fetch members', []);
+        // client.emit('fetch banned', []);
       }
     } catch (error) {
       throwError(client, error.message);
@@ -556,7 +542,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (!login) throw new Error('No valid user login provided!');
       const chat_id = payload.chat_id;
       if (!chat_id) throw new Error('No valid chat_id provided!');
+      const chat = await this.chatService.channel(chat_id);
+      console.log(chat);
+      if (!chat) {
+        client.emit('fetch_msgs', []);
+        client.emit('fetch owner', []);
+        client.emit('fetch admins', []);
+        client.emit('fetch members', []);
+        client.emit('fetch banned', []);
+        client.emit('notif', 'Channel has been deleted');
+      }
       const isMember = await this.chatService.isChannelMember(chat_id, login);
+      console.log(login);
+
       // const password = payload.password || '';
       // await this.chatService.joinChannel(login, chat_id, password);
       // join to a room
