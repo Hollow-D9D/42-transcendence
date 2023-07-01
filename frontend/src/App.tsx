@@ -21,7 +21,6 @@ export const UsersStatusCxt = createContext<IUserStatus[] | undefined>(
 );
 
 export const NotifCxt = createContext<INotifCxt | undefined>(undefined);
-
 const socketOptions = {
   transportOptions: {
     polling: {
@@ -31,11 +30,12 @@ const socketOptions = {
     },
   },
 };
+
 export const socket = io(
   `${process.env.REACT_APP_BACKEND_SOCKET}`,
   socketOptions
 );
-console.log(process.env.REACT_APP_BACKEND_SOCKET);
+
 export default function App() {
   const [usersStatus, setUsersStatus] = useState<IUserStatus[] | undefined>(
     undefined
@@ -51,9 +51,6 @@ export default function App() {
 
   useEffect(() => {
     socket.on("update-status", (data, str: string) => {
-      // consol e.log("update", data);
-      
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       userstatusTab = [];
       for (let i = 0; i <= data.length - 1; i++) {
         let newUser: IUserStatus = {
@@ -66,9 +63,6 @@ export default function App() {
       }
       setUsersStatus(userstatusTab);
     });
-    // return () => {
-    //   socket.off('update-status')
-    // }
   }, [usersStatus]);
   const navigate = useNavigate();
 
@@ -106,7 +100,6 @@ export default function App() {
     });
 
     socket.on("start game", (payload) => {
-      console.log("start game");
       localStorage.setItem("gameStarted", "true");
       localStorage.setItem("room_id", payload.response.id);
       localStorage.setItem(
@@ -118,13 +111,10 @@ export default function App() {
       navigate("/app/game");
       setGameRequest(false);
       return () => {
-        console.log("off start game");
         socket.off("start game");
       };
     });
-    return () => { 
-      //socket.emit("disconnect", { login: 'lyuboy urish ban' });
-    };
+    return () => {};
   }, []);
 
   return (

@@ -22,7 +22,6 @@ const fetchPost = async (
     });
     const result_1 = await response.json();
     if (!response.ok) {
-      console.log("POST error on ", url);
       return "error: " + url;
     }
     // check if user is 2FA
@@ -70,7 +69,6 @@ export const storeToken = (token: any) => {
 
 export const logOut = async () => {
   let fetchUrl = process.env.REACT_APP_BACKEND_URL + "/auth/logout";
-  console.log("Logout");
   try {
     const response = await fetch(fetchUrl, {
       method: "GET",
@@ -85,7 +83,6 @@ export const logOut = async () => {
   } catch (error) {
     return console.log("error", error);
   }
-  // return fetchPostLogout();
 };
 
 const fetchPostLogout = async () => {};

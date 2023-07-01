@@ -54,7 +54,6 @@ export default function Auth() {
       // sign in the user
       fetchData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   return (

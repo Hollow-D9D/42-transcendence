@@ -12,7 +12,6 @@ export const getOtherUser = async (otherUsername: string) => {
     );
     const result = await response.json();
     if (!response.ok) {
-      console.log("POST error on ");
       return "error";
     }
     return result;

@@ -25,7 +25,6 @@ export function Activate2FA(props: any) {
 
   useEffect(() => {
     if (props.show && image === "") getQRCode();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.show]);
 
   const handleSubmit = (e: any) => {
