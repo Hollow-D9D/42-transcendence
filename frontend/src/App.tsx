@@ -8,6 +8,7 @@ import { TAlert } from "./toasts/TAlert";
 import { GameRequestCard } from "./routes/gameRequestCard";
 import { gameInvitation } from "./routes/chat_modes/type/chat.type";
 import { useContext } from "react";
+
 let LoginStatus = {
   islogged: false,
   setUserName: () => { },
@@ -50,15 +51,17 @@ export default function App() {
 
   useEffect(() => {
     socket.on("update-status", (data, str: string) => {
+      // consol e.log("update", data);
+      
       // eslint-disable-next-line react-hooks/exhaustive-deps
       userstatusTab = [];
       for (let i = 0; i <= data.length - 1; i++) {
         let newUser: IUserStatus = {
-          key: data[i][0],
+          key: data[i].id,
           userModel: { id: 0, status: -1 },
         };
-        newUser.userModel.id = data[i][0];
-        newUser.userModel.status = data[i][1];
+        newUser.userModel.id = data[i].id;
+        newUser.userModel.status = data[i].status;
         userstatusTab.push(newUser);
       }
       setUsersStatus(userstatusTab);
@@ -69,18 +72,6 @@ export default function App() {
   }, [usersStatus]);
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   socket.on("game invitation", (game: gameInvitation) => {
-
-  //     setGameRequest(true);
-  //     setGameInfo(game);
-
-  //   });
-  //   // setGameRequest(true);
-  //   socket.on("error", (data) => {
-  //     console.log("ERROROOOOROROOR:::: ", data.error);
-  //   });
-  // }, []);
   useEffect(() => {
     socket.on("request new connection", () => {
       if (localStorage.getItem("userLogged") === "true")
@@ -131,8 +122,7 @@ export default function App() {
         socket.off("start game");
       };
     });
-    return () => {
-      
+    return () => { 
       //socket.emit("disconnect", { login: 'lyuboy urish ban' });
     };
   }, []);

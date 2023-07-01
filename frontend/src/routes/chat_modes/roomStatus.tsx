@@ -2,12 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import "./roomStatus.css";
 import {
   chatPreview,
-  gameInvitation,
   mute,
   oneUser,
   Tag,
   updateChannel,
-  updateUser,
 } from "./type/chat.type";
 import {
   Menu,
@@ -21,7 +19,6 @@ import "./context.css";
 import { AddUserIcon, QuitIcon } from "./icon";
 import ReactTags from "react-tag-autocomplete";
 import { socket } from "../../App";
-import { Player } from "../game.interfaces";
 import { useNavigate } from "react-router-dom";
 import { UsersStatusCxt } from "../../App";
 import { IUserStatus } from "../../globals/Interfaces";
@@ -35,13 +32,11 @@ export default function RoomStatus({
   current,
   role,
   outsider,
-  updateStatus,
   blockedList,
 }: {
   current: chatPreview | undefined;
   role: string;
   outsider: boolean | undefined;
-  updateStatus: number;
   blockedList: [];
 }) {
   const [add, setAdd] = useState<boolean>(false);
@@ -59,7 +54,7 @@ export default function RoomStatus({
         await socket.emit("get invitation tags", { chat_id: current?.id });
       })();
     }
-  }, [updateStatus, current, email]);
+  }, [current, email]);
 
   useEffect(() => {
     socket.on("invitation tags", (data: Tag[]) => {
@@ -89,7 +84,7 @@ export default function RoomStatus({
     })();
   };
 
-  const onDelete = (i: number) => {};
+  const onDelete = (i: number) => { };
 
   return (
     <div className="chat-status-zone">
@@ -225,6 +220,7 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
+      console.log('hey');
       setMembers(
         data.map((elem: any): oneUser => {
           return {
@@ -373,23 +369,8 @@ function Status({
     (async () => {
       console.log("send invite");
 
-      await socket.emit("send invite", {
-        login: localStorage.getItem("userEmail"),
-        target: global.selectedUser.login,
-      });
+      await socket.emit("send invite", { login: localStorage.getItem("userEmail"), target: global.selectedUser.login });
     })();
-    //  (player: Player) => {
-    //   const invitation: gameInvitation = {
-    //     gameInfo: player,
-    //     inviterId: Number(localStorage.getItem("userID")),
-    //     inviterName: localStorage.getItem("userNickname")!,
-    //     targetId: global.selectedUser.id,
-    //   };
-    //   socket.emit("send invitation", invitation);
-    //   localStorage.setItem("roomid", player.roomId.toString());
-    //   localStorage.setItem("playernb", player.playerNb.toString());
-    //   navigate("/app/privateGame");
-    // });
   }
 
   function handleMute(mins: number) {
@@ -514,7 +495,7 @@ function Status({
         {global.selectedUser?.status === 1 ? (
           <Item onClick={handleCreateGame}>invite to a game!</Item>
         ) : (
-          <></>
+          null
         )}
         <Separator />
         {role === "owner" && global.selectedUser?.role !== "banned" ? (
@@ -537,15 +518,11 @@ function Status({
             </Item>
           </>
         ) : (
-          <></>
+          null
         )}
         {(role === "admin" || role === "owner") &&
-        global.selectedUser?.role !== "banned" ? (
-          <div
-            style={{
-              display: global.selectedUser?.role !== "owner" ? "" : "none",
-            }}
-          >
+          global.selectedUser?.role !== "banned" && global.selectedUser?.role !== "owner" ? (
+          <>
             <Submenu style={{}} label="mute">
               <Item onClick={() => handleMute(1)}>1 mins</Item>
               <Item onClick={() => handleMute(2)}>2 mins</Item>
@@ -558,13 +535,12 @@ function Status({
             )}
             <Item onClick={handleKickOut}>kick out</Item>
             <Item onClick={() => handleBanUser()}>ban</Item>
-          </div>
+          </>
         ) : (
-          role === "admin" ||
-          (role === "owner" ? (
+          (role === "admin" || role === "owner" ? (
             <Item onClick={() => handleUnbanUser()}>unban</Item>
           ) : (
-            <></>
+            null
           ))
         )}
       </Menu>
@@ -591,9 +567,10 @@ function OneStatus({
 
   useEffect(() => {
     setAvatarURL(data.profpic_url);
-    // console.log("data", data);
-    // setStatus(data.status);
-    let found = data.status;
+    let found = usersStatus?.find((elem) =>{
+      return data.id === elem.userModel.id
+    })?.userModel.status;
+
     switch (found) {
       case 0:
         setStatus("status-offline");
@@ -605,7 +582,6 @@ function OneStatus({
         setStatus("status-ingame");
         break;
     }
-    // }
   }, [data.id, usersStatus]);
 
   const handleMenu = (event: any) => {

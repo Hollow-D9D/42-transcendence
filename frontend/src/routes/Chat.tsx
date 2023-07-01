@@ -40,7 +40,7 @@ export default function Chat() {
     });
 
     return () => {
-      socket.off("notif");
+      socket.off("exception");
       socket.off("fetch role");
       socket.off("fetch blocked");
       socket.off("update channel request");
@@ -139,7 +139,7 @@ export default function Chat() {
           current={selectedChat}
           role={role}
           outsider={outsider}
-          updateStatus={updateStatus}
+          //updateStatus={updateStatus}
           blockedList={blockedList}
         />
       </div>
