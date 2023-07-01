@@ -383,13 +383,13 @@ function PreviewChat({
   role: string;
 }) {
   const [avatarURL, setAvatarURL] = useState(
-    process.env.PUBLIC_URL + "/target.png"
+    process.env.REACT_APP_PUBLIC_URL + "/target.png"
   );
 
   useEffect(() => {
     const getAvatar = () => {
       if (data.avatar === "") {
-        setAvatarURL(process.env.PUBLIC_URL + "/target.png");
+        setAvatarURL(process.env.REACT_APP_PUBLIC_URL + "/target.png");
       } else {
         setAvatarURL(data.avatar);
       }

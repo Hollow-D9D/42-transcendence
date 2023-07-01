@@ -9,20 +9,20 @@ const GetIcons = (props: any) => {
   const location = useLocation();
   const [modalShow, setModalShow] = useState(false);
 
-  // Determine the icon to display based on the URL
+  
   const url = props.url;
   const fill =
     url === "private-profile"
-      ? "person"
+      ? "person-badge"
       : url === "leaderboard"
-        ? "trophy"
-        : url === "chat"
-          ? "chat-left-dots"
-          : url === "game"
-            ? "dpad"
-            : // : url === "watch"
-            // ? "play-btn"
-            "box-arrow-right"; // Determine the icon to display based on the URL
+      ? "trophy"
+      : url === "chat"
+      ? "chat-dots"
+      : url === "game"
+      ? "dice-6"
+      : // : url === "watch"
+        // ? "play-btn"
+        "box-arrow-right"; 
 
   return (
     <main>
@@ -35,7 +35,6 @@ const GetIcons = (props: any) => {
             await Api.get(`/auth/logout`, {
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("userToken")}`
               },
             });
           } catch (err) {
@@ -49,8 +48,9 @@ const GetIcons = (props: any) => {
       <div>
         <i
           id="clickableIcon"
-          className={`bi bi-${fill} icons thick ${location.pathname === "/app/" + url ? "hide" : "current"
-            }`}
+          className={`bi bi-${fill} icons thick ${
+            location.pathname === "/app/" + url ? "hide" : "current"
+          }`}
           onClick={
             url === "logout"
               ? () => setModalShow(true)
@@ -59,8 +59,9 @@ const GetIcons = (props: any) => {
         />
         <i
           id="clickableIcon"
-          className={`bi bi-${fill}-fill icons thin ${location.pathname === "/app/" + url ? "current" : "hide"
-            }`}
+          className={`bi bi-${fill}-fill icons thin ${
+            location.pathname === "/app/" + url ? "current" : "hide"
+          }`}
           onClick={() => navigate("/app/" + url)}
         />
       </div>
@@ -75,10 +76,9 @@ export const CNavBar = () => {
         <div className="toolbar">
           <div className="toolbar-top space-around">
             <GetIcons url="private-profile" />
-            <GetIcons url="leaderboard" />
             <GetIcons url="chat" />
             <GetIcons url="game" />
-            {/* <GetIcons url="watch" /> */}
+            <GetIcons url="leaderboard" />
             <GetIcons url="logout" />
           </div>
         </div>

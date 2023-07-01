@@ -66,9 +66,10 @@ export const AddFriend: React.FC = () => {
 
   return (
     <Card className="p-4 modify-card" style={{ height: "200px" }}>
-      <Navbar className="IBM-text" style={{ fontSize: "20px" }} expand="lg">
+      <Navbar className="IBM-text" style={{ fontSize: "16px" }} expand="lg">
         <Container>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          {/* <Navbar.Toggle aria-controls="basic-navbar-nav" /> */}
+		  <Navbar.Toggle aria-controls="basic-navbar-nav" className="navbar-dark" > <i className="bi bi-list-nested" ></i> </Navbar.Toggle>
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="mr-auto">
               <Form className="form-inline" margin-right="auto">

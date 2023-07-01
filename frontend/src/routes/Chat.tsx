@@ -132,7 +132,7 @@ export default function Chat() {
       <div
         style={{
           display: selectedChat?.dm ? "none" : "",
-          backgroundColor: "#003e60",
+          backgroundColor: "#006006",
         }}
       >
         <RoomStatus
