@@ -1,4 +1,4 @@
-import { Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Inject, CACHE_MANAGER, OnApplicationBootstrap } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -16,7 +16,6 @@ import { parseToken } from 'src/utils/auth.utils';
 import { ChannelMode, isValidChannelMode } from 'src/typeorm/channelmode.enum';
 import { ProfileService } from '../profile/profile.service';
 import { FriendsService } from 'src/profile/friends/friends.service';
-import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -50,18 +49,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       // if (had) next();
       // else next(new Error('Wrong login provided!'));
-
       next();
     });
   }
 
-  handleConnection(client: any, ...args: any[]) {
-    // console.log("connected", client);
+  onApplicationBootstrap() {
+    setInterval(async () => await this.UpdateStatus(), 1000);
   }
 
-  handleDisconnect(client: any) {
-    // this.leaveRoom(client, 'global');
-  }
+  async handleConnection(client: any, ...args: any[]) {}
+
+  async handleDisconnect(client: any) {}
 
   private findRoom(client: Socket, login: string) {
     const rooms = Object.keys(this.rooms);
@@ -543,7 +541,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const chat_id = payload.chat_id;
       if (!chat_id) throw new Error('No valid chat_id provided!');
       const chat = await this.chatService.channel(chat_id);
-      console.log(chat);
       if (!chat) {
         client.emit('fetch_msgs', []);
         client.emit('fetch owner', []);
@@ -553,7 +550,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit('notif', 'Channel has been deleted');
       }
       const isMember = await this.chatService.isChannelMember(chat_id, login);
-      console.log(login);
 
       // const password = payload.password || '';
       // await this.chatService.joinChannel(login, chat_id, password);
@@ -575,12 +571,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  async UpdateStatus() {
+    console.log(this.chatService === undefined);
+    const users = await this.chatService.allUsers();
+    if (users) this.server.emit('update-status', users);
+  }
+
   @SubscribeMessage('get search suggest')
   async handleSuggest(client: any, payload: any) {
     try {
       const login = payload.login;
       const blocked_users = (await this.friendsService.getFriends(login))
-        .blocked_users;
+        ?.blocked_users;
       const users = await this.chatService.allUsers();
       const channels = await this.chatService.getSearchChats(login);
       client.emit('search suggest', {
@@ -760,16 +762,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throwError(client, 'Something went wrong');
     }
   }
-
-  // @SubscribeMessage('leave_chat')
-  // async handleLeave(client: any, payload: any) {
-  //   const login = payload.login;
-  //   const roomName = payload.chat_id;
-  //   if (!login) throwError(client, 'No login');
-  //   if (!roomName) throwError(client, 'No chat_id');
-
-  //   // this.leaveRoom(client, roomName, login);
-  // }
 
   // TODO: check if user is blocked or not
   @SubscribeMessage('new_message')

@@ -347,11 +347,13 @@ export class GameMatchGateway implements OnGatewayInit {
       let sockets: UserSocket[] = await this.cacheM.get('user_sockets');
       let login = sockets.find((elem) => {
         return elem.socket === client.id;
-      }).login;
-      console.log(login);
-      let user = await this.profileService.getProfile(login);
-      user.user.status = 0;
-      await user.user.save();
+      })?.login;
+      if (login) {
+        console.log(login);
+        let user = await this.profileService.getProfile(login);
+        user.user.status = 0;
+        await user.user.save();
+      }
     } catch (err) {
       throwError(client, err.message);
     }
@@ -479,9 +481,12 @@ export class GameMatchGateway implements OnGatewayInit {
   @SubscribeMessage('new-connection')
   async handleNewConnection(client: Socket, payload: any) {
     let user = await this.profileService.getProfile(payload.login);
-    user.user.status = 1;
-    user.user.save();
-    this.addUserSocket(payload.login, client);
+    if (user?.user) {
+      user.user.status = 1;
+      user.user.save();
+      this.addUserSocket(payload.login, client);
+      this.server.emit('update channel request');
+    }
   }
 
   async addUserSocket(login: string, socket: Socket) {
@@ -505,6 +510,7 @@ export class GameMatchGateway implements OnGatewayInit {
 
   @SubscribeMessage('input')
   handleInputL(client: any, payload: any): void {
+    if (this.game[payload.room_id] === undefined) return;
     if (payload.isPlayer1 === 'true') {
       if (payload.up !== undefined) {
         this.game[payload.room_id].upInputL = payload.up;

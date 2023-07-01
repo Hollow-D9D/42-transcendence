@@ -498,6 +498,7 @@ export class ChatService {
       channelWithMuteds.mutedUsers.push(mutedUser);
 
       await this.mutedUserRepo.save(mutedUser);
+
       // const data = await this.channelForMute(chat_id);
     }
   }
