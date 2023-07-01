@@ -30,7 +30,6 @@ const GetIcons = (props: any) => {
         show={modalShow}
         onHide={() => setModalShow(false)}
         onSubmit={async () => {
-          console.log("logging otu");
           try {
             await Api.get(`/auth/logout`, {
               headers: {

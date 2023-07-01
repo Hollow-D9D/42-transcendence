@@ -27,8 +27,36 @@ export class AchievementsService {
       id: 2,
       name: 'First blood',
       alias: 'first_win',
-      icon: 'path/to/icon.png',
+      icon: process.env.BACKEND_URL + '/upload/win.png',
       description: 'First enemy is slayed!',
+      level: 1,
+      progress: 1,
+    },
+    {
+      id: 3,
+      name: 'Friendly Potato',
+      alias: 'first_friend',
+      icon: process.env.BACKEND_URL + '/upload/social.png',
+      description:
+        'Being potato is hard, being a friendly potato is even harder',
+      level: 1,
+      progress: 1,
+    },
+    {
+      id: 4,
+      name: 'BloodSeeker',
+      alias: 'killing_spree',
+      icon: process.env.BACKEND_URL + '/upload/blood.png',
+      description: 'I crave blood!',
+      level: 1,
+      progress: 1,
+    },
+    {
+      id: 5,
+      name: 'Bad day',
+      alias: 'fivth_loss',
+      icon: process.env.BACKEND_URL + '/upload/dummy.png',
+      description: 'Lost 5 times',
       level: 1,
       progress: 1,
     },
@@ -69,8 +97,7 @@ export class AchievementsService {
       //   .execute();
 
       const aches = await this.achieveRepo.find();
-      if (aches.length == 0)
-      {
+      if (aches.length == 0) {
         await Promise.all(
           this.achieves.map(async (achieve) => {
             const newOne = this.achieveRepo.create(achieve);
@@ -78,8 +105,6 @@ export class AchievementsService {
           }),
         );
       }
-
-     
     } catch (error) {
       throw error;
     }

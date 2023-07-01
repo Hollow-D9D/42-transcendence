@@ -24,7 +24,7 @@ export class AuthController {
         query.state,
       );
       if (!(await this.authService.checkUser(userInfo.login))) {
-        this.authService.createUser(userInfo);
+        await this.authService.createUser(userInfo);
       }
       return await this.authService.loginUser(userInfo);
     } catch (err) {
@@ -40,7 +40,6 @@ export class AuthController {
   async getLogout(@Headers() headers) {
     try {
       const payload = getPayload(headers);
-      console.log('payload', payload);
       return await this.authService.logoutUser(payload.login);
     } catch (err) {
       return {

@@ -39,7 +39,6 @@ export class ProfileService {
       matches.sort((a: Match, b: Match) => {
         return a.playedOn.getTime() - b.playedOn.getTime();
       });
-      console.log(matches);
       return matches;
     } catch (error) {
       throw error;

@@ -20,14 +20,12 @@ export default function LeaderBoard() {
   useEffect(() => {
     const updateLeaderBoard = async () => {
       const result = await getAchievements();
-      console.log(result);
       if (result !== "error") {
         setData(result);
         setFetched(true);
       }
     };
     updateLeaderBoard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetched]);
 
   return (
@@ -176,7 +174,7 @@ function OneRow({
       );
     default:
       return (
-        <div className="element" onClick={() => navigate("/app/public/" + id)}>
+        <div className="element" >
           <div className="index">#{rank}</div>
           <div className="id">{id}</div>
           <div className="user">

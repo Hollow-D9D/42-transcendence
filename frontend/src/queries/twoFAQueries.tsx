@@ -6,8 +6,11 @@ import { getUserData } from "./userQueries";
 /* Generate 2FA QR code */
 export const twoFAGenerate = async () => {
   try {
-    const response = await Api.get("/auth/two-factor");
-    // console.log("we've got there", response.data);
+    const response = await Api.get("/auth/two-factor", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      }
+    });
     return response.data.body.qrCode;
   } catch (err) {
     console.log(err);
@@ -23,17 +26,11 @@ export const twoFAAuth = async (twoFAcode: string, userSignIn: any) => {
       Authorization: `Bearer ${localStorage.getItem("userToken")}`,
     },
   });
-  // console.log("response", response);
   return response;
 };
 
 /* Turn on 2FA for signed in user */
 export const twoFAOn = async (code: string) => {
-  // let raw = JSON.stringify({
-  //   twoFAcode: code,
-  // });
-  // console.log(code);
-
   try {
     const response = await Api.get(`/auth/two-factor/enable?token=${code}`, {
       headers: {
@@ -45,8 +42,6 @@ export const twoFAOn = async (code: string) => {
   } catch (err) {
     console.log(err);
   }
-  // console.log("TURN ON");
-  // return fetchPost(raw, "turn-on", null);
 };
 
 export const twoFAOff = async () => {
@@ -57,8 +52,6 @@ export const twoFAOff = async () => {
         Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
     });
-    // console.log(response);
-
     return response;
   } catch (err) {
     console.log(err);
@@ -85,7 +78,6 @@ const fetchPost = async (body: any, url: string, userSignIn: any) => {
     });
     const result_1 = await response.json();
     if (!response.ok) {
-      console.log("POST error on ", url);
       return null;
     }
     if (url !== "generate") {

@@ -1,5 +1,5 @@
 import "./chatPreview.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import {
   chatPreview,
   newDM,
@@ -14,7 +14,6 @@ import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import { current } from "@reduxjs/toolkit";
 import { socket } from "../../App";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MENU_CHANNEL = "menu_channel";
 const MENU_DM = "menu_dm";
 
@@ -41,9 +40,7 @@ export default function Preview({
   const [hide, setHide] = useState<any>();
   const [role, setRole] = useState<any>();
   const [menuEvent, setMenuEvent] = useState<any>(null);
-
-  // console.log("global:::::", global.selectedChat);
-
+  
   useEffect(() => {
     (async function () {
       await socket.emit("get search suggest", { login: email });
@@ -67,9 +64,6 @@ export default function Preview({
               return e.login === name;
             });
           } else isBlocked = true;
-          // console.log(data.friends);
-
-          // if (user)
           name = user.nickname;
           avatarPic = user.profpic_url;
         }
@@ -129,7 +123,6 @@ export default function Preview({
       socket.off("update preview");
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -138,7 +131,6 @@ export default function Preview({
       show(menuEvent, { id: JSON.stringify(global.selectedChat) });
       setMenuEvent(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blockedList, show, hide, current]);
 
   const addPreview = (channelId: number) => {
@@ -193,11 +185,10 @@ export default function Preview({
       </div>
       <div className="preview-chat-list">
         {roomPreview.map((value, index) => {
-          // console.log(index);
           return value.isBlocked ? (
-            <></>
+            null
           ) : (
-            <div key={index}>
+            <div key={'room' + JSON.stringify(value)}>
               <PreviewChat
                 data={value}
                 onClick={() => {
@@ -398,7 +389,6 @@ function PreviewChat({
   }, [data.ownerId, data.avatar]);
 
   const handleMenu = (event: any) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     let { hideAll } = useContextMenu({
       id: JSON.stringify(global.selectedChat),
     });

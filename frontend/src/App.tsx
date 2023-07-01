@@ -8,6 +8,7 @@ import { TAlert } from "./toasts/TAlert";
 import { GameRequestCard } from "./routes/gameRequestCard";
 import { gameInvitation } from "./routes/chat_modes/type/chat.type";
 import { useContext } from "react";
+
 let LoginStatus = {
   islogged: false,
   setUserName: () => { },
@@ -20,7 +21,6 @@ export const UsersStatusCxt = createContext<IUserStatus[] | undefined>(
 );
 
 export const NotifCxt = createContext<INotifCxt | undefined>(undefined);
-
 const socketOptions = {
   transportOptions: {
     polling: {
@@ -30,11 +30,12 @@ const socketOptions = {
     },
   },
 };
+
 export const socket = io(
   `${process.env.REACT_APP_BACKEND_SOCKET}`,
   socketOptions
 );
-console.log(process.env.REACT_APP_BACKEND_SOCKET);
+
 export default function App() {
   const [usersStatus, setUsersStatus] = useState<IUserStatus[] | undefined>(
     undefined
@@ -50,37 +51,21 @@ export default function App() {
 
   useEffect(() => {
     socket.on("update-status", (data, str: string) => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       userstatusTab = [];
       for (let i = 0; i <= data.length - 1; i++) {
         let newUser: IUserStatus = {
-          key: data[i][0],
+          key: data[i].id,
           userModel: { id: 0, status: -1 },
         };
-        newUser.userModel.id = data[i][0];
-        newUser.userModel.status = data[i][1];
+        newUser.userModel.id = data[i].id;
+        newUser.userModel.status = data[i].status;
         userstatusTab.push(newUser);
       }
       setUsersStatus(userstatusTab);
     });
-    // return () => {
-    //   socket.off('update-status')
-    // }
   }, [usersStatus]);
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   socket.on("game invitation", (game: gameInvitation) => {
-
-  //     setGameRequest(true);
-  //     setGameInfo(game);
-
-  //   });
-  //   // setGameRequest(true);
-  //   socket.on("error", (data) => {
-  //     console.log("ERROROOOOROROOR:::: ", data.error);
-  //   });
-  // }, []);
   useEffect(() => {
     socket.on("request new connection", () => {
       if (localStorage.getItem("userLogged") === "true")
@@ -88,6 +73,8 @@ export default function App() {
           login: localStorage.getItem("userEmail"),
         });
     });
+
+  
 
     socket.on("game invitation", (payload) => {
       setGameRequest(true);
@@ -115,7 +102,6 @@ export default function App() {
     });
 
     socket.on("start game", (payload) => {
-      console.log("start game");
       localStorage.setItem("gameStarted", "true");
       localStorage.setItem("room_id", payload.response.id);
       localStorage.setItem(
@@ -127,13 +113,11 @@ export default function App() {
       navigate("/app/game");
       setGameRequest(false);
       return () => {
-        console.log("off start game");
         socket.off("start game");
       };
     });
     return () => {
       
-      //socket.emit("disconnect", { login: 'lyuboy urish ban' });
     };
   }, []);
 

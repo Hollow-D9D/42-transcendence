@@ -107,7 +107,9 @@ export class AuthService {
       let list: Array<string> = (await this.cacheM.get('logged_in'))
         ? await this.cacheM.get('logged_in')
         : [];
-      list = list.splice(list.indexOf(login), 1);
+      list = list.filter((e) => {
+        return e !== login;
+      });
       await this.cacheM.set('logged_in', list, 0);
       const user = await this.userRepo.findOne({
         where: { login: login },

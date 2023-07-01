@@ -111,7 +111,7 @@ const SearchResultDisplay = (props: any) => {
               <DisplayRow
                 listType={"addFriend"}
                 isFriend={h.isFriend}
-                key={index}
+                key={'friend' + JSON.stringify(h)}
                 userModel={h}
               />
             );

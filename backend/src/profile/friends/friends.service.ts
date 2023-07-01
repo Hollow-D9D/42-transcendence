@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/typeorm';
 import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { log } from 'console';
+import { AchievementsService } from 'src/achievements/achievements.service';
 @Injectable()
 export class FriendsService {
   constructor(
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    private readonly achievementService: AchievementsService,
   ) {}
-
   /**
    * @param login string
    * @returns arrray of Friend instances
@@ -132,7 +132,7 @@ export class FriendsService {
     try {
       const user = await this.userRepo.findOne({
         where: { id: user_id },
-        relations: ['friend_requests', 'friends'],
+        relations: ['friend_requests', 'friends', 'achievements'],
       });
       const friendUser = await this.userRepo.findOne({
         where: { id: friend_id },
@@ -140,8 +140,17 @@ export class FriendsService {
       user.friend_requests = user.friend_requests.filter(
         (friend) => friend.id !== friend_id,
       );
+
       user.friends.push(friendUser);
-      user.save();
+      await user.save();
+      if (
+        user.achievements.some((e) => {
+          // console.log(e);
+          return e.alias === 'first_friend';
+        }) === false
+      ) {
+        await this.achievementService.addAchievement(user.id, 'first_friend');
+      }
     } catch (err) {
       throw err;
     }

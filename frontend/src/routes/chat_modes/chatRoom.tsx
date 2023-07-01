@@ -165,9 +165,9 @@ function MsgStream({
           return value.id === blocked.id;
         });
         return isBlocked ? (
-          <div key={index}></div>
+          <div key={'msg' + JSON.stringify(value)}></div>
         ) : (
-          <div key={index}>
+          <div key={'msg' + JSON.stringify(value)}>
             <OneMessage data={value} email={email} />
           </div>
         );
@@ -186,7 +186,6 @@ function OneMessage({ data, email }: { data: oneMsg; email: string | null }) {
   useEffect(() => {
     if (data.email === email) setSender("self");
     else setSender("other");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   return (
