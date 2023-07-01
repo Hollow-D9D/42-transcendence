@@ -74,6 +74,8 @@ export default function App() {
         });
     });
 
+  
+
     socket.on("game invitation", (payload) => {
       setGameRequest(true);
       setGameInfo({
@@ -114,7 +116,9 @@ export default function App() {
         socket.off("start game");
       };
     });
-    return () => {};
+    return () => {
+      
+    };
   }, []);
 
   return (

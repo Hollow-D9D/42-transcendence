@@ -534,7 +534,7 @@ function Status({
             <Item onClick={() => handleBanUser()}>ban</Item>
           </>
         ) : (
-          (role === "admin" || role === "owner" ? (
+          ((role === "admin" || role === "owner") && global.selectedUser?.role !== 'owner' ? (
             <Item onClick={() => handleUnbanUser()}>unban</Item>
           ) : (
             null
