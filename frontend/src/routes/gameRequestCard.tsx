@@ -22,7 +22,6 @@ export function GameRequestCard({
   }, [game]);
 
   const joinGame = async () => {
-    console.log("game invite");
     await socket.emit("accept game invite", {
       login1: game?.inviterLogin,
       login2: localStorage.getItem("userEmail"),

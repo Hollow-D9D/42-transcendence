@@ -220,7 +220,6 @@ function MemberStatus({
     });
 
     socket.on("fetch members", (data) => {
-      console.log('hey');
       setMembers(
         data.map((elem: any): oneUser => {
           return {
@@ -357,7 +356,6 @@ function Status({
 
   useEffect(() => {
     socket.on("admin success", (payload: any) => {
-      // console.log(payload.role);
       global.selectedUser.role = payload.role;
     });
     return () => {
@@ -368,7 +366,6 @@ function Status({
   function handleCreateGame() {
     (async () => {
       console.log("send invite");
-
       await socket.emit("send invite", { login: localStorage.getItem("userEmail"), target: global.selectedUser.login });
     })();
   }
@@ -444,7 +441,7 @@ function Status({
       await socket.emit("ban user", update);
     })();
   }
-  //TODO
+
   function handleUnbanUser() {
     let update: updateChannel = {
       chat_id: current!.id,
@@ -481,7 +478,7 @@ function Status({
     <>
       {users?.map((value, index) => {
         return (
-          <div key={index}>
+          <div key={'user' + JSON.stringify(value)}>
             <OneStatus
               data={value}
               setSelData={setSelData}
@@ -537,7 +534,7 @@ function Status({
             <Item onClick={() => handleBanUser()}>ban</Item>
           </>
         ) : (
-          (role === "admin" || role === "owner" ? (
+          ((role === "admin" || role === "owner") && global.selectedUser?.role !== 'owner' ? (
             <Item onClick={() => handleUnbanUser()}>unban</Item>
           ) : (
             null
@@ -585,7 +582,6 @@ function OneStatus({
   }, [data.id, usersStatus]);
 
   const handleMenu = (event: any) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     let { hideAll } = useContextMenu({
       id: JSON.stringify(global.selectedUser),
     });
@@ -598,9 +594,7 @@ function OneStatus({
       (map: any) => map.id === data.id
     )!;
     // global.selectedUser.status = global.onlineStatus;
-
     event.preventDefault();
-
     setSelData({ data: data, event: event });
   };
 

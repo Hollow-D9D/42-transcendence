@@ -3,8 +3,6 @@ import { socket } from "../App";
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
 import { GameEndCard } from "./GameEndCard";
 import Switch from "react-switch";
-// import io, { Socket } from "socket.io-client";
-// const socket = io(process.env.REACT_APP_BACKEND_SOCKET || "");
 
 const GameInstance = (props: any) => {
   let foregroundColor = props.cool ? "#86D99C" : "aliceblue";
@@ -47,7 +45,6 @@ const GameInstance = (props: any) => {
   useEffect(() => {
     setRatio(canvasHeight / 100);
   }, [canvasHeight, canvasWidth]);
-  // const socket = io("http://localhost:3001");
   useEffect(() => {
     setRatio(canvasHeight / 100);
     draw();
@@ -73,13 +70,9 @@ const GameInstance = (props: any) => {
       room_id: room_id,
       login: localStorage.getItem("userEmail"),
     });
-    //Handle up event for W and S
     canvasRef.current?.focus();
     return () => {
-      console.log("Disconnected");
-
       socket.off("game");
-      // socket.disconnect();
     };
   }, []);
 
@@ -87,7 +80,6 @@ const GameInstance = (props: any) => {
     const room_id = localStorage.getItem("room_id");
 
     if (e.key === "w") {
-      //if left player
       socket.emit("input", {
         up: false,
         room_id: room_id,
@@ -242,7 +234,6 @@ const Game = () => {
     });
 
     socket.on("end game", (payload) => {
-      console.log("end game");
       const isWinner =
         localStorage.getItem("isPlayer1") === "true"
           ? payload.winner
@@ -251,9 +242,7 @@ const Game = () => {
       setWinner(isWinner);
     });
 
-    return () => {
-      // socket.off("start game");
-    };
+    return () => {};
   }, []);
 
   const handleClick = () => {

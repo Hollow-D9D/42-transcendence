@@ -8,7 +8,7 @@ import "./context.css";
 import Switch from "react-switch";
 import { Tag } from "react-tag-autocomplete";
 import { matchSorter } from "match-sorter";
-import { Api } from "../../Config/Api";
+
 interface NewRoomCardProps {
   newRoomRequest: boolean;
   onNewRoomRequest: () => void;
@@ -49,7 +49,6 @@ export function NewRoomCard({
     return () => {
       socket.off("user tags");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newRoomRequest]);
 
   const onAddMember = (member: Tag) => {
@@ -100,8 +99,6 @@ export function NewRoomCard({
     })();
     socket.on("error", () => {
       console.log("chat create error");
-
-      //TODO HANDLE CREATE ERROR RESPONSES
     });
     initVars();
     onNewRoomRequest();

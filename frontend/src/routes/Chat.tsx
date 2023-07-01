@@ -45,7 +45,6 @@ export default function Chat() {
       socket.off("fetch blocked");
       socket.off("update channel request");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -61,7 +60,6 @@ export default function Chat() {
     if (selectedChat) {
       setShow(!selectedChat.isPassword || !outsider);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [outsider]);
 
   useEffect(() => {
@@ -89,7 +87,6 @@ export default function Chat() {
     return () => {
       socket.off("update channel request");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateStatus, selectedChat, show]);
 
   const newRoomCardDisappear = () => {
