@@ -176,7 +176,7 @@ function OneRow({
       );
     default:
       return (
-        <div className="element" onClick={() => navigate("/app/public/" + id)}>
+        <div className="element" >
           <div className="index">#{rank}</div>
           <div className="id">{id}</div>
           <div className="user">

@@ -286,13 +286,13 @@ const Game = () => {
       <div className="Button-msg-zone">
         <StartButton />
       </div>
-      <div className="div-switch">
+      <div className="div-switch-game">
         <div>
           <label style={{ color: cool ? "rgb(0,136,0)" : "grey" }}>
             Make It Look Cool
           </label>
         </div>
-        <div className="div-switch">
+        <div style={{marginTop:'23px'}}>
           <Switch
             className="switch"
             onChange={handleCool}
