@@ -6,7 +6,7 @@ export const UsersRelations = () => {
     <Card className="p-5 modify-card">
       <Navbar className="IBM-text" style={{ fontSize: "15px" }} expand="lg">
         <Container>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Toggle aria-controls="basic-navbar-nav" className="navbar-dark" > <i className="bi bi-list-nested" ></i> </Navbar.Toggle>
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="">
               <NavLink

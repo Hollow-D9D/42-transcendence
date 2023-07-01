@@ -2,23 +2,23 @@
     display: flex;
     height: 100vh;
     width: 100vw;
-    background-color: #252a2a;
-    border-color: grey;
+    background-color: #07240e;
+    border-color: rgb(128, 128, 128);
 }
 
 .card-disappear-click-zone {
   position: fixed;
   height: 100vh;
   width: 100vw;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(24, 80, 18, 0.3);
 }
 
 .add-zone {
     position: fixed;
-    top: 50%;
+    top: 20%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    animation-name: mymove;
+    animation-name:initial;
     animation-duration: 0.5s;
     animation-timing-function: ease;
 }
@@ -32,7 +32,7 @@
   /* Firefox */
   * {
     scrollbar-width: none;
-    scrollbar-color: #C3CEDA #071330;
+    scrollbar-color: #b3e1b0 #0f6413;
   }
 
   /* Chrome, Edge, and Safari */
@@ -41,11 +41,11 @@
   }
 
   *::-webkit-scrollbar-track {
-    background: #2c3447;
+    background: #0f6f37;
   }
 
   *::-webkit-scrollbar-thumb {
     background-color: #C3CEDA;
     border-radius: 10px;
-    border: 3px solid #2c3447;
+    border: 3px solid #085415;
   }

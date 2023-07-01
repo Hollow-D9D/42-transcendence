@@ -1,9 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;300;400;500;600;700&family=Raleway:wght@400;500&family=Roboto:wght@300;400;500;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap");
+ @import url("https://fonts.googleapis.com/css?family=Tangerine:bold,bolditalic|Inconsolata:italic|Droid+Sans");
 :root {
   /* Text */
   --text-color-white: #dadada;
-  --text-color-blue: #b9c5ff;
+  --text-color-blue: #b9ffd0;
   --text-color-gray: #31353c;
   /* Basic */
   --basic-color-background: #292d32;
@@ -13,13 +14,13 @@
   /* Cards */
   --cards-color-gray-up: #36382e;
   --cards-color-gray: #31353c;
-  --cards-color-blue: #4361ee;
+  --cards-color-blue: #43ee71;
   /* Buttons */
   --buttons-color-icons: #f2f2f2;
   --buttons-color-pink: #f72585;
-  --buttons-color-blue: #5d76ec;
-  --buttons-color-blue-selected: #3c58dd;
-  --buttons-color-blue-disabled: #506df3;
+  --buttons-color-blue: #5dec9d;
+  --buttons-color-blue-selected: #3cdd4f;
+  --buttons-color-blue-disabled: #105724;
   --buttons-color-gray-disabled: #3b4048;
   /* Styles */
   --styles-halo-blue: radial-gradient(
@@ -37,12 +38,12 @@
   --styles-linear-transp-blue: linear-gradient(
     135deg,
     rgba(60, 88, 221, 0) 0%,
-    #3c58dd 100%
+    #3cdd49 100%
   );
   --styles-linear-light-blue: linear-gradient(
     180deg,
-    #50caff -11.53%,
-    #4361ee 100%
+    #50ffbf -11.53%,
+    #35bb33 100%
   );
 }
 
@@ -55,7 +56,7 @@
   background-color: var(--basic-color-background);
   background-size:cover;
   background-position:initial;
-  font-family: "Roboto" sans-serif;
+  font-family: "Tangerine" sans-serif;
   color: var(--text-color-white);
   width: 100vw;
   height: 100vh;
@@ -75,7 +76,7 @@
 }
 
 .ROBOTO-text {
-  font-family: "Roboto", sans-serif;
+  font-family: "Inconsolata", sans-serif;
   font-weight: 300;
   letter-spacing: -0.4px;
   color: var(--text-color-white);
@@ -87,7 +88,7 @@
 }
 
 .content {
-  font-family: "Roboto", sans-serif;
+  font-family: "Inconsolata", sans-serif;
   padding-left: 20px;
   letter-spacing: -0.4px;
 }
@@ -109,7 +110,7 @@
 .submit-button {
   margin-left: 30px;
   background: var(--buttons-color-pink);
-  box-shadow: 2px 3.5px 15px #a819c8, -2px -3.5px 15px #54bae9;
+  box-shadow: 2px 3.5px 15px #19c839, -2px -3.5px 15px #54bae9;
   transition: 0.2s ease;
   border: none;
   outline: none;
@@ -117,7 +118,7 @@
 }
 
 .submit-button:hover {
-  background: #3c58dd;
+  background: #dadd3c;
   box-shadow: inset 2px 3.5px 15px rgba(15, 21, 49, 0.25),
     inset -2px -3.5px 15px #556fe8;
   color: var(--text-color-white);
@@ -137,19 +138,19 @@
 
 .submit-button:active {
   color: var(--text-color-white);
-  background-color: #3c58dd;
-  box-shadow: inset 2px 3.5px 15px rgba(15, 21, 49, 0.25),
-    inset -2px -3.5px 15px #556fe8;
+  background-color: #2a9e45;
+  box-shadow: inset 2px 3.5px 15px rgba(15, 49, 36, 0.25),
+    inset -2px -3.5px 15px #17702b;
   border-color: none;
   outline: 0;
 }
 
 .btn {
-  border-radius: 12.5px;
+  border-radius: 12px;
 }
 
 .link-primary {
-  cursor: pointer;
+  cursor:crosshair;
 }
 
 /* a:link {
@@ -166,13 +167,9 @@ a:hover {
   color: var(--buttons-color-blue-disabled);
 }
 
-/* selected link */
-/* a:active { */
-/* color: var(--basic-color-green); */
-/* } */
 
 .active-class {
-  color: #4361ee;
+  color: #b2ee43;
 }
 .not-active-class {
   color: white;

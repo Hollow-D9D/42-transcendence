@@ -1,6 +1,6 @@
 .chat-status-zone {
-    background-color: #252a2a;
-    width: 250px;
+    background-color: #252a26;
+    width: 240px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -9,7 +9,7 @@
 }
 
 .status-top {
-    background-color: #191e1e;
+    background-color: #191e1a;
     height: 60px;
 }
 

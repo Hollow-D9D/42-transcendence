@@ -60,7 +60,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /app
     environment:
-      PUBLIC_URL: ${FRONT_URL}
+      REACT_APP_PUBLIC_URL: ${FRONT_URL}
       REACT_APP_BACKEND_URL: ${BACK_URL}
       REACT_APP_BACKEND_SOCKET: ${SOCKET_URL}
       SITE_URL: ${SITE_URL}

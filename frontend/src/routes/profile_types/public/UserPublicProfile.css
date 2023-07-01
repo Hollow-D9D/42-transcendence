@@ -1,14 +1,14 @@
 :root {
-  --padding-sides: 30px;
-  --padding-tops: 20px;
+  --padding-sides: 14px;
+  --padding-tops: 12px;
   /* Text */
   --text-color-white: #dadada;
-  --text-color-blue: #b9c5ff;
-  --text-color-gray: #31353c;
+  --text-color-blue: #b9ffbc;
+  --text-color-gray: #313c32;
 }
 
 .public-profile-header {
-  border-radius: calc((100px + (2 * var(--padding-tops)) / 2));
+  border-radius: calc((80px + (2 * var(--padding-tops)) / 2));
   padding: var(--padding-tops);
   padding-left: var(--padding-sides);
   padding-right: var(--padding-sides);
@@ -24,8 +24,8 @@
   width: 10vh;
   border-radius: 50%;
 
-  background: #5d76ec;
-  box-shadow: 4px 8px 15px rgba(18, 20, 26, 0.3), -4px -8px 15px #78a5e9;
+  background: #5dec7c;
+  box-shadow: 4px 8px 15px rgba(18, 26, 18, 0.3), -4px -8px 15px #78e980;
 }
 
 .public-username-text {
@@ -185,9 +185,9 @@
   max-height: 45vh;
   overflow-x: auto;
 
-  background: #31353c;
+  background: #313c33;
   box-shadow: inset 10px 10px 10px rgba(0, 0, 0, 0.25),
-    inset -10px -10px 10px #30343a;
+    inset -10px -10px 10px #303a30;
   border-radius: 10px;
 }
 
@@ -208,7 +208,7 @@
   color: #dadada;
 }
 .text-games {
-  font-family: "Roboto", sans-serif;
+  font-family: "Inconsolata", sans-serif;
   font-weight: 400;
   font-size: 0.8rem;
   letter-spacing: -0.03em;
@@ -229,7 +229,7 @@
 }
 
 .public-left {
-  width: 50vw;
+  width: 34vw;
   max-width: 700px;
   margin-right: 1vw;
 }

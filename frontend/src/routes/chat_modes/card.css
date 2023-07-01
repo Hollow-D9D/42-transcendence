@@ -14,12 +14,12 @@
 }
 
 .card-chat {
-    background-color: whitesmoke;
+    background-color: rgb(227, 239, 225);
     z-index: 1000;
     height: 500px;
     width: 350px;
-    border-radius: 12px;
-    box-shadow: 0px 13px 36px 5px rgba(0,0,0,0.4);
+    border-radius: 4px;
+    box-shadow: 0px 10px 22px 5px rgba(0,0,0,0.4);
     display: flex;
     flex-direction: column;
     padding-bottom: 20px;
@@ -27,11 +27,11 @@
 
 .card-chat-title {
     margin: auto;
-    margin-top: 10px;
-    width: 260px;
+    margin-top: 8px;
+    width: 240px;
     text-align: center;
-    color: grey;
-    font-weight: 600;
+    color: rgb(128, 128, 128);
+    font-weight: 400;
     line-height: 4;
     border-bottom: 1px solid grey;
 }

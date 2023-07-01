@@ -6,7 +6,7 @@ import { MUploadAvatar } from "../../../modals/MUploadAvatar";
 import { ModifyEntry } from "./ModifyUserInfo";
 import { TwoFA } from "./TwoFA";
 import { UsersRelations } from "./users_relations/UsersRelations";
-import IconPen from "../../../ressources/icons/Icon_Pen.svg";
+import IconPen from "../../../ressources/Icon_Pen.svg";
 import "../Profiles.css";
 import { COnUserSimple } from "../../../ContextMenus/COnUserSimple";
 import { AddFriend } from "./users_relations/AddFriend";

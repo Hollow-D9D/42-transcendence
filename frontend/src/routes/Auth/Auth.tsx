@@ -15,8 +15,8 @@ export default function Auth() {
   let location = useLocation();
   
   const hrefURL = process.env.REACT_APP_LINK;
-  console.log(hrefURL)
-  // Use a callback to avoid re-rendering
+  console.log(process.env)
+  
   const userSignIn = useCallback(() => {
     let username = localStorage.getItem("userName");
     if (username)
@@ -74,3 +74,5 @@ export default function Auth() {
     </div>
   );
 }
+
+

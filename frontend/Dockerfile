@@ -1,47 +1,47 @@
-# FROM node:lts-alpine
+FROM node:19-alpine as builder
 
-# WORKDIR /app
-
-# COPY package.json yarn.lock ./
-
-# RUN yarn install
-
-# COPY . .
-
-# RUN yarn run build
-
-# RUN yarn global add serve
-
-# # EXPOSE 3000
-
-# CMD ["serve", "-s", "build", "-l", "3000"]
-
-# RUN apk add --no-cache bash
-
-# WORKDIR /app
-
-# ENTRYPOINT [ "bash", "start.sh" ]
-
-
-FROM node:16-alpine as builder
-# Set the working directory to /app inside the container
 WORKDIR /app
-# Copy app files
-COPY . .
-# Install dependencies (npm ci makes sure the exact versions in the lockfile gets installed)
+
+COPY package.json .
+COPY packge-lock.json .
+
 RUN npm ci --legacy-peer-deps
-# Build the app
+
+COPY . .
+
+ARG REACT_APP_BACKEND_URL
+ARG REACT_APP_BACKEND_SOCKET
+ARG REACT_APP_HOST_IP
+ARG REACT_APP_BACK_PORT
+ARG REACT_APP_FRONT_PORT
+ARG REACT_APP_PUBLIC_URL
+ARG REACT_APP_LINK
+
+ENV REACT_APP_BACKEND_URL: $REACT_APP_BACKEND_URL
+ENV REACT_APP_BACKEND_SOCKET: $REACT_APP_BACKEND_SOCKET
+ENV REACT_APP_HOST_IP: $REACT_APP_HOST_IP
+ENV REACT_APP_BACK_PORT = $REACT_APP_BACK_PORT
+ENV REACT_APP_FRONT_PORT: $REACT_APP_FRONT_PORT
+ENV REACT_APP_PUBLIC_URL: $REACT_APP_PUBLIC_URL
+ENV REACT_APP_LINK=$REACT_APP_LINK
+
+
+RUN echo "DEBUG": ${REACT_APP_BACKEND_URL}
+RUN echo "DEBUG": ${REACT_APP_BACKEND_SOCKET}
+RUN echo "DEBUG": ${REACT_APP_LINK}
+
+# RUN npm ci --legacy-peer-deps
+
 RUN npm run build
 
-# Bundle static assets with nginx
 FROM nginx:1.21.0-alpine as production
 
 ENV NODE_ENV production
-# Copy built assets from `builder` image
+
 COPY --from=builder /app/build /usr/share/nginx/html
-# Add your nginx.conf
+
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-# Expose port
+
 EXPOSE 80
-# Start nginx
+
 CMD ["nginx", "-g", "daemon off;"]
